@@ -385,10 +385,6 @@ export type EnumAlertTypeFieldUpdateOperationsInput = {
   set?: $Enums.AlertType
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type AlertCreateWithoutVendorInput = {
   id?: string
   type: $Enums.AlertType

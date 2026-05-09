@@ -1,0 +1,126 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+datasource db {
+  provider = "postgresql"
+}
+generator client {
+  provider      = "prisma-client"
+  output        = "../src/generated/prisma"
+  moduleFormat  = "cjs"
+}
+
+
+enum VendorStatus {
+  PENDING
+  VERIFIED
+  REVIEW
+  REJECTED
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum AlertType {
+  DEVICE_REUSE
+  DUPLICATE_DOCUMENT
+  SUSPICIOUS_TRANSACTION
+  FRAUD_RING
+}
+
+model User {
+  id          String   @id @default(uuid())
+  email       String   @unique
+  password    String
+  role        String   @default("ADMIN")
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Vendor {
+  id                String   @id @default(uuid())
+  businessName      String
+  email             String   @unique
+  phone             String
+
+  status            VendorStatus @default(PENDING)
+
+  overallRiskScore  Float @default(0)
+  riskLevel         RiskLevel @default(LOW)
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  documents         Document[]
+  devices           Device[]
+  transactions      Transaction[]
+  alerts            Alert[]
+}
+
+model Document {
+  id              String   @id @default(uuid())
+
+  vendorId        String
+  vendor          Vendor @relation(fields: [vendorId], references: [id])
+
+  documentType    String
+  fileUrl         String
+
+  documentHash    String?
+  tamperScore     Float @default(0)
+
+  createdAt       DateTime @default(now())
+}
+
+model Device {
+  id                String @id @default(uuid())
+
+  vendorId          String
+  vendor            Vendor @relation(fields: [vendorId], references: [id])
+
+  deviceHash        String
+  ipAddress         String
+  browser           String
+  timezone          String
+
+  riskScore         Float @default(0)
+
+  createdAt         DateTime @default(now())
+}
+
+model Transaction {
+  id                  String @id @default(uuid())
+
+  vendorId            String
+  vendor              Vendor @relation(fields: [vendorId], references: [id])
+
+  transactionRef      String @unique
+
+  amount              Float
+  channel             String
+  status              String
+
+  financialRiskScore  Float @default(0)
+
+  createdAt           DateTime @default(now())
+}
+
+model Alert {
+  id              String @id @default(uuid())
+
+  vendorId        String
+  vendor          Vendor @relation(fields: [vendorId], references: [id])
+
+  type            AlertType
+  message         String
+
+  resolved        Boolean @default(false)
+
+  createdAt       DateTime @default(now())
+}

@@ -11,9 +11,9 @@ export default function Transactions() {
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-black text-white tracking-tight">Squad Transactions</h1>
+          <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">Squad Transactions</h1>
           <p className="text-sm text-gray-400 mt-1">Payment telemetry and webhook events.</p>
         </div>
       </div>
@@ -50,8 +50,8 @@ export default function Transactions() {
 
       <div className="glass-panel rounded-2xl overflow-hidden">
         {/* Toolbar */}
-        <div className="p-4 border-b border-white/5 flex gap-4 bg-black/20">
-          <div className="relative flex-1 max-w-md">
+        <div className="p-4 border-b border-white/5 flex flex-col sm:flex-row gap-4 bg-black/20">
+          <div className="relative flex-1 w-full sm:max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
             <input 
               type="text" 
@@ -59,7 +59,7 @@ export default function Transactions() {
               className="w-full bg-white/5 border border-white/10 rounded-lg py-2 pl-10 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 transition-all"
             />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-semibold text-gray-300 hover:text-white transition-colors">
+          <button className="flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-semibold text-gray-300 hover:text-white transition-colors">
             <Filter className="h-4 w-4" />
             Status
           </button>

@@ -11,18 +11,18 @@ export default function Alerts() {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-black text-white tracking-tight">Alerts Center</h1>
+          <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">Alerts Center</h1>
           <p className="text-sm text-gray-400 mt-1">Review and manage system-generated risk flags.</p>
         </div>
       </div>
 
-      <div className="flex p-1 bg-black/40 rounded-xl w-max border border-white/5 mb-6">
-        <button className="px-6 py-2 text-sm font-bold rounded-lg bg-white/10 text-white shadow-md transition-all">
+      <div className="flex p-1 bg-black/40 rounded-xl w-full sm:w-max border border-white/5 mb-6">
+        <button className="flex-1 sm:flex-none px-6 py-2 text-sm font-bold rounded-lg bg-white/10 text-white shadow-md transition-all">
           Active (5)
         </button>
-        <button className="px-6 py-2 text-sm font-bold rounded-lg text-gray-400 hover:text-white transition-all">
+        <button className="flex-1 sm:flex-none px-6 py-2 text-sm font-bold rounded-lg text-gray-400 hover:text-white transition-all">
           Resolved
         </button>
       </div>
@@ -35,13 +35,13 @@ export default function Alerts() {
             </div>
             
             <div className="flex-1">
-              <div className="flex justify-between items-start mb-2">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2 gap-2 sm:gap-0">
                 <div>
                   <h3 className="text-lg font-bold text-white">{alert.title}</h3>
                   <p className="text-sm text-gray-400">Related to: <strong className="text-white">{alert.entity}</strong></p>
                 </div>
-                <div className="text-right">
-                  <span className={`inline-block px-2 py-0.5 rounded text-xs font-bold border mb-1 ${alert.bg} ${alert.color}`}>
+                <div className="sm:text-right flex items-center sm:block gap-3">
+                  <span className={`inline-block px-2 py-0.5 rounded text-xs font-bold border sm:mb-1 ${alert.bg} ${alert.color}`}>
                     {alert.severity}
                   </span>
                   <span className="block text-xs text-gray-500">{alert.time}</span>

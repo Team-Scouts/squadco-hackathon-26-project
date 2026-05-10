@@ -35,7 +35,7 @@ export default function DashboardLayout() {
   ];
 
   return (
-    <div className="min-h-[100svh] bg-gray-950 text-gray-200 font-sans flex selection:bg-emerald-500/30">
+    <div className="min-h-screen bg-gray-950 text-gray-200 font-sans flex selection:bg-emerald-500/30">
       {/* Sidebar */}
       <aside className="w-64 border-r border-white/5 bg-gray-900/50 backdrop-blur-xl flex flex-col fixed inset-y-0 left-0 z-20">
         <div className="h-20 flex items-center px-6 border-b border-white/5">
@@ -43,7 +43,7 @@ export default function DashboardLayout() {
             to="/"
             className="flex items-center gap-3 font-extrabold text-white no-underline transition-opacity hover:opacity-80"
           >
-            <div className="relative grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-emerald-400 to-cyan-500 text-gray-950 shadow-[0_0_15px_rgba(16,185,129,0.4)]">
+            <div className="relative grid h-8 w-8 place-items-center rounded-lg bg-linear-to-br from-emerald-400 to-cyan-500 text-gray-950 shadow-[0_0_15px_rgba(16,185,129,0.4)]">
               V
             </div>
             <span className="text-lg tracking-tight">VeriSphere</span>
@@ -69,7 +69,7 @@ export default function DashboardLayout() {
         </nav>
 
         <div className="p-4 border-t border-white/5">
-          <button onClick={signOut}>
+          <button onClick={signOut} className="flex  gap-x-2 items-center">
             <LogOut className="h-5 w-5 text-gray-500" />
             Sign Out
           </button>
@@ -77,9 +77,9 @@ export default function DashboardLayout() {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 ml-64 flex flex-col min-h-[100svh]">
+      <div className="flex-1 ml-64 flex flex-col min-h-svh">
         {/* Top Header */}
-        <header className="h-20 border-b border-white/5 bg-gray-950/80 backdrop-blur-xl flex items-center justify-between px-8 sticky top-0 z-10">
+        <header className="h-20 border-b border-white/5 bg-gray-950/80 backdrop-blur-xl flex items-center justify-between px-8 sticky top-0 z-20">
           <div className="relative w-96">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
             <input
@@ -95,16 +95,19 @@ export default function DashboardLayout() {
               <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 animate-ping"></span>
               <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500"></span>
             </button>
-            <div className="h-9 w-9 rounded-full bg-gradient-to-tr from-emerald-500 to-cyan-500 border-2 border-gray-900 shadow-[0_0_10px_rgba(16,185,129,0.3)] ml-2 cursor-pointer transition-transform hover:scale-105"></div>
+            <Link
+              to="/dashboard/settings?tab=profile"
+              className="h-9 w-9 rounded-full bg-linear-to-tr from-emerald-500 to-cyan-500 border-2 border-gray-900 shadow-[0_0_10px_rgba(16,185,129,0.3)] ml-2 cursor-pointer transition-transform hover:scale-105"
+            ></Link>
           </div>
         </header>
 
         {/* Dashboard Content */}
         <main className="flex-1 p-8 relative">
           <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-emerald-900/10 blur-[150px]"></div>
+            <div className="absolute top-0 right-0 md:w-125 md:h-125 rounded-full bg-emerald-900/10 blur-[150px]"></div>
           </div>
-          <div className="relative z-10 max-w-[1400px] mx-auto">
+          <div className="relative z-10 max-w-350 mx-auto">
             <Outlet />
           </div>
         </main>

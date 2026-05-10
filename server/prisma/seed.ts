@@ -5,7 +5,7 @@ import {
   PrismaClient,
   RiskLevel,
   VendorStatus,
-} from 'src/generated/prisma/client';
+} from '../src/generated/prisma/client';
 
 import { devices } from './mock/devices';
 import { transactions } from './mock/transactions';

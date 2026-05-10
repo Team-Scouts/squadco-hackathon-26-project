@@ -447,10 +447,6 @@ export type DocumentUncheckedUpdateManyWithoutVendorNestedInput = {
   deleteMany?: Prisma.DocumentScalarWhereInput | Prisma.DocumentScalarWhereInput[]
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
 export type DocumentCreateWithoutVendorInput = {
   id?: string
   documentType: string

@@ -136,12 +136,12 @@ export default function Landing() {
 
       <main id="top" className="relative z-10">
         {/* Hero Section */}
-        <section className="relative isolate grid min-h-[90svh] overflow-hidden px-6 pb-12 pt-32 md:px-12 md:pt-40">
+        <section className="relative isolate grid min-h-[90svh] overflow-hidden px-6 pb-12 pt-24 md:px-12 md:pt-28">
           <div className="absolute inset-0 -z-30 opacity-20 mix-blend-screen">
              <img className="h-full w-full object-cover object-center [mask-image:linear-gradient(to_bottom,black_40%,transparent_100%)]" src={heroImage} alt="" />
           </div>
           
-          <div className="w-full max-w-[720px] self-center pt-10">
+          <div className="w-full max-w-[720px] self-center">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-emerald-400 backdrop-blur-sm">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>

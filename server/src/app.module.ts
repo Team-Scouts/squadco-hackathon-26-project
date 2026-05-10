@@ -15,6 +15,7 @@ import { AlertsModule } from './modules/alerts/alerts.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { PayoutsModule } from './modules/payouts/payouts.module';
 import { auth } from './lib/auth';
+import { Neo4jModule } from './neo4j/neo4j.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { auth } from './lib/auth';
     AlertsModule,
     AdminModule,
     PayoutsModule,
+    Neo4jModule,
   ],
   controllers: [AppController],
   providers: [AppService],

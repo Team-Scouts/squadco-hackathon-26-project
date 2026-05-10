@@ -69,8 +69,11 @@ export default function DashboardLayout() {
         </nav>
 
         <div className="p-4 border-t border-white/5">
-          <button onClick={signOut} className="flex  gap-x-2 items-center">
-            <LogOut className="h-5 w-5 text-gray-500" />
+          <button
+            onClick={signOut}
+            className="flex  gap-x-2 items-center font-semibold text-sm"
+          >
+            <LogOut className="h-5 w-5 text-gray-400" />
             Sign Out
           </button>
         </div>

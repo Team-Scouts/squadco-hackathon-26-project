@@ -13,6 +13,7 @@ import {
   ArrowRight,
   ExternalLink,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function DashboardHome() {
   const summaryMetrics = [
@@ -55,7 +56,7 @@ export default function DashboardHome() {
   ];
 
   const quickActions = [
-    { label: "Add new vendor", icon: Plus },
+    { label: "Add new vendor", icon: Plus, path: "/dashboard/vendors/new" },
     { label: "Upload document", icon: FileUp },
     { label: "Run risk check", icon: Zap },
     { label: "Replay demo webhook", icon: PlayCircle },
@@ -402,15 +403,31 @@ export default function DashboardHome() {
               Quick Actions
             </h2>
             <div className="space-y-2">
-              {quickActions.map((action, i) => (
-                <button
-                  key={i}
-                  className="w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-sm font-semibold text-gray-300 hover:text-white transition-all group"
-                >
-                  <action.icon className="h-4 w-4 text-emerald-500 group-hover:scale-110 transition-transform" />
-                  {action.label}
-                </button>
-              ))}
+              {quickActions.map((action, i) => {
+                const content = (
+                  <>
+                    <action.icon className="h-4 w-4 text-emerald-500 group-hover:scale-110 transition-transform" />
+                    {action.label}
+                  </>
+                );
+
+                return action.path ? (
+                  <Link
+                    key={i}
+                    to={action.path}
+                    className="w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-sm font-semibold text-gray-300 hover:text-white transition-all group"
+                  >
+                    {content}
+                  </Link>
+                ) : (
+                  <button
+                    key={i}
+                    className="w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-sm font-semibold text-gray-300 hover:text-white transition-all group"
+                  >
+                    {content}
+                  </button>
+                );
+              })}
             </div>
           </div>
 

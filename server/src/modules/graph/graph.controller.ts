@@ -1,34 +1,39 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Param, Post } from '@nestjs/common';
+import { Roles } from '@thallesp/nestjs-better-auth';
 import { GraphService } from './graph.service';
-import { CreateGraphDto } from './dto/create-graph.dto';
-import { UpdateGraphDto } from './dto/update-graph.dto';
 
+@Roles(['ADMIN', 'REVIEWER', 'admin', 'reviewer'])
 @Controller('graph')
 export class GraphController {
   constructor(private readonly graphService: GraphService) {}
 
-  @Post()
-  create(@Body() createGraphDto: CreateGraphDto) {
-    return this.graphService.create(createGraphDto);
+  @Get('vendors/:id')
+  getVendorGraph(@Param('id') id: string) {
+    return this.graphService.getVendorGraph(id);
   }
 
-  @Get()
-  findAll() {
-    return this.graphService.findAll();
+  @Get('shared-devices')
+  getSharedDevices() {
+    return this.graphService.getSharedDevices();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.graphService.findOne(+id);
+  @Get('shared-accounts')
+  getSharedAccounts() {
+    return this.graphService.getSharedAccounts();
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateGraphDto: UpdateGraphDto) {
-    return this.graphService.update(+id, updateGraphDto);
+  @Get('duplicate-documents')
+  getDuplicateDocuments() {
+    return this.graphService.getDuplicateDocuments();
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.graphService.remove(+id);
+  @Get('fraud-clusters')
+  getFraudClusters() {
+    return this.graphService.getFraudClusters();
+  }
+
+  @Post('sync')
+  syncExistingPrismaDataToGraph() {
+    return this.graphService.syncExistingPrismaDataToGraph();
   }
 }

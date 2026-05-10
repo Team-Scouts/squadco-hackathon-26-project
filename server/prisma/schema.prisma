@@ -24,6 +24,7 @@ enum RiskLevel {
   LOW
   MEDIUM
   HIGH
+  CRITICAL
 }
 
 enum AlertType {
@@ -34,10 +35,10 @@ enum AlertType {
 }
 
 model User {
-  id       String @id @default(uuid())
-  email    String @unique
+  id       String  @id @default(uuid())
+  email    String  @unique
   password String?
-  role     String @default("ADMIN")
+  role     String  @default("ADMIN")
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -68,6 +69,9 @@ model Vendor {
   devices      Device[]
   transactions Transaction[]
   alerts       Alert[]
+  bankAccounts BankAccount[]
+  transfers    Transfer[]
+  riskScores   RiskScore[]
 }
 
 model Document {
@@ -116,6 +120,123 @@ model Transaction {
   financialRiskScore Float @default(0)
 
   createdAt DateTime @default(now())
+
+  webhookEvents WebhookEvent[]
+}
+
+model BankAccount {
+  id String @id @default(uuid())
+
+  vendorId String
+  vendor   Vendor @relation(fields: [vendorId], references: [id])
+
+  bankCode           String
+  bankName           String
+  accountNumberHash  String
+  accountNumberLast4 String
+  accountName        String
+  lookupStatus       String @default("PENDING")
+  identityMatchScore Float  @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  transfers Transfer[]
+
+  @@index([vendorId])
+  @@index([accountNumberHash])
+}
+
+model Transfer {
+  id String @id @default(uuid())
+
+  vendorId String
+  vendor   Vendor @relation(fields: [vendorId], references: [id])
+
+  bankAccountId String
+  bankAccount   BankAccount @relation(fields: [bankAccountId], references: [id])
+
+  transferReference String @unique
+  amount            Float
+  currency          String @default("NGN")
+  status            String
+  rawPayload        Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  webhookEvents WebhookEvent[]
+
+  @@index([vendorId])
+  @@index([bankAccountId])
+}
+
+model WebhookEvent {
+  id String @id @default(uuid())
+
+  provider             String
+  eventType            String
+  transactionReference String?
+  transferReference    String?
+  rawPayload           Json
+  signature            String?
+  processed            Boolean   @default(false)
+  processedAt          DateTime?
+
+  graphSynced       Boolean @default(false)
+  graphSyncAttempts Int     @default(0)
+  graphSyncError    String?
+
+  createdAt DateTime @default(now())
+
+  transaction Transaction? @relation(fields: [transactionReference], references: [transactionRef])
+  transfer    Transfer?    @relation(fields: [transferReference], references: [transferReference])
+
+  @@index([provider])
+  @@index([eventType])
+  @@index([transactionReference])
+  @@index([transferReference])
+  @@index([graphSynced])
+}
+
+model RiskScore {
+  id String @id @default(uuid())
+
+  vendorId String
+  vendor   Vendor @relation(fields: [vendorId], references: [id])
+
+  documentRisk         Float     @default(0)
+  networkFraudRisk     Float     @default(0)
+  financialAnomalyRisk Float     @default(0)
+  deviceRisk           Float     @default(0)
+  identityMismatchRisk Float     @default(0)
+  manualReviewPenalty  Float     @default(0)
+  overallRisk          Float     @default(0)
+  riskLevel            RiskLevel
+  recommendedAction    String
+  reasons              Json
+
+  createdAt DateTime @default(now())
+
+  @@index([vendorId])
+  @@index([riskLevel])
+}
+
+model GraphSyncFailure {
+  id String @id @default(uuid())
+
+  entityType String
+  entityId   String?
+  operation  String
+  error      String
+  retryCount Int     @default(0)
+  resolved   Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([entityType, entityId])
+  @@index([resolved])
 }
 
 model Alert {

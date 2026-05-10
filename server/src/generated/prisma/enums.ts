@@ -22,7 +22,8 @@ export type VendorStatus = (typeof VendorStatus)[keyof typeof VendorStatus]
 export const RiskLevel = {
   LOW: 'LOW',
   MEDIUM: 'MEDIUM',
-  HIGH: 'HIGH'
+  HIGH: 'HIGH',
+  CRITICAL: 'CRITICAL'
 } as const
 
 export type RiskLevel = (typeof RiskLevel)[keyof typeof RiskLevel]

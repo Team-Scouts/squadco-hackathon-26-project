@@ -9,6 +9,7 @@ import { TransactionsModule } from './modules/transactions/transactions.module';
 import { SquadModule } from './modules/squad/squad.module';
 import { RiskModule } from './modules/risk/risk.module';
 import { GraphModule } from './modules/graph/graph.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 // import { DeviceIntelligenceModule } from './modules/device-intelligence/device-intelligence.module';
 import { AlertsModule } from './modules/alerts/alerts.module';
 import { AdminModule } from './modules/admin/admin.module';
@@ -24,7 +25,17 @@ import { auth } from './lib/auth';
     VendorsModule,
     DocumentsModule,
     TransactionsModule,
-    SquadModule,
+    ConfigModule.forRoot({ isGlobal: true }),
+
+    // Register SquadModule asynchronously so ConfigService is available
+    SquadModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: (config: ConfigService) => ({
+        secretKey: config.getOrThrow<string>('SQUAD_SECRET_KEY'),
+        isProduction: config.get('NODE_ENV') === 'production',
+      }),
+      inject: [ConfigService],
+    }),
     RiskModule,
     GraphModule,
     // DeviceIntelligenceModule,

@@ -8,6 +8,7 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  Headers,
 } from '@nestjs/common';
 import { SquadService } from './squad.service';
 import {
@@ -22,12 +23,27 @@ import {
   GetAllTransfersDto,
   RefundDto,
 } from './dto/squad.dto';
-import { OptionalAuth } from '@thallesp/nestjs-better-auth';
+import { AllowAnonymous, OptionalAuth } from '@thallesp/nestjs-better-auth';
 
 @OptionalAuth()
 @Controller('squad')
 export class SquadController {
   constructor(private readonly squadService: SquadService) {}
+
+  @AllowAnonymous()
+  @Post('webhook')
+  @HttpCode(HttpStatus.OK)
+  handleWebhook(
+    @Body() payload: Record<string, unknown>,
+    @Headers('x-squad-signature') squadSignature?: string,
+    @Headers('squad-signature') fallbackSignature?: string,
+    @Headers('x-signature') genericSignature?: string,
+  ) {
+    return this.squadService.handleWebhook(
+      payload,
+      squadSignature ?? fallbackSignature ?? genericSignature,
+    );
+  }
 
   // ──────────────────────────────────────────────────────────────────────────
   // PAYMENTS

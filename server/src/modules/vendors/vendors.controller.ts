@@ -1,34 +1,39 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+
 import { VendorsService } from './vendors.service';
+
 import { CreateVendorDto } from './dto/create-vendor.dto';
+
 import { UpdateVendorDto } from './dto/update-vendor.dto';
 
 @Controller('vendors')
 export class VendorsController {
   constructor(private readonly vendorsService: VendorsService) {}
 
+  // CREATE
   @Post()
-  create(@Body() createVendorDto: CreateVendorDto) {
-    return this.vendorsService.create(createVendorDto);
+  createVendor(@Body() createVendorDto: CreateVendorDto) {
+    return this.vendorsService.createVendor(createVendorDto);
   }
 
+  // GET ALL
   @Get()
-  findAll() {
-    return this.vendorsService.findAll();
+  getVendors() {
+    return this.vendorsService.getVendors();
   }
 
+  // GET ONE
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.vendorsService.findOne(+id);
+  getVendorById(@Param('id') id: string) {
+    return this.vendorsService.getVendorById(id);
   }
 
+  // UPDATE STATUS
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateVendorDto: UpdateVendorDto) {
-    return this.vendorsService.update(+id, updateVendorDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.vendorsService.remove(+id);
+  updateVendor(
+    @Param('id') id: string,
+    @Body() updateVendorDto: UpdateVendorDto,
+  ) {
+    return this.vendorsService.updateVendor(id, updateVendorDto);
   }
 }

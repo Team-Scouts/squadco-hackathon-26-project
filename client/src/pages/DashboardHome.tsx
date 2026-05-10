@@ -153,7 +153,7 @@ export default function DashboardHome() {
         {summaryMetrics.map((metric, i) => (
           <div
             key={i}
-            className="glass-panel rounded-xl p-4 flex flex-col justify-between hover:bg-white/5 transition-colors"
+            className="glass-panel rounded-xl p-4 flex flex-col justify-between hover:bg-white/10 transition-colors"
           >
             <div className="flex justify-between items-start mb-2">
               <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider leading-tight">

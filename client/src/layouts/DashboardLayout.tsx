@@ -62,9 +62,6 @@ export default function DashboardLayout() {
                 <item.icon
                   className={`h-5 w-5 ${isActive ? "text-emerald-400" : "text-gray-500"}`}
                 />
-                <item.icon
-                  className={`h-5 w-5 ${isActive ? "text-emerald-400" : "text-gray-500"}`}
-                />
                 {item.name}
               </Link>
             );
@@ -72,7 +69,7 @@ export default function DashboardLayout() {
         </nav>
 
         <div className="p-4 border-t border-white/5">
-          <button onClick={signOut}>
+          <button onClick={signOut} className="flex  gap-x-2 items-center">
             <LogOut className="h-5 w-5 text-gray-500" />
             Sign Out
           </button>
@@ -82,7 +79,7 @@ export default function DashboardLayout() {
       {/* Main Content */}
       <div className="flex-1 ml-64 flex flex-col min-h-svh">
         {/* Top Header */}
-        <header className="h-20 border-b border-white/5 bg-gray-950/80 backdrop-blur-xl flex items-center justify-between px-8 sticky top-0 z-10">
+        <header className="h-20 border-b border-white/5 bg-gray-950/80 backdrop-blur-xl flex items-center justify-between px-8 sticky top-0 z-20">
           <div className="relative w-96">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
             <input
@@ -98,7 +95,10 @@ export default function DashboardLayout() {
               <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 animate-ping"></span>
               <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500"></span>
             </button>
-            <div className="h-9 w-9 rounded-full bg-linear-to-tr from-emerald-500 to-cyan-500 border-2 border-gray-900 shadow-[0_0_10px_rgba(16,185,129,0.3)] ml-2 cursor-pointer transition-transform hover:scale-105"></div>
+            <Link
+              to="/dashboard/settings?tab=profile"
+              className="h-9 w-9 rounded-full bg-linear-to-tr from-emerald-500 to-cyan-500 border-2 border-gray-900 shadow-[0_0_10px_rgba(16,185,129,0.3)] ml-2 cursor-pointer transition-transform hover:scale-105"
+            ></Link>
           </div>
         </header>
 

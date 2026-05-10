@@ -1,34 +1,153 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Patch,
+  Body,
+  Param,
+  Query,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { SquadService } from './squad.service';
-import { CreateSquadDto } from './dto/create-squad.dto';
-import { UpdateSquadDto } from './dto/update-squad.dto';
+import {
+  InitiatePaymentDto,
+  ChargeCardDto,
+  CancelRecurringChargeDto,
+  QueryTransactionsDto,
+  SimulatePaymentDto,
+  AccountLookupDto,
+  FundTransferDto,
+  RequeryTransferDto,
+  GetAllTransfersDto,
+  RefundDto,
+} from './dto/squad.dto';
+import { OptionalAuth } from '@thallesp/nestjs-better-auth';
 
+@OptionalAuth()
 @Controller('squad')
 export class SquadController {
   constructor(private readonly squadService: SquadService) {}
 
-  @Post()
-  create(@Body() createSquadDto: CreateSquadDto) {
-    return this.squadService.create(createSquadDto);
+  // ──────────────────────────────────────────────────────────────────────────
+  // PAYMENTS
+  // ──────────────────────────────────────────────────────────────────────────
+
+  /**
+   * POST /squad/transaction/initiate
+   * Initiates a payment and returns a checkout URL   */
+  @Post('transaction/initiate')
+  @HttpCode(HttpStatus.OK)
+  initiatePayment(@Body() dto: InitiatePaymentDto) {
+    return this.squadService.initiatePayment(dto);
   }
 
-  @Get()
-  findAll() {
-    return this.squadService.findAll();
+  /**
+   * GET /squad/transaction/verify/:transactionRef
+   * Verifies a transaction by its unique reference.
+   */
+  @Get('transaction/verify/:transactionRef')
+  verifyTransaction(@Param('transactionRef') transactionRef: string) {
+    return this.squadService.verifyTransaction(transactionRef);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.squadService.findOne(+id);
+  /**
+   * POST /squad/transaction/charge-card
+   * Charges a previously tokenised card.
+   */
+  @Post('transaction/charge-card')
+  @HttpCode(HttpStatus.OK)
+  chargeCard(@Body() dto: ChargeCardDto) {
+    return this.squadService.chargeCard(dto);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSquadDto: UpdateSquadDto) {
-    return this.squadService.update(+id, updateSquadDto);
+  /**
+   * PATCH /squad/transaction/cancel/recurring
+   * Cancels an active recurring card token.
+   */
+  @Patch('transaction/cancel/recurring')
+  cancelRecurringCharge(@Body() dto: CancelRecurringChargeDto) {
+    return this.squadService.cancelRecurringCharge(dto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.squadService.remove(+id);
+  /**
+   * GET /squad/transaction
+   * Queries all transactions with optional filters.
+   * Required query params: currency, start_date, end_date, page, perpage
+   */
+  @Get('transaction')
+  queryTransactions(@Query() query: QueryTransactionsDto) {
+    return this.squadService.queryTransactions(query);
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // SANDBOX HELPERS
+  // ──────────────────────────────────────────────────────────────────────────
+
+  /**
+   * POST /squad/simulate/payment
+   * Simulates a payment into a dynamic virtual account (sandbox only).
+   */
+  @Post('simulate/payment')
+  @HttpCode(HttpStatus.OK)
+  simulatePayment(@Body() dto: SimulatePaymentDto) {
+    return this.squadService.simulatePayment(dto);
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // TRANSFERS / PAYOUTS
+  // ──────────────────────────────────────────────────────────────────────────
+
+  /**
+   * POST /squad/payout/lookup
+   * Looks up an account name before initiating a transfer.
+   */
+  @Post('payout/lookup')
+  @HttpCode(HttpStatus.OK)
+  lookupAccount(@Body() dto: AccountLookupDto) {
+    return this.squadService.lookupAccount(dto);
+  }
+
+  /**
+   * POST /squad/payout/transfer
+   * Transfers funds from your Squad wallet to a bank account.
+   */
+  @Post('payout/transfer')
+  @HttpCode(HttpStatus.OK)
+  fundTransfer(@Body() dto: FundTransferDto) {
+    return this.squadService.fundTransfer(dto);
+  }
+
+  /**
+   * POST /squad/payout/requery
+   * Re-queries the status of a transfer.
+   */
+  @Post('payout/requery')
+  @HttpCode(HttpStatus.OK)
+  requeryTransfer(@Body() dto: RequeryTransferDto) {
+    return this.squadService.requeryTransfer(dto);
+  }
+
+  /**
+   * GET /squad/payout/list
+   * Retrieves all transfers from your Squad wallet.
+   */
+  @Get('payout/list')
+  getAllTransfers(@Query() query: GetAllTransfersDto) {
+    return this.squadService.getAllTransfers(query);
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // REFUNDS
+  // ──────────────────────────────────────────────────────────────────────────
+
+  /**
+   * POST /squad/transaction/refund
+   * Initiates a full or partial refund on a completed transaction.
+   */
+  @Post('transaction/refund')
+  @HttpCode(HttpStatus.OK)
+  initiateRefund(@Body() dto: RefundDto) {
+    return this.squadService.initiateRefund(dto);
   }
 }

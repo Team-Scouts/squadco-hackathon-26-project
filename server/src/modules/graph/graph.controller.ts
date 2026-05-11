@@ -2,7 +2,7 @@ import { Controller, Get, Param, Post } from '@nestjs/common';
 import { Roles } from '@thallesp/nestjs-better-auth';
 import { GraphService } from './graph.service';
 
-@Roles(['ADMIN', 'REVIEWER', 'admin', 'reviewer'])
+@Roles(['admin', 'reviewer'])
 @Controller('graph')
 export class GraphController {
   constructor(private readonly graphService: GraphService) {}

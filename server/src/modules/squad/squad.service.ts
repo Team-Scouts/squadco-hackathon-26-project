@@ -4,8 +4,12 @@ import {
   HttpException,
   HttpStatus,
   Logger,
+  UnauthorizedException,
 } from '@nestjs/common';
 import axios, { AxiosInstance, AxiosError } from 'axios';
+import { createHmac, timingSafeEqual } from 'node:crypto';
+import { PrismaService } from '../../prisma/prisma.service';
+import { GraphService } from '../graph/graph.service';
 
 import {
   SQUAD_MODULE_OPTIONS,
@@ -46,6 +50,8 @@ export class SquadService {
 
   constructor(
     @Inject(SQUAD_MODULE_OPTIONS) private readonly options: SquadModuleOptions,
+    private readonly prisma: PrismaService,
+    private readonly graphService: GraphService,
   ) {
     const baseURL = options.isProduction
       ? SQUAD_PRODUCTION_BASE_URL
@@ -71,6 +77,203 @@ export class SquadService {
         throw new HttpException({ message, raw: err.response?.data }, status);
       },
     );
+  }
+
+  async handleWebhook(payload: Record<string, any>, signature?: string) {
+    if (!this.isValidWebhookSignature(payload, signature)) {
+      throw new UnauthorizedException('Invalid Squad webhook signature');
+    }
+
+    const eventType =
+      this.resolveFirstString(payload, ['event', 'type', 'event_type']) ??
+      'squad.webhook';
+    const data = this.resolveEventData(payload);
+    const transactionReference = this.resolveFirstString(data, [
+      'transaction_ref',
+      'transactionRef',
+      'transaction_reference',
+      'reference',
+    ]);
+    const transferReference = this.resolveFirstString(data, [
+      'transfer_reference',
+      'transferReference',
+      'transfer_ref',
+    ]);
+    const vendorId = this.resolveVendorId(payload);
+
+    const webhookEvent = await this.prisma.webhookEvent.create({
+      data: {
+        provider: 'SQUAD',
+        eventType,
+        transactionReference,
+        transferReference,
+        rawPayload: payload,
+        signature,
+      },
+    });
+
+    if (vendorId && transactionReference) {
+      await this.prisma.transaction.upsert({
+        where: { transactionRef: transactionReference },
+        create: {
+          vendorId,
+          transactionRef: transactionReference,
+          amount: this.resolveAmount(data),
+          channel: this.resolveFirstString(data, ['channel']) ?? 'SQUAD',
+          status:
+            this.resolveFirstString(data, ['status', 'transaction_status']) ??
+            'UNKNOWN',
+          financialRiskScore: 0,
+        },
+        update: {
+          amount: this.resolveAmount(data),
+          channel: this.resolveFirstString(data, ['channel']) ?? 'SQUAD',
+          status:
+            this.resolveFirstString(data, ['status', 'transaction_status']) ??
+            'UNKNOWN',
+        },
+      });
+    }
+
+    if (vendorId && transferReference) {
+      await this.persistTransferFromWebhook(vendorId, transferReference, data);
+    }
+
+    let graphSynced = false;
+    if (vendorId) {
+      graphSynced = await this.graphService.safeSyncVendorById(vendorId);
+    }
+
+    await this.prisma.webhookEvent.update({
+      where: { id: webhookEvent.id },
+      data: {
+        processed: true,
+        processedAt: new Date(),
+        graphSynced,
+        graphSyncAttempts: { increment: 1 },
+        graphSyncError: graphSynced ? null : 'Graph sync failed; queued for retry',
+      },
+    });
+
+    await this.graphService.safeSyncWebhookEventById(webhookEvent.id);
+
+    return {
+      received: true,
+      eventId: webhookEvent.id,
+      transactionReference,
+      transferReference,
+      graphSynced,
+    };
+  }
+
+  private async persistTransferFromWebhook(
+    vendorId: string,
+    transferReference: string,
+    data: Record<string, any>,
+  ) {
+    const bankAccountId = this.resolveFirstString(data, [
+      'bankAccountId',
+      'bank_account_id',
+    ]);
+
+    if (!bankAccountId) {
+      this.logger.warn(
+        `Skipping transfer persistence for ${transferReference}; no bankAccountId was present in webhook metadata`,
+      );
+      return;
+    }
+
+    await this.prisma.transfer.upsert({
+      where: { transferReference },
+      create: {
+        vendorId,
+        bankAccountId,
+        transferReference,
+        amount: this.resolveAmount(data),
+        currency: this.resolveFirstString(data, ['currency']) ?? 'NGN',
+        status: this.resolveFirstString(data, ['status']) ?? 'UNKNOWN',
+        rawPayload: data,
+      },
+      update: {
+        amount: this.resolveAmount(data),
+        currency: this.resolveFirstString(data, ['currency']) ?? 'NGN',
+        status: this.resolveFirstString(data, ['status']) ?? 'UNKNOWN',
+        rawPayload: data,
+      },
+    });
+  }
+
+  private isValidWebhookSignature(
+    payload: Record<string, any>,
+    signature?: string,
+  ) {
+    const webhookSecret = process.env.SQUAD_WEBHOOK_SECRET;
+
+    if (!webhookSecret) {
+      this.logger.warn(
+        'SQUAD_WEBHOOK_SECRET is not set; accepting Squad webhook without signature validation',
+      );
+      return true;
+    }
+
+    if (!signature) {
+      return false;
+    }
+
+    const normalizedSignature = signature.replace(/^sha(256|512)=/i, '');
+    const body = JSON.stringify(payload);
+    const candidates = [
+      createHmac('sha512', webhookSecret).update(body).digest('hex'),
+      createHmac('sha256', webhookSecret).update(body).digest('hex'),
+    ];
+
+    return candidates.some((candidate) =>
+      this.safeCompare(normalizedSignature, candidate),
+    );
+  }
+
+  private safeCompare(left: string, right: string) {
+    const leftBuffer = Buffer.from(left);
+    const rightBuffer = Buffer.from(right);
+
+    return (
+      leftBuffer.length === rightBuffer.length &&
+      timingSafeEqual(leftBuffer, rightBuffer)
+    );
+  }
+
+  private resolveEventData(payload: Record<string, any>) {
+    return (payload.data ?? payload.body ?? payload) as Record<string, any>;
+  }
+
+  private resolveVendorId(payload: Record<string, any>) {
+    const data = this.resolveEventData(payload);
+    const metadata = (data.metadata ?? payload.metadata ?? {}) as Record<
+      string,
+      any
+    >;
+
+    return (
+      this.resolveFirstString(metadata, ['vendor_id', 'vendorId']) ??
+      this.resolveFirstString(data, ['vendor_id', 'vendorId'])
+    );
+  }
+
+  private resolveAmount(data: Record<string, any>) {
+    const amount = data.amount ?? data.amount_paid ?? data.transfer_amount ?? 0;
+    const parsed = Number(amount);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+
+  private resolveFirstString(data: Record<string, any>, keys: string[]) {
+    for (const key of keys) {
+      const value = data[key];
+      if (typeof value === 'string' && value.length > 0) {
+        return value;
+      }
+    }
+
+    return undefined;
   }
 
   // ──────────────────────────────────────────────────────────────────────────

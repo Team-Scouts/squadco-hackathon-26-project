@@ -76,13 +76,61 @@ async function main() {
       },
     });
 
+    const accountHash = i === 0 ? 'acct_hash_clean_001' : 'acct_hash_shared_001';
+    const bankAccount = await prisma.bankAccount.create({
+      data: {
+        vendorId: vendor.id,
+        bankCode: '058',
+        bankName: 'Guaranty Trust Bank',
+        accountNumberHash: accountHash,
+        accountNumberLast4: i === 0 ? '1001' : '2020',
+        accountName: vendorData.businessName,
+        lookupStatus: 'MATCHED',
+        identityMatchScore: i === 0 ? 96 : 58,
+      },
+    });
+
+    await prisma.transfer.create({
+      data: {
+        vendorId: vendor.id,
+        bankAccountId: bankAccount.id,
+        transferReference: `TRF_${String(i + 1).padStart(3, '0')}`,
+        amount: i === 0 ? 250000 : 50000,
+        currency: 'NGN',
+        status: i === 0 ? 'SUCCESS' : 'PENDING',
+        rawPayload: {
+          sandbox: true,
+          seeded: true,
+        },
+      },
+    });
+
+    await prisma.riskScore.create({
+      data: {
+        vendorId: vendor.id,
+        documentRisk: i === 0 ? 8 : 62,
+        networkFraudRisk: i === 0 ? 5 : 88,
+        financialAnomalyRisk: i === 0 ? 12 : 70,
+        deviceRisk: i === 0 ? 10 : 90,
+        identityMismatchRisk: i === 0 ? 4 : 55,
+        manualReviewPenalty: i === 0 ? 0 : 20,
+        overallRisk: vendorData.overallRiskScore,
+        riskLevel: vendorData.riskLevel as RiskLevel,
+        recommendedAction: i === 0 ? 'approve' : 'manual_review',
+        reasons:
+          i === 0
+            ? ['Clean document hash', 'Unique payment and account signals']
+            : ['Shared device signal', 'Shared bank account hash'],
+      },
+    });
+
     // Create Document
     await prisma.document.create({
       data: {
         vendorId: vendor.id,
         documentType: 'CAC_CERTIFICATE',
         fileUrl: 'https://example.com/cac-doc.pdf',
-        documentHash: `DOC_HASH_${i}`,
+        documentHash: i === 0 ? 'DOC_HASH_CLEAN_001' : 'DOC_HASH_SHARED_001',
         tamperScore: Math.random() * 100,
       },
     });

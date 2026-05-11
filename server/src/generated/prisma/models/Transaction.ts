@@ -245,6 +245,7 @@ export type TransactionWhereInput = {
   financialRiskScore?: Prisma.FloatFilter<"Transaction"> | number
   createdAt?: Prisma.DateTimeFilter<"Transaction"> | Date | string
   vendor?: Prisma.XOR<Prisma.VendorScalarRelationFilter, Prisma.VendorWhereInput>
+  webhookEvents?: Prisma.WebhookEventListRelationFilter
 }
 
 export type TransactionOrderByWithRelationInput = {
@@ -257,6 +258,7 @@ export type TransactionOrderByWithRelationInput = {
   financialRiskScore?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   vendor?: Prisma.VendorOrderByWithRelationInput
+  webhookEvents?: Prisma.WebhookEventOrderByRelationAggregateInput
 }
 
 export type TransactionWhereUniqueInput = Prisma.AtLeast<{
@@ -272,6 +274,7 @@ export type TransactionWhereUniqueInput = Prisma.AtLeast<{
   financialRiskScore?: Prisma.FloatFilter<"Transaction"> | number
   createdAt?: Prisma.DateTimeFilter<"Transaction"> | Date | string
   vendor?: Prisma.XOR<Prisma.VendorScalarRelationFilter, Prisma.VendorWhereInput>
+  webhookEvents?: Prisma.WebhookEventListRelationFilter
 }, "id" | "transactionRef">
 
 export type TransactionOrderByWithAggregationInput = {
@@ -313,6 +316,7 @@ export type TransactionCreateInput = {
   financialRiskScore?: number
   createdAt?: Date | string
   vendor: Prisma.VendorCreateNestedOneWithoutTransactionsInput
+  webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutTransactionInput
 }
 
 export type TransactionUncheckedCreateInput = {
@@ -324,6 +328,7 @@ export type TransactionUncheckedCreateInput = {
   status: string
   financialRiskScore?: number
   createdAt?: Date | string
+  webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTransactionInput
 }
 
 export type TransactionUpdateInput = {
@@ -335,6 +340,7 @@ export type TransactionUpdateInput = {
   financialRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   vendor?: Prisma.VendorUpdateOneRequiredWithoutTransactionsNestedInput
+  webhookEvents?: Prisma.WebhookEventUpdateManyWithoutTransactionNestedInput
 }
 
 export type TransactionUncheckedUpdateInput = {
@@ -346,6 +352,7 @@ export type TransactionUncheckedUpdateInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   financialRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutTransactionNestedInput
 }
 
 export type TransactionCreateManyInput = {
@@ -433,6 +440,11 @@ export type TransactionSumOrderByAggregateInput = {
   financialRiskScore?: Prisma.SortOrder
 }
 
+export type TransactionNullableScalarRelationFilter = {
+  is?: Prisma.TransactionWhereInput | null
+  isNot?: Prisma.TransactionWhereInput | null
+}
+
 export type TransactionCreateNestedManyWithoutVendorInput = {
   create?: Prisma.XOR<Prisma.TransactionCreateWithoutVendorInput, Prisma.TransactionUncheckedCreateWithoutVendorInput> | Prisma.TransactionCreateWithoutVendorInput[] | Prisma.TransactionUncheckedCreateWithoutVendorInput[]
   connectOrCreate?: Prisma.TransactionCreateOrConnectWithoutVendorInput | Prisma.TransactionCreateOrConnectWithoutVendorInput[]
@@ -475,6 +487,22 @@ export type TransactionUncheckedUpdateManyWithoutVendorNestedInput = {
   deleteMany?: Prisma.TransactionScalarWhereInput | Prisma.TransactionScalarWhereInput[]
 }
 
+export type TransactionCreateNestedOneWithoutWebhookEventsInput = {
+  create?: Prisma.XOR<Prisma.TransactionCreateWithoutWebhookEventsInput, Prisma.TransactionUncheckedCreateWithoutWebhookEventsInput>
+  connectOrCreate?: Prisma.TransactionCreateOrConnectWithoutWebhookEventsInput
+  connect?: Prisma.TransactionWhereUniqueInput
+}
+
+export type TransactionUpdateOneWithoutWebhookEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.TransactionCreateWithoutWebhookEventsInput, Prisma.TransactionUncheckedCreateWithoutWebhookEventsInput>
+  connectOrCreate?: Prisma.TransactionCreateOrConnectWithoutWebhookEventsInput
+  upsert?: Prisma.TransactionUpsertWithoutWebhookEventsInput
+  disconnect?: Prisma.TransactionWhereInput | boolean
+  delete?: Prisma.TransactionWhereInput | boolean
+  connect?: Prisma.TransactionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TransactionUpdateToOneWithWhereWithoutWebhookEventsInput, Prisma.TransactionUpdateWithoutWebhookEventsInput>, Prisma.TransactionUncheckedUpdateWithoutWebhookEventsInput>
+}
+
 export type TransactionCreateWithoutVendorInput = {
   id?: string
   transactionRef: string
@@ -483,6 +511,7 @@ export type TransactionCreateWithoutVendorInput = {
   status: string
   financialRiskScore?: number
   createdAt?: Date | string
+  webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutTransactionInput
 }
 
 export type TransactionUncheckedCreateWithoutVendorInput = {
@@ -493,6 +522,7 @@ export type TransactionUncheckedCreateWithoutVendorInput = {
   status: string
   financialRiskScore?: number
   createdAt?: Date | string
+  webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTransactionInput
 }
 
 export type TransactionCreateOrConnectWithoutVendorInput = {
@@ -535,6 +565,66 @@ export type TransactionScalarWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Transaction"> | Date | string
 }
 
+export type TransactionCreateWithoutWebhookEventsInput = {
+  id?: string
+  transactionRef: string
+  amount: number
+  channel: string
+  status: string
+  financialRiskScore?: number
+  createdAt?: Date | string
+  vendor: Prisma.VendorCreateNestedOneWithoutTransactionsInput
+}
+
+export type TransactionUncheckedCreateWithoutWebhookEventsInput = {
+  id?: string
+  vendorId: string
+  transactionRef: string
+  amount: number
+  channel: string
+  status: string
+  financialRiskScore?: number
+  createdAt?: Date | string
+}
+
+export type TransactionCreateOrConnectWithoutWebhookEventsInput = {
+  where: Prisma.TransactionWhereUniqueInput
+  create: Prisma.XOR<Prisma.TransactionCreateWithoutWebhookEventsInput, Prisma.TransactionUncheckedCreateWithoutWebhookEventsInput>
+}
+
+export type TransactionUpsertWithoutWebhookEventsInput = {
+  update: Prisma.XOR<Prisma.TransactionUpdateWithoutWebhookEventsInput, Prisma.TransactionUncheckedUpdateWithoutWebhookEventsInput>
+  create: Prisma.XOR<Prisma.TransactionCreateWithoutWebhookEventsInput, Prisma.TransactionUncheckedCreateWithoutWebhookEventsInput>
+  where?: Prisma.TransactionWhereInput
+}
+
+export type TransactionUpdateToOneWithWhereWithoutWebhookEventsInput = {
+  where?: Prisma.TransactionWhereInput
+  data: Prisma.XOR<Prisma.TransactionUpdateWithoutWebhookEventsInput, Prisma.TransactionUncheckedUpdateWithoutWebhookEventsInput>
+}
+
+export type TransactionUpdateWithoutWebhookEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  transactionRef?: Prisma.StringFieldUpdateOperationsInput | string
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  channel?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  financialRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  vendor?: Prisma.VendorUpdateOneRequiredWithoutTransactionsNestedInput
+}
+
+export type TransactionUncheckedUpdateWithoutWebhookEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  vendorId?: Prisma.StringFieldUpdateOperationsInput | string
+  transactionRef?: Prisma.StringFieldUpdateOperationsInput | string
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  channel?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  financialRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type TransactionCreateManyVendorInput = {
   id?: string
   transactionRef: string
@@ -553,6 +643,7 @@ export type TransactionUpdateWithoutVendorInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   financialRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  webhookEvents?: Prisma.WebhookEventUpdateManyWithoutTransactionNestedInput
 }
 
 export type TransactionUncheckedUpdateWithoutVendorInput = {
@@ -563,6 +654,7 @@ export type TransactionUncheckedUpdateWithoutVendorInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   financialRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutTransactionNestedInput
 }
 
 export type TransactionUncheckedUpdateManyWithoutVendorInput = {
@@ -576,6 +668,35 @@ export type TransactionUncheckedUpdateManyWithoutVendorInput = {
 }
 
 
+/**
+ * Count Type TransactionCountOutputType
+ */
+
+export type TransactionCountOutputType = {
+  webhookEvents: number
+}
+
+export type TransactionCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  webhookEvents?: boolean | TransactionCountOutputTypeCountWebhookEventsArgs
+}
+
+/**
+ * TransactionCountOutputType without action
+ */
+export type TransactionCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TransactionCountOutputType
+   */
+  select?: Prisma.TransactionCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * TransactionCountOutputType without action
+ */
+export type TransactionCountOutputTypeCountWebhookEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.WebhookEventWhereInput
+}
+
 
 export type TransactionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -587,6 +708,8 @@ export type TransactionSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   financialRiskScore?: boolean
   createdAt?: boolean
   vendor?: boolean | Prisma.VendorDefaultArgs<ExtArgs>
+  webhookEvents?: boolean | Prisma.Transaction$webhookEventsArgs<ExtArgs>
+  _count?: boolean | Prisma.TransactionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["transaction"]>
 
 export type TransactionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -627,6 +750,8 @@ export type TransactionSelectScalar = {
 export type TransactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "vendorId" | "transactionRef" | "amount" | "channel" | "status" | "financialRiskScore" | "createdAt", ExtArgs["result"]["transaction"]>
 export type TransactionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   vendor?: boolean | Prisma.VendorDefaultArgs<ExtArgs>
+  webhookEvents?: boolean | Prisma.Transaction$webhookEventsArgs<ExtArgs>
+  _count?: boolean | Prisma.TransactionCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TransactionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   vendor?: boolean | Prisma.VendorDefaultArgs<ExtArgs>
@@ -639,6 +764,7 @@ export type $TransactionPayload<ExtArgs extends runtime.Types.Extensions.Interna
   name: "Transaction"
   objects: {
     vendor: Prisma.$VendorPayload<ExtArgs>
+    webhookEvents: Prisma.$WebhookEventPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1044,6 +1170,7 @@ readonly fields: TransactionFieldRefs;
 export interface Prisma__TransactionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   vendor<T extends Prisma.VendorDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.VendorDefaultArgs<ExtArgs>>): Prisma.Prisma__VendorClient<runtime.Types.Result.GetResult<Prisma.$VendorPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  webhookEvents<T extends Prisma.Transaction$webhookEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Transaction$webhookEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WebhookEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1479,6 +1606,30 @@ export type TransactionDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.I
    * Limit how many Transactions to delete.
    */
   limit?: number
+}
+
+/**
+ * Transaction.webhookEvents
+ */
+export type Transaction$webhookEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the WebhookEvent
+   */
+  select?: Prisma.WebhookEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the WebhookEvent
+   */
+  omit?: Prisma.WebhookEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WebhookEventInclude<ExtArgs> | null
+  where?: Prisma.WebhookEventWhereInput
+  orderBy?: Prisma.WebhookEventOrderByWithRelationInput | Prisma.WebhookEventOrderByWithRelationInput[]
+  cursor?: Prisma.WebhookEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.WebhookEventScalarFieldEnum | Prisma.WebhookEventScalarFieldEnum[]
 }
 
 /**

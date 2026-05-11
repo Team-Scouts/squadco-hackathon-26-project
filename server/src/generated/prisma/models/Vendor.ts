@@ -252,6 +252,9 @@ export type VendorWhereInput = {
   devices?: Prisma.DeviceListRelationFilter
   transactions?: Prisma.TransactionListRelationFilter
   alerts?: Prisma.AlertListRelationFilter
+  bankAccounts?: Prisma.BankAccountListRelationFilter
+  transfers?: Prisma.TransferListRelationFilter
+  riskScores?: Prisma.RiskScoreListRelationFilter
 }
 
 export type VendorOrderByWithRelationInput = {
@@ -268,6 +271,9 @@ export type VendorOrderByWithRelationInput = {
   devices?: Prisma.DeviceOrderByRelationAggregateInput
   transactions?: Prisma.TransactionOrderByRelationAggregateInput
   alerts?: Prisma.AlertOrderByRelationAggregateInput
+  bankAccounts?: Prisma.BankAccountOrderByRelationAggregateInput
+  transfers?: Prisma.TransferOrderByRelationAggregateInput
+  riskScores?: Prisma.RiskScoreOrderByRelationAggregateInput
 }
 
 export type VendorWhereUniqueInput = Prisma.AtLeast<{
@@ -287,6 +293,9 @@ export type VendorWhereUniqueInput = Prisma.AtLeast<{
   devices?: Prisma.DeviceListRelationFilter
   transactions?: Prisma.TransactionListRelationFilter
   alerts?: Prisma.AlertListRelationFilter
+  bankAccounts?: Prisma.BankAccountListRelationFilter
+  transfers?: Prisma.TransferListRelationFilter
+  riskScores?: Prisma.RiskScoreListRelationFilter
 }, "id" | "email">
 
 export type VendorOrderByWithAggregationInput = {
@@ -335,6 +344,9 @@ export type VendorCreateInput = {
   devices?: Prisma.DeviceCreateNestedManyWithoutVendorInput
   transactions?: Prisma.TransactionCreateNestedManyWithoutVendorInput
   alerts?: Prisma.AlertCreateNestedManyWithoutVendorInput
+  bankAccounts?: Prisma.BankAccountCreateNestedManyWithoutVendorInput
+  transfers?: Prisma.TransferCreateNestedManyWithoutVendorInput
+  riskScores?: Prisma.RiskScoreCreateNestedManyWithoutVendorInput
 }
 
 export type VendorUncheckedCreateInput = {
@@ -351,6 +363,9 @@ export type VendorUncheckedCreateInput = {
   devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutVendorInput
   transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutVendorInput
   alerts?: Prisma.AlertUncheckedCreateNestedManyWithoutVendorInput
+  bankAccounts?: Prisma.BankAccountUncheckedCreateNestedManyWithoutVendorInput
+  transfers?: Prisma.TransferUncheckedCreateNestedManyWithoutVendorInput
+  riskScores?: Prisma.RiskScoreUncheckedCreateNestedManyWithoutVendorInput
 }
 
 export type VendorUpdateInput = {
@@ -367,6 +382,9 @@ export type VendorUpdateInput = {
   devices?: Prisma.DeviceUpdateManyWithoutVendorNestedInput
   transactions?: Prisma.TransactionUpdateManyWithoutVendorNestedInput
   alerts?: Prisma.AlertUpdateManyWithoutVendorNestedInput
+  bankAccounts?: Prisma.BankAccountUpdateManyWithoutVendorNestedInput
+  transfers?: Prisma.TransferUpdateManyWithoutVendorNestedInput
+  riskScores?: Prisma.RiskScoreUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUncheckedUpdateInput = {
@@ -383,6 +401,9 @@ export type VendorUncheckedUpdateInput = {
   devices?: Prisma.DeviceUncheckedUpdateManyWithoutVendorNestedInput
   transactions?: Prisma.TransactionUncheckedUpdateManyWithoutVendorNestedInput
   alerts?: Prisma.AlertUncheckedUpdateManyWithoutVendorNestedInput
+  bankAccounts?: Prisma.BankAccountUncheckedUpdateManyWithoutVendorNestedInput
+  transfers?: Prisma.TransferUncheckedUpdateManyWithoutVendorNestedInput
+  riskScores?: Prisma.RiskScoreUncheckedUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorCreateManyInput = {
@@ -528,6 +549,48 @@ export type VendorUpdateOneRequiredWithoutTransactionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.VendorUpdateToOneWithWhereWithoutTransactionsInput, Prisma.VendorUpdateWithoutTransactionsInput>, Prisma.VendorUncheckedUpdateWithoutTransactionsInput>
 }
 
+export type VendorCreateNestedOneWithoutBankAccountsInput = {
+  create?: Prisma.XOR<Prisma.VendorCreateWithoutBankAccountsInput, Prisma.VendorUncheckedCreateWithoutBankAccountsInput>
+  connectOrCreate?: Prisma.VendorCreateOrConnectWithoutBankAccountsInput
+  connect?: Prisma.VendorWhereUniqueInput
+}
+
+export type VendorUpdateOneRequiredWithoutBankAccountsNestedInput = {
+  create?: Prisma.XOR<Prisma.VendorCreateWithoutBankAccountsInput, Prisma.VendorUncheckedCreateWithoutBankAccountsInput>
+  connectOrCreate?: Prisma.VendorCreateOrConnectWithoutBankAccountsInput
+  upsert?: Prisma.VendorUpsertWithoutBankAccountsInput
+  connect?: Prisma.VendorWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.VendorUpdateToOneWithWhereWithoutBankAccountsInput, Prisma.VendorUpdateWithoutBankAccountsInput>, Prisma.VendorUncheckedUpdateWithoutBankAccountsInput>
+}
+
+export type VendorCreateNestedOneWithoutTransfersInput = {
+  create?: Prisma.XOR<Prisma.VendorCreateWithoutTransfersInput, Prisma.VendorUncheckedCreateWithoutTransfersInput>
+  connectOrCreate?: Prisma.VendorCreateOrConnectWithoutTransfersInput
+  connect?: Prisma.VendorWhereUniqueInput
+}
+
+export type VendorUpdateOneRequiredWithoutTransfersNestedInput = {
+  create?: Prisma.XOR<Prisma.VendorCreateWithoutTransfersInput, Prisma.VendorUncheckedCreateWithoutTransfersInput>
+  connectOrCreate?: Prisma.VendorCreateOrConnectWithoutTransfersInput
+  upsert?: Prisma.VendorUpsertWithoutTransfersInput
+  connect?: Prisma.VendorWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.VendorUpdateToOneWithWhereWithoutTransfersInput, Prisma.VendorUpdateWithoutTransfersInput>, Prisma.VendorUncheckedUpdateWithoutTransfersInput>
+}
+
+export type VendorCreateNestedOneWithoutRiskScoresInput = {
+  create?: Prisma.XOR<Prisma.VendorCreateWithoutRiskScoresInput, Prisma.VendorUncheckedCreateWithoutRiskScoresInput>
+  connectOrCreate?: Prisma.VendorCreateOrConnectWithoutRiskScoresInput
+  connect?: Prisma.VendorWhereUniqueInput
+}
+
+export type VendorUpdateOneRequiredWithoutRiskScoresNestedInput = {
+  create?: Prisma.XOR<Prisma.VendorCreateWithoutRiskScoresInput, Prisma.VendorUncheckedCreateWithoutRiskScoresInput>
+  connectOrCreate?: Prisma.VendorCreateOrConnectWithoutRiskScoresInput
+  upsert?: Prisma.VendorUpsertWithoutRiskScoresInput
+  connect?: Prisma.VendorWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.VendorUpdateToOneWithWhereWithoutRiskScoresInput, Prisma.VendorUpdateWithoutRiskScoresInput>, Prisma.VendorUncheckedUpdateWithoutRiskScoresInput>
+}
+
 export type VendorCreateNestedOneWithoutAlertsInput = {
   create?: Prisma.XOR<Prisma.VendorCreateWithoutAlertsInput, Prisma.VendorUncheckedCreateWithoutAlertsInput>
   connectOrCreate?: Prisma.VendorCreateOrConnectWithoutAlertsInput
@@ -555,6 +618,9 @@ export type VendorCreateWithoutDocumentsInput = {
   devices?: Prisma.DeviceCreateNestedManyWithoutVendorInput
   transactions?: Prisma.TransactionCreateNestedManyWithoutVendorInput
   alerts?: Prisma.AlertCreateNestedManyWithoutVendorInput
+  bankAccounts?: Prisma.BankAccountCreateNestedManyWithoutVendorInput
+  transfers?: Prisma.TransferCreateNestedManyWithoutVendorInput
+  riskScores?: Prisma.RiskScoreCreateNestedManyWithoutVendorInput
 }
 
 export type VendorUncheckedCreateWithoutDocumentsInput = {
@@ -570,6 +636,9 @@ export type VendorUncheckedCreateWithoutDocumentsInput = {
   devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutVendorInput
   transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutVendorInput
   alerts?: Prisma.AlertUncheckedCreateNestedManyWithoutVendorInput
+  bankAccounts?: Prisma.BankAccountUncheckedCreateNestedManyWithoutVendorInput
+  transfers?: Prisma.TransferUncheckedCreateNestedManyWithoutVendorInput
+  riskScores?: Prisma.RiskScoreUncheckedCreateNestedManyWithoutVendorInput
 }
 
 export type VendorCreateOrConnectWithoutDocumentsInput = {
@@ -601,6 +670,9 @@ export type VendorUpdateWithoutDocumentsInput = {
   devices?: Prisma.DeviceUpdateManyWithoutVendorNestedInput
   transactions?: Prisma.TransactionUpdateManyWithoutVendorNestedInput
   alerts?: Prisma.AlertUpdateManyWithoutVendorNestedInput
+  bankAccounts?: Prisma.BankAccountUpdateManyWithoutVendorNestedInput
+  transfers?: Prisma.TransferUpdateManyWithoutVendorNestedInput
+  riskScores?: Prisma.RiskScoreUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUncheckedUpdateWithoutDocumentsInput = {
@@ -616,6 +688,9 @@ export type VendorUncheckedUpdateWithoutDocumentsInput = {
   devices?: Prisma.DeviceUncheckedUpdateManyWithoutVendorNestedInput
   transactions?: Prisma.TransactionUncheckedUpdateManyWithoutVendorNestedInput
   alerts?: Prisma.AlertUncheckedUpdateManyWithoutVendorNestedInput
+  bankAccounts?: Prisma.BankAccountUncheckedUpdateManyWithoutVendorNestedInput
+  transfers?: Prisma.TransferUncheckedUpdateManyWithoutVendorNestedInput
+  riskScores?: Prisma.RiskScoreUncheckedUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorCreateWithoutDevicesInput = {
@@ -631,6 +706,9 @@ export type VendorCreateWithoutDevicesInput = {
   documents?: Prisma.DocumentCreateNestedManyWithoutVendorInput
   transactions?: Prisma.TransactionCreateNestedManyWithoutVendorInput
   alerts?: Prisma.AlertCreateNestedManyWithoutVendorInput
+  bankAccounts?: Prisma.BankAccountCreateNestedManyWithoutVendorInput
+  transfers?: Prisma.TransferCreateNestedManyWithoutVendorInput
+  riskScores?: Prisma.RiskScoreCreateNestedManyWithoutVendorInput
 }
 
 export type VendorUncheckedCreateWithoutDevicesInput = {
@@ -646,6 +724,9 @@ export type VendorUncheckedCreateWithoutDevicesInput = {
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutVendorInput
   transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutVendorInput
   alerts?: Prisma.AlertUncheckedCreateNestedManyWithoutVendorInput
+  bankAccounts?: Prisma.BankAccountUncheckedCreateNestedManyWithoutVendorInput
+  transfers?: Prisma.TransferUncheckedCreateNestedManyWithoutVendorInput
+  riskScores?: Prisma.RiskScoreUncheckedCreateNestedManyWithoutVendorInput
 }
 
 export type VendorCreateOrConnectWithoutDevicesInput = {
@@ -677,6 +758,9 @@ export type VendorUpdateWithoutDevicesInput = {
   documents?: Prisma.DocumentUpdateManyWithoutVendorNestedInput
   transactions?: Prisma.TransactionUpdateManyWithoutVendorNestedInput
   alerts?: Prisma.AlertUpdateManyWithoutVendorNestedInput
+  bankAccounts?: Prisma.BankAccountUpdateManyWithoutVendorNestedInput
+  transfers?: Prisma.TransferUpdateManyWithoutVendorNestedInput
+  riskScores?: Prisma.RiskScoreUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUncheckedUpdateWithoutDevicesInput = {
@@ -692,6 +776,9 @@ export type VendorUncheckedUpdateWithoutDevicesInput = {
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutVendorNestedInput
   transactions?: Prisma.TransactionUncheckedUpdateManyWithoutVendorNestedInput
   alerts?: Prisma.AlertUncheckedUpdateManyWithoutVendorNestedInput
+  bankAccounts?: Prisma.BankAccountUncheckedUpdateManyWithoutVendorNestedInput
+  transfers?: Prisma.TransferUncheckedUpdateManyWithoutVendorNestedInput
+  riskScores?: Prisma.RiskScoreUncheckedUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorCreateWithoutTransactionsInput = {
@@ -707,6 +794,9 @@ export type VendorCreateWithoutTransactionsInput = {
   documents?: Prisma.DocumentCreateNestedManyWithoutVendorInput
   devices?: Prisma.DeviceCreateNestedManyWithoutVendorInput
   alerts?: Prisma.AlertCreateNestedManyWithoutVendorInput
+  bankAccounts?: Prisma.BankAccountCreateNestedManyWithoutVendorInput
+  transfers?: Prisma.TransferCreateNestedManyWithoutVendorInput
+  riskScores?: Prisma.RiskScoreCreateNestedManyWithoutVendorInput
 }
 
 export type VendorUncheckedCreateWithoutTransactionsInput = {
@@ -722,6 +812,9 @@ export type VendorUncheckedCreateWithoutTransactionsInput = {
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutVendorInput
   devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutVendorInput
   alerts?: Prisma.AlertUncheckedCreateNestedManyWithoutVendorInput
+  bankAccounts?: Prisma.BankAccountUncheckedCreateNestedManyWithoutVendorInput
+  transfers?: Prisma.TransferUncheckedCreateNestedManyWithoutVendorInput
+  riskScores?: Prisma.RiskScoreUncheckedCreateNestedManyWithoutVendorInput
 }
 
 export type VendorCreateOrConnectWithoutTransactionsInput = {
@@ -753,6 +846,9 @@ export type VendorUpdateWithoutTransactionsInput = {
   documents?: Prisma.DocumentUpdateManyWithoutVendorNestedInput
   devices?: Prisma.DeviceUpdateManyWithoutVendorNestedInput
   alerts?: Prisma.AlertUpdateManyWithoutVendorNestedInput
+  bankAccounts?: Prisma.BankAccountUpdateManyWithoutVendorNestedInput
+  transfers?: Prisma.TransferUpdateManyWithoutVendorNestedInput
+  riskScores?: Prisma.RiskScoreUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUncheckedUpdateWithoutTransactionsInput = {
@@ -768,6 +864,273 @@ export type VendorUncheckedUpdateWithoutTransactionsInput = {
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutVendorNestedInput
   devices?: Prisma.DeviceUncheckedUpdateManyWithoutVendorNestedInput
   alerts?: Prisma.AlertUncheckedUpdateManyWithoutVendorNestedInput
+  bankAccounts?: Prisma.BankAccountUncheckedUpdateManyWithoutVendorNestedInput
+  transfers?: Prisma.TransferUncheckedUpdateManyWithoutVendorNestedInput
+  riskScores?: Prisma.RiskScoreUncheckedUpdateManyWithoutVendorNestedInput
+}
+
+export type VendorCreateWithoutBankAccountsInput = {
+  id?: string
+  businessName: string
+  email: string
+  phone: string
+  status?: $Enums.VendorStatus
+  overallRiskScore?: number
+  riskLevel?: $Enums.RiskLevel
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  documents?: Prisma.DocumentCreateNestedManyWithoutVendorInput
+  devices?: Prisma.DeviceCreateNestedManyWithoutVendorInput
+  transactions?: Prisma.TransactionCreateNestedManyWithoutVendorInput
+  alerts?: Prisma.AlertCreateNestedManyWithoutVendorInput
+  transfers?: Prisma.TransferCreateNestedManyWithoutVendorInput
+  riskScores?: Prisma.RiskScoreCreateNestedManyWithoutVendorInput
+}
+
+export type VendorUncheckedCreateWithoutBankAccountsInput = {
+  id?: string
+  businessName: string
+  email: string
+  phone: string
+  status?: $Enums.VendorStatus
+  overallRiskScore?: number
+  riskLevel?: $Enums.RiskLevel
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutVendorInput
+  devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutVendorInput
+  transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutVendorInput
+  alerts?: Prisma.AlertUncheckedCreateNestedManyWithoutVendorInput
+  transfers?: Prisma.TransferUncheckedCreateNestedManyWithoutVendorInput
+  riskScores?: Prisma.RiskScoreUncheckedCreateNestedManyWithoutVendorInput
+}
+
+export type VendorCreateOrConnectWithoutBankAccountsInput = {
+  where: Prisma.VendorWhereUniqueInput
+  create: Prisma.XOR<Prisma.VendorCreateWithoutBankAccountsInput, Prisma.VendorUncheckedCreateWithoutBankAccountsInput>
+}
+
+export type VendorUpsertWithoutBankAccountsInput = {
+  update: Prisma.XOR<Prisma.VendorUpdateWithoutBankAccountsInput, Prisma.VendorUncheckedUpdateWithoutBankAccountsInput>
+  create: Prisma.XOR<Prisma.VendorCreateWithoutBankAccountsInput, Prisma.VendorUncheckedCreateWithoutBankAccountsInput>
+  where?: Prisma.VendorWhereInput
+}
+
+export type VendorUpdateToOneWithWhereWithoutBankAccountsInput = {
+  where?: Prisma.VendorWhereInput
+  data: Prisma.XOR<Prisma.VendorUpdateWithoutBankAccountsInput, Prisma.VendorUncheckedUpdateWithoutBankAccountsInput>
+}
+
+export type VendorUpdateWithoutBankAccountsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumVendorStatusFieldUpdateOperationsInput | $Enums.VendorStatus
+  overallRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  riskLevel?: Prisma.EnumRiskLevelFieldUpdateOperationsInput | $Enums.RiskLevel
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documents?: Prisma.DocumentUpdateManyWithoutVendorNestedInput
+  devices?: Prisma.DeviceUpdateManyWithoutVendorNestedInput
+  transactions?: Prisma.TransactionUpdateManyWithoutVendorNestedInput
+  alerts?: Prisma.AlertUpdateManyWithoutVendorNestedInput
+  transfers?: Prisma.TransferUpdateManyWithoutVendorNestedInput
+  riskScores?: Prisma.RiskScoreUpdateManyWithoutVendorNestedInput
+}
+
+export type VendorUncheckedUpdateWithoutBankAccountsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumVendorStatusFieldUpdateOperationsInput | $Enums.VendorStatus
+  overallRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  riskLevel?: Prisma.EnumRiskLevelFieldUpdateOperationsInput | $Enums.RiskLevel
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutVendorNestedInput
+  devices?: Prisma.DeviceUncheckedUpdateManyWithoutVendorNestedInput
+  transactions?: Prisma.TransactionUncheckedUpdateManyWithoutVendorNestedInput
+  alerts?: Prisma.AlertUncheckedUpdateManyWithoutVendorNestedInput
+  transfers?: Prisma.TransferUncheckedUpdateManyWithoutVendorNestedInput
+  riskScores?: Prisma.RiskScoreUncheckedUpdateManyWithoutVendorNestedInput
+}
+
+export type VendorCreateWithoutTransfersInput = {
+  id?: string
+  businessName: string
+  email: string
+  phone: string
+  status?: $Enums.VendorStatus
+  overallRiskScore?: number
+  riskLevel?: $Enums.RiskLevel
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  documents?: Prisma.DocumentCreateNestedManyWithoutVendorInput
+  devices?: Prisma.DeviceCreateNestedManyWithoutVendorInput
+  transactions?: Prisma.TransactionCreateNestedManyWithoutVendorInput
+  alerts?: Prisma.AlertCreateNestedManyWithoutVendorInput
+  bankAccounts?: Prisma.BankAccountCreateNestedManyWithoutVendorInput
+  riskScores?: Prisma.RiskScoreCreateNestedManyWithoutVendorInput
+}
+
+export type VendorUncheckedCreateWithoutTransfersInput = {
+  id?: string
+  businessName: string
+  email: string
+  phone: string
+  status?: $Enums.VendorStatus
+  overallRiskScore?: number
+  riskLevel?: $Enums.RiskLevel
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutVendorInput
+  devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutVendorInput
+  transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutVendorInput
+  alerts?: Prisma.AlertUncheckedCreateNestedManyWithoutVendorInput
+  bankAccounts?: Prisma.BankAccountUncheckedCreateNestedManyWithoutVendorInput
+  riskScores?: Prisma.RiskScoreUncheckedCreateNestedManyWithoutVendorInput
+}
+
+export type VendorCreateOrConnectWithoutTransfersInput = {
+  where: Prisma.VendorWhereUniqueInput
+  create: Prisma.XOR<Prisma.VendorCreateWithoutTransfersInput, Prisma.VendorUncheckedCreateWithoutTransfersInput>
+}
+
+export type VendorUpsertWithoutTransfersInput = {
+  update: Prisma.XOR<Prisma.VendorUpdateWithoutTransfersInput, Prisma.VendorUncheckedUpdateWithoutTransfersInput>
+  create: Prisma.XOR<Prisma.VendorCreateWithoutTransfersInput, Prisma.VendorUncheckedCreateWithoutTransfersInput>
+  where?: Prisma.VendorWhereInput
+}
+
+export type VendorUpdateToOneWithWhereWithoutTransfersInput = {
+  where?: Prisma.VendorWhereInput
+  data: Prisma.XOR<Prisma.VendorUpdateWithoutTransfersInput, Prisma.VendorUncheckedUpdateWithoutTransfersInput>
+}
+
+export type VendorUpdateWithoutTransfersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumVendorStatusFieldUpdateOperationsInput | $Enums.VendorStatus
+  overallRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  riskLevel?: Prisma.EnumRiskLevelFieldUpdateOperationsInput | $Enums.RiskLevel
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documents?: Prisma.DocumentUpdateManyWithoutVendorNestedInput
+  devices?: Prisma.DeviceUpdateManyWithoutVendorNestedInput
+  transactions?: Prisma.TransactionUpdateManyWithoutVendorNestedInput
+  alerts?: Prisma.AlertUpdateManyWithoutVendorNestedInput
+  bankAccounts?: Prisma.BankAccountUpdateManyWithoutVendorNestedInput
+  riskScores?: Prisma.RiskScoreUpdateManyWithoutVendorNestedInput
+}
+
+export type VendorUncheckedUpdateWithoutTransfersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumVendorStatusFieldUpdateOperationsInput | $Enums.VendorStatus
+  overallRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  riskLevel?: Prisma.EnumRiskLevelFieldUpdateOperationsInput | $Enums.RiskLevel
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutVendorNestedInput
+  devices?: Prisma.DeviceUncheckedUpdateManyWithoutVendorNestedInput
+  transactions?: Prisma.TransactionUncheckedUpdateManyWithoutVendorNestedInput
+  alerts?: Prisma.AlertUncheckedUpdateManyWithoutVendorNestedInput
+  bankAccounts?: Prisma.BankAccountUncheckedUpdateManyWithoutVendorNestedInput
+  riskScores?: Prisma.RiskScoreUncheckedUpdateManyWithoutVendorNestedInput
+}
+
+export type VendorCreateWithoutRiskScoresInput = {
+  id?: string
+  businessName: string
+  email: string
+  phone: string
+  status?: $Enums.VendorStatus
+  overallRiskScore?: number
+  riskLevel?: $Enums.RiskLevel
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  documents?: Prisma.DocumentCreateNestedManyWithoutVendorInput
+  devices?: Prisma.DeviceCreateNestedManyWithoutVendorInput
+  transactions?: Prisma.TransactionCreateNestedManyWithoutVendorInput
+  alerts?: Prisma.AlertCreateNestedManyWithoutVendorInput
+  bankAccounts?: Prisma.BankAccountCreateNestedManyWithoutVendorInput
+  transfers?: Prisma.TransferCreateNestedManyWithoutVendorInput
+}
+
+export type VendorUncheckedCreateWithoutRiskScoresInput = {
+  id?: string
+  businessName: string
+  email: string
+  phone: string
+  status?: $Enums.VendorStatus
+  overallRiskScore?: number
+  riskLevel?: $Enums.RiskLevel
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutVendorInput
+  devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutVendorInput
+  transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutVendorInput
+  alerts?: Prisma.AlertUncheckedCreateNestedManyWithoutVendorInput
+  bankAccounts?: Prisma.BankAccountUncheckedCreateNestedManyWithoutVendorInput
+  transfers?: Prisma.TransferUncheckedCreateNestedManyWithoutVendorInput
+}
+
+export type VendorCreateOrConnectWithoutRiskScoresInput = {
+  where: Prisma.VendorWhereUniqueInput
+  create: Prisma.XOR<Prisma.VendorCreateWithoutRiskScoresInput, Prisma.VendorUncheckedCreateWithoutRiskScoresInput>
+}
+
+export type VendorUpsertWithoutRiskScoresInput = {
+  update: Prisma.XOR<Prisma.VendorUpdateWithoutRiskScoresInput, Prisma.VendorUncheckedUpdateWithoutRiskScoresInput>
+  create: Prisma.XOR<Prisma.VendorCreateWithoutRiskScoresInput, Prisma.VendorUncheckedCreateWithoutRiskScoresInput>
+  where?: Prisma.VendorWhereInput
+}
+
+export type VendorUpdateToOneWithWhereWithoutRiskScoresInput = {
+  where?: Prisma.VendorWhereInput
+  data: Prisma.XOR<Prisma.VendorUpdateWithoutRiskScoresInput, Prisma.VendorUncheckedUpdateWithoutRiskScoresInput>
+}
+
+export type VendorUpdateWithoutRiskScoresInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumVendorStatusFieldUpdateOperationsInput | $Enums.VendorStatus
+  overallRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  riskLevel?: Prisma.EnumRiskLevelFieldUpdateOperationsInput | $Enums.RiskLevel
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documents?: Prisma.DocumentUpdateManyWithoutVendorNestedInput
+  devices?: Prisma.DeviceUpdateManyWithoutVendorNestedInput
+  transactions?: Prisma.TransactionUpdateManyWithoutVendorNestedInput
+  alerts?: Prisma.AlertUpdateManyWithoutVendorNestedInput
+  bankAccounts?: Prisma.BankAccountUpdateManyWithoutVendorNestedInput
+  transfers?: Prisma.TransferUpdateManyWithoutVendorNestedInput
+}
+
+export type VendorUncheckedUpdateWithoutRiskScoresInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumVendorStatusFieldUpdateOperationsInput | $Enums.VendorStatus
+  overallRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  riskLevel?: Prisma.EnumRiskLevelFieldUpdateOperationsInput | $Enums.RiskLevel
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutVendorNestedInput
+  devices?: Prisma.DeviceUncheckedUpdateManyWithoutVendorNestedInput
+  transactions?: Prisma.TransactionUncheckedUpdateManyWithoutVendorNestedInput
+  alerts?: Prisma.AlertUncheckedUpdateManyWithoutVendorNestedInput
+  bankAccounts?: Prisma.BankAccountUncheckedUpdateManyWithoutVendorNestedInput
+  transfers?: Prisma.TransferUncheckedUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorCreateWithoutAlertsInput = {
@@ -783,6 +1146,9 @@ export type VendorCreateWithoutAlertsInput = {
   documents?: Prisma.DocumentCreateNestedManyWithoutVendorInput
   devices?: Prisma.DeviceCreateNestedManyWithoutVendorInput
   transactions?: Prisma.TransactionCreateNestedManyWithoutVendorInput
+  bankAccounts?: Prisma.BankAccountCreateNestedManyWithoutVendorInput
+  transfers?: Prisma.TransferCreateNestedManyWithoutVendorInput
+  riskScores?: Prisma.RiskScoreCreateNestedManyWithoutVendorInput
 }
 
 export type VendorUncheckedCreateWithoutAlertsInput = {
@@ -798,6 +1164,9 @@ export type VendorUncheckedCreateWithoutAlertsInput = {
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutVendorInput
   devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutVendorInput
   transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutVendorInput
+  bankAccounts?: Prisma.BankAccountUncheckedCreateNestedManyWithoutVendorInput
+  transfers?: Prisma.TransferUncheckedCreateNestedManyWithoutVendorInput
+  riskScores?: Prisma.RiskScoreUncheckedCreateNestedManyWithoutVendorInput
 }
 
 export type VendorCreateOrConnectWithoutAlertsInput = {
@@ -829,6 +1198,9 @@ export type VendorUpdateWithoutAlertsInput = {
   documents?: Prisma.DocumentUpdateManyWithoutVendorNestedInput
   devices?: Prisma.DeviceUpdateManyWithoutVendorNestedInput
   transactions?: Prisma.TransactionUpdateManyWithoutVendorNestedInput
+  bankAccounts?: Prisma.BankAccountUpdateManyWithoutVendorNestedInput
+  transfers?: Prisma.TransferUpdateManyWithoutVendorNestedInput
+  riskScores?: Prisma.RiskScoreUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUncheckedUpdateWithoutAlertsInput = {
@@ -844,6 +1216,9 @@ export type VendorUncheckedUpdateWithoutAlertsInput = {
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutVendorNestedInput
   devices?: Prisma.DeviceUncheckedUpdateManyWithoutVendorNestedInput
   transactions?: Prisma.TransactionUncheckedUpdateManyWithoutVendorNestedInput
+  bankAccounts?: Prisma.BankAccountUncheckedUpdateManyWithoutVendorNestedInput
+  transfers?: Prisma.TransferUncheckedUpdateManyWithoutVendorNestedInput
+  riskScores?: Prisma.RiskScoreUncheckedUpdateManyWithoutVendorNestedInput
 }
 
 
@@ -856,6 +1231,9 @@ export type VendorCountOutputType = {
   devices: number
   transactions: number
   alerts: number
+  bankAccounts: number
+  transfers: number
+  riskScores: number
 }
 
 export type VendorCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -863,6 +1241,9 @@ export type VendorCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   devices?: boolean | VendorCountOutputTypeCountDevicesArgs
   transactions?: boolean | VendorCountOutputTypeCountTransactionsArgs
   alerts?: boolean | VendorCountOutputTypeCountAlertsArgs
+  bankAccounts?: boolean | VendorCountOutputTypeCountBankAccountsArgs
+  transfers?: boolean | VendorCountOutputTypeCountTransfersArgs
+  riskScores?: boolean | VendorCountOutputTypeCountRiskScoresArgs
 }
 
 /**
@@ -903,6 +1284,27 @@ export type VendorCountOutputTypeCountAlertsArgs<ExtArgs extends runtime.Types.E
   where?: Prisma.AlertWhereInput
 }
 
+/**
+ * VendorCountOutputType without action
+ */
+export type VendorCountOutputTypeCountBankAccountsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BankAccountWhereInput
+}
+
+/**
+ * VendorCountOutputType without action
+ */
+export type VendorCountOutputTypeCountTransfersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TransferWhereInput
+}
+
+/**
+ * VendorCountOutputType without action
+ */
+export type VendorCountOutputTypeCountRiskScoresArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RiskScoreWhereInput
+}
+
 
 export type VendorSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -918,6 +1320,9 @@ export type VendorSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   devices?: boolean | Prisma.Vendor$devicesArgs<ExtArgs>
   transactions?: boolean | Prisma.Vendor$transactionsArgs<ExtArgs>
   alerts?: boolean | Prisma.Vendor$alertsArgs<ExtArgs>
+  bankAccounts?: boolean | Prisma.Vendor$bankAccountsArgs<ExtArgs>
+  transfers?: boolean | Prisma.Vendor$transfersArgs<ExtArgs>
+  riskScores?: boolean | Prisma.Vendor$riskScoresArgs<ExtArgs>
   _count?: boolean | Prisma.VendorCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["vendor"]>
 
@@ -963,6 +1368,9 @@ export type VendorInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   devices?: boolean | Prisma.Vendor$devicesArgs<ExtArgs>
   transactions?: boolean | Prisma.Vendor$transactionsArgs<ExtArgs>
   alerts?: boolean | Prisma.Vendor$alertsArgs<ExtArgs>
+  bankAccounts?: boolean | Prisma.Vendor$bankAccountsArgs<ExtArgs>
+  transfers?: boolean | Prisma.Vendor$transfersArgs<ExtArgs>
+  riskScores?: boolean | Prisma.Vendor$riskScoresArgs<ExtArgs>
   _count?: boolean | Prisma.VendorCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type VendorIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -975,6 +1383,9 @@ export type $VendorPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     devices: Prisma.$DevicePayload<ExtArgs>[]
     transactions: Prisma.$TransactionPayload<ExtArgs>[]
     alerts: Prisma.$AlertPayload<ExtArgs>[]
+    bankAccounts: Prisma.$BankAccountPayload<ExtArgs>[]
+    transfers: Prisma.$TransferPayload<ExtArgs>[]
+    riskScores: Prisma.$RiskScorePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1384,6 +1795,9 @@ export interface Prisma__VendorClient<T, Null = never, ExtArgs extends runtime.T
   devices<T extends Prisma.Vendor$devicesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vendor$devicesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DevicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   transactions<T extends Prisma.Vendor$transactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vendor$transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   alerts<T extends Prisma.Vendor$alertsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vendor$alertsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AlertPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  bankAccounts<T extends Prisma.Vendor$bankAccountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vendor$bankAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BankAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  transfers<T extends Prisma.Vendor$transfersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vendor$transfersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TransferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  riskScores<T extends Prisma.Vendor$riskScoresArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vendor$riskScoresArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RiskScorePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1908,6 +2322,78 @@ export type Vendor$alertsArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.AlertScalarFieldEnum | Prisma.AlertScalarFieldEnum[]
+}
+
+/**
+ * Vendor.bankAccounts
+ */
+export type Vendor$bankAccountsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BankAccount
+   */
+  select?: Prisma.BankAccountSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the BankAccount
+   */
+  omit?: Prisma.BankAccountOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BankAccountInclude<ExtArgs> | null
+  where?: Prisma.BankAccountWhereInput
+  orderBy?: Prisma.BankAccountOrderByWithRelationInput | Prisma.BankAccountOrderByWithRelationInput[]
+  cursor?: Prisma.BankAccountWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BankAccountScalarFieldEnum | Prisma.BankAccountScalarFieldEnum[]
+}
+
+/**
+ * Vendor.transfers
+ */
+export type Vendor$transfersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Transfer
+   */
+  select?: Prisma.TransferSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Transfer
+   */
+  omit?: Prisma.TransferOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TransferInclude<ExtArgs> | null
+  where?: Prisma.TransferWhereInput
+  orderBy?: Prisma.TransferOrderByWithRelationInput | Prisma.TransferOrderByWithRelationInput[]
+  cursor?: Prisma.TransferWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TransferScalarFieldEnum | Prisma.TransferScalarFieldEnum[]
+}
+
+/**
+ * Vendor.riskScores
+ */
+export type Vendor$riskScoresArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RiskScore
+   */
+  select?: Prisma.RiskScoreSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the RiskScore
+   */
+  omit?: Prisma.RiskScoreOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RiskScoreInclude<ExtArgs> | null
+  where?: Prisma.RiskScoreWhereInput
+  orderBy?: Prisma.RiskScoreOrderByWithRelationInput | Prisma.RiskScoreOrderByWithRelationInput[]
+  cursor?: Prisma.RiskScoreWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RiskScoreScalarFieldEnum | Prisma.RiskScoreScalarFieldEnum[]
 }
 
 /**

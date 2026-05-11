@@ -15,7 +15,11 @@ import { AlertsModule } from './modules/alerts/alerts.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { PayoutsModule } from './modules/payouts/payouts.module';
 import { auth } from './lib/auth';
+<<<<<<< HEAD
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
+=======
+import { Neo4jModule } from './neo4j/neo4j.module';
+>>>>>>> c7f473d7a8d189e9a02ea1da369688ad2a4d3402
 
 @Module({
   imports: [
@@ -43,7 +47,11 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
     AlertsModule,
     AdminModule,
     PayoutsModule,
+<<<<<<< HEAD
     CloudinaryModule,
+=======
+    Neo4jModule,
+>>>>>>> c7f473d7a8d189e9a02ea1da369688ad2a4d3402
   ],
   controllers: [AppController],
   providers: [AppService],

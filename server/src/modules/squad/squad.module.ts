@@ -2,6 +2,8 @@ import { Module, DynamicModule, Global } from '@nestjs/common';
 import { SquadService } from './squad.service';
 import { SquadController } from './squad.controller';
 import { SquadModuleOptions, SQUAD_MODULE_OPTIONS } from './squad.config';
+import { PrismaModule } from '../../prisma/prisma.module';
+import { GraphModule } from '../graph/graph.module';
 
 /**
  * SquadModule
@@ -34,6 +36,7 @@ export class SquadModule {
   static register(options: SquadModuleOptions): DynamicModule {
     return {
       module: SquadModule,
+      imports: [PrismaModule, GraphModule],
       controllers: [SquadController],
       providers: [
         { provide: SQUAD_MODULE_OPTIONS, useValue: options },
@@ -52,7 +55,7 @@ export class SquadModule {
   }): DynamicModule {
     return {
       module: SquadModule,
-      imports: asyncOptions.imports ?? [],
+      imports: [...(asyncOptions.imports ?? []), PrismaModule, GraphModule],
       controllers: [SquadController],
       providers: [
         {

@@ -25,7 +25,7 @@ export default function Auth() {
     // Simulated auth delay
     if (isLogin) {
       try {
-        const { data } = await signIn.email(
+        await signIn.email(
           {
             email: email,
             password: password,
@@ -39,7 +39,7 @@ export default function Auth() {
       }
     } else {
       try {
-        const { data } = await signUp.email(
+        await signUp.email(
           {
             email: email,
             password: password,

@@ -9,10 +9,14 @@ import {
   Trash2,
 } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
+import { useSession } from "../lib/authClient";
 
 export default function Settings() {
   const [params, setParams] = useSearchParams("");
   const active = params.get("tab");
+
+  const { data } = useSession();
 
   const teamMembers = [
     {
@@ -243,7 +247,7 @@ export default function Settings() {
                     </label>
                     <input
                       type="text"
-                      defaultValue="Jane"
+                      defaultValue={data?.user.name.split(" ")[0]}
                       className="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-all"
                     />
                   </div>
@@ -253,7 +257,7 @@ export default function Settings() {
                     </label>
                     <input
                       type="text"
-                      defaultValue="Doe"
+                      defaultValue={data?.user.name.split(" ")[1]}
                       className="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-all"
                     />
                   </div>
@@ -265,7 +269,7 @@ export default function Settings() {
                   </label>
                   <input
                     type="email"
-                    defaultValue="jane@acmecorp.com"
+                    defaultValue={data?.user.email}
                     className="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-all"
                   />
                 </div>

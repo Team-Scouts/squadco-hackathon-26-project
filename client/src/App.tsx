@@ -6,6 +6,8 @@ import PrivacyPolicy from './pages/PrivacyPolicy'
 import DashboardLayout from './layouts/DashboardLayout'
 import DashboardHome from './pages/DashboardHome'
 import Vendors from './pages/Vendors'
+import CreateVendor from './pages/CreateVendor'
+import VendorDetail from './pages/VendorDetail'
 import Transactions from './pages/Transactions'
 import Alerts from './pages/Alerts'
 import Settings from './pages/Settings'
@@ -21,6 +23,8 @@ function App() {
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<DashboardHome />} />
           <Route path="vendors" element={<Vendors />} />
+          <Route path="vendors/new" element={<CreateVendor />} />
+          <Route path="vendors/:vendorId" element={<VendorDetail />} />
           <Route path="transactions" element={<Transactions />} />
           <Route path="alerts" element={<Alerts />} />
           <Route path="settings" element={<Settings />} />

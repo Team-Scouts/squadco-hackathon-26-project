@@ -17,6 +17,8 @@ import { PayoutsModule } from './modules/payouts/payouts.module';
 import { auth } from './lib/auth';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { Neo4jModule } from './neo4j/neo4j.module';
+>>>>>>> c7f473d7a8d189e9a02ea1da369688ad2a4d3402
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
@@ -26,6 +28,7 @@ import { Neo4jModule } from './neo4j/neo4j.module';
     }),
     VendorsModule,
     DocumentsModule,
+    UserModule,
     TransactionsModule,
     ConfigModule.forRoot({ isGlobal: true }),
 

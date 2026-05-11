@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import cloudinary from '../config/cloudinary.config';
+import multer from 'multer';
 
 @Injectable()
 export class CloudinaryService {

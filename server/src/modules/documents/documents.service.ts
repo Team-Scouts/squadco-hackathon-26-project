@@ -1,26 +1,73 @@
-import { Injectable } from '@nestjs/common';
-import { CreateDocumentDto } from './dto/create-document.dto';
-import { UpdateDocumentDto } from './dto/update-document.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+
+import { UploadDocumentDto } from './dto/upload-document.dto';
+
+import * as crypto from 'crypto';
+import { PrismaService } from '../../prisma/prisma.service';
+import { CloudinaryService } from '../../cloudinary/cloudinary.service';
 
 @Injectable()
 export class DocumentsService {
-  create(createDocumentDto: CreateDocumentDto) {
-    return 'This action adds a new document';
+  constructor(
+    private prisma: PrismaService,
+    private cloudinaryService: CloudinaryService,
+  ) {}
+
+  async uploadDocument(
+    file: Express.Multer.File,
+    uploadDocumentDto: UploadDocumentDto,
+  ) {
+    const vendor = await this.prisma.vendor.findUnique({
+      where: {
+        id: uploadDocumentDto.vendorId,
+      },
+    });
+
+    if (!vendor) {
+      throw new NotFoundException('Vendor not found');
+    }
+
+    // Upload to Cloudinary
+    const uploadedFile: any = await this.cloudinaryService.uploadFile(file);
+
+    // Generate placeholder hash
+    const documentHash = crypto
+      .createHash('sha256')
+      .update(file.buffer)
+      .digest('hex');
+
+    // Save to database
+    const document = await this.prisma.document.create({
+      data: {
+        vendorId: uploadDocumentDto.vendorId,
+        documentType: uploadDocumentDto.documentType,
+        fileUrl: uploadedFile.secure_url,
+        documentHash,
+      },
+    });
+
+    return {
+      success: true,
+      message: 'Document uploaded successfully',
+      data: document,
+    };
   }
 
-  findAll() {
-    return `This action returns all documents`;
-  }
+  async getVendorDocuments(vendorId: string) {
+    const documents = await this.prisma.document.findMany({
+      where: {
+        vendorId,
+      },
 
-  findOne(id: number) {
-    return `This action returns a #${id} document`;
-  }
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
 
-  update(id: number, updateDocumentDto: UpdateDocumentDto) {
-    return `This action updates a #${id} document`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} document`;
+    return {
+      success: true,
+      count: documents.length,
+      data: documents,
+    };
   }
 }

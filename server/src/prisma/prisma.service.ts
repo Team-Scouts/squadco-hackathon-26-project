@@ -1,5 +1,4 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-// import { PrismaClient } from './generated/prisma/client';
 
 import { PrismaPg } from '@prisma/adapter-pg';
 import 'dotenv/config'; // ensures process.env.DATABASE_URL is loaded
@@ -13,7 +12,7 @@ export class PrismaService
   constructor() {
     // Use the adapter from Prisma 7+ example
     const adapter = new PrismaPg({
-      connectionString: process.env.DATABASE_URL, // note: connectionString key
+      connectionString: process.env.DATABASE_URL, //
     });
 
     super({ adapter }); // pass adapter to PrismaClient
@@ -21,7 +20,7 @@ export class PrismaService
 
   async onModuleInit() {
     await this.$connect(); // connect to DB when module starts
-    console.log('Prisma connected to database manasseh');
+    console.log('Prisma connected to database');
   }
 
   async onModuleDestroy() {

@@ -617,10 +617,6 @@ export type WebhookEventUncheckedUpdateManyWithoutTransferNestedInput = {
   deleteMany?: Prisma.WebhookEventScalarWhereInput | Prisma.WebhookEventScalarWhereInput[]
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type IntFieldUpdateOperationsInput = {
   set?: number
   increment?: number

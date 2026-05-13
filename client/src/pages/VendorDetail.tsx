@@ -32,7 +32,9 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import type { VendorFromQuery } from "../typesAndInterfaces";
+import type { IndividualVendorDetails } from "../typesAndInterfaces";
+import GraphApi, { transformNeo4jToNVL } from "../lib/graphLib";
+import { BasicNvlWrapper, InteractiveNvlWrapper } from "@neo4j-nvl/react";
 
 type DocumentField = {
   label: string;
@@ -462,7 +464,7 @@ function DocumentModification() {
 export default function VendorDetail() {
   const { vendorId } = useParams();
   const { data: vendorDetails, isSuccess } = useQuery<{
-    data: VendorFromQuery;
+    data: IndividualVendorDetails;
   }>({
     queryKey: ["vendor_details", vendorId],
     staleTime: 30 * 60 * 1000,
@@ -479,16 +481,30 @@ export default function VendorDetail() {
     },
   });
 
+  const {
+    data: userGraph,
+    isLoading: loadingGraph,
+    isSuccess: graphLoaded,
+  } = useQuery({
+    queryKey: ["vendorGraph", vendorId],
+    queryFn: async () => {
+      const neo4jRawResponse = await GraphApi.getGraph(String(vendorId));
+      console.log(neo4jRawResponse);
+      return transformNeo4jToNVL(neo4jRawResponse);
+    },
+    staleTime: 30 * 60 * 1000,
+  });
+
   const metrics = [
     {
       label: "Trust score",
-      value: vendorDetails?.data.riskLevel,
+      value: vendorDetails?.data.overallRiskScore,
       icon: ShieldAlert,
       color: "text-red-400",
     },
     {
       label: "Documents",
-      value: "7",
+      value: vendorDetails?.data.documents.length,
       icon: FileText,
       color: "text-emerald-400",
     },
@@ -597,7 +613,16 @@ export default function VendorDetail() {
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_22rem]">
           <div className="space-y-6">
-            <TrustGraph />
+            <p className="text-2xl font-bold">Vendor Graph</p>
+            {graphLoaded && userGraph && (
+              <div className="h-125">
+                <InteractiveNvlWrapper
+                  nodes={userGraph?.nodes}
+                  rels={userGraph.relationships}
+                />
+              </div>
+            )}
+            {loadingGraph && <p>Loading Neo4jTrustGraph...</p>}
             <DocumentModification />
           </div>
 

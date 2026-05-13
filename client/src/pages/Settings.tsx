@@ -9,7 +9,6 @@ import {
   Trash2,
 } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
-import { useEffect } from "react";
 import { useSession } from "../lib/authClient";
 
 export default function Settings() {

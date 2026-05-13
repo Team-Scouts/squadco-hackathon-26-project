@@ -7,7 +7,6 @@ export class CreateVendorDto {
 
   @IsEmail()
   email: string;
-
   @IsString()
   phone: string;
 }

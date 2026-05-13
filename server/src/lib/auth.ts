@@ -22,9 +22,14 @@ export const auth = betterAuth({
   }),
   plugins: [
     admin({
-      defaultRole: 'user',
+      defaultRole: 'admin',
       adminRoles: ['admin'],
     }),
   ],
-  trustedOrigins: ['http://localhost:5173'],
+  trustedOrigins: ['http://localhost:5173', 'http://localhost:3000'],
+  //REMOVE BEFORE DEPLOYMENT!!!!
+  advanced: {
+    disableOriginCheck: true,
+  },
+  //REMOVE ABEG
 });

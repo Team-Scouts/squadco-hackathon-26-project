@@ -9,7 +9,7 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
-import { signIn, signUp } from "../lib/authClient";
+import { signIn, signUp, useSession } from "../lib/authClient";
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -19,6 +19,10 @@ export default function Auth() {
   const [firstName, updateFirstName] = useState("");
   const [lastName, updateLastName] = useState("");
   const navigate = useNavigate();
+  const { data } = useSession();
+  if (data && data.user) {
+    navigate("/dashboard");
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

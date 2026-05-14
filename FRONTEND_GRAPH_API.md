@@ -1,8 +1,8 @@
-# Frontend Guide: VeriSphere Graph API
+# Frontend Graph API Integration Guide
 
-This guide explains how the frontend should use the Neo4j-powered graph features.
+This document explains how the frontend should consume VeriSphere graph data.
 
-The frontend must never connect directly to Neo4j Aura and must never use Neo4j credentials. All graph data must come from the NestJS backend.
+The frontend must never connect directly to Neo4j Aura and must never include Neo4j credentials. All graph data must be requested through the NestJS backend.
 
 ```txt
 Frontend -> NestJS GraphController -> GraphService -> Neo4jService -> Neo4j Aura
@@ -10,85 +10,98 @@ Frontend -> NestJS GraphController -> GraphService -> Neo4jService -> Neo4j Aura
 
 PostgreSQL remains the source of truth. Neo4j is a derived relationship store used by the backend for fraud graph queries.
 
-## Base URL
+## Environment
 
-For local development, the backend currently runs on:
+Use the same backend base URL variable already used by the Better Auth client:
 
 ```txt
-http://localhost:3000
+VITE_SERVER_BASE_URL=http://localhost:3000
 ```
 
-There is currently no global `/api` prefix configured in NestJS, so graph routes start directly with `/graph`.
-
-If the backend later adds an API prefix, update the frontend base URL accordingly.
-
-```ts
-export const API_BASE_URL = 'http://localhost:3000'
-```
+The current backend has no global `/api` prefix, so graph routes start directly with `/graph`.
 
 ## Authentication
 
-Graph endpoints are protected.
-
-Allowed backend roles:
+Graph endpoints are protected backend endpoints. The user must be signed in and must have one of these lowercase roles:
 
 ```txt
-ADMIN
-REVIEWER
 admin
 reviewer
 ```
 
-Frontend requests should include auth cookies:
+Every frontend graph request must send Better Auth cookies:
 
 ```ts
-credentials: 'include'
+credentials: "include"
+```
+
+If a request returns `FORBIDDEN`, sign out and sign in again, then confirm the session user includes:
+
+```json
+{
+  "role": "admin"
+}
+```
+
+## Frontend Helper
+
+Use the shared helper at:
+
+```txt
+client/src/lib/graphApi.ts
+```
+
+Available helper methods:
+
+```ts
+graphApi.getVendorGraph(vendorId)
+graphApi.getSharedDevices()
+graphApi.getSharedAccounts()
+graphApi.getDuplicateDocuments()
+graphApi.getFraudClusters()
+graphApi.syncGraphData()
+graphApi.getNeo4jHealth()
+```
+
+Import it like this:
+
+```ts
+import { graphApi, type GraphResponse } from "../lib/graphApi";
+```
+
+You can also import individual helpers:
+
+```ts
+import { getFraudClusters, type GraphResponse } from "../lib/graphApi";
+```
+
+## Graph Response Contract
+
+All frontend-facing graph endpoints return this shape:
+
+```ts
+export type GraphNode = {
+  id: string;
+  type: string;
+  label: string;
+  data?: Record<string, unknown>;
+};
+
+export type GraphEdge = {
+  id: string;
+  source: string;
+  target: string;
+  label: string;
+  type: string;
+};
+
+export type GraphResponse = {
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+};
 ```
 
 Example:
-
-```ts
-const response = await fetch(`${API_BASE_URL}/graph/fraud-clusters`, {
-  credentials: 'include',
-})
-```
-
-If requests fail in the browser because of CORS, the backend needs credentials-enabled CORS for the Vite origin:
-
-```ts
-app.enableCors({
-  origin: 'http://localhost:5173',
-  credentials: true,
-})
-```
-
-## Graph Response Shape
-
-All frontend-facing graph endpoints return this structure:
-
-```ts
-export type GraphResponse = {
-  nodes: GraphNode[]
-  edges: GraphEdge[]
-}
-
-export type GraphNode = {
-  id: string
-  type: string
-  label: string
-  data: Record<string, unknown>
-}
-
-export type GraphEdge = {
-  id: string
-  source: string
-  target: string
-  label: string
-  type: string
-}
-```
-
-Example response:
 
 ```json
 {
@@ -116,71 +129,7 @@ Example response:
 }
 ```
 
-## Available Endpoints
-
-### Neo4j Health
-
-Internal/debug endpoint.
-
-```txt
-GET /neo4j/health
-```
-
-Use this to check whether the backend can reach Neo4j.
-
-Example:
-
-```ts
-export async function getNeo4jHealth() {
-  const response = await fetch(`${API_BASE_URL}/neo4j/health`, {
-    credentials: 'include',
-  })
-
-  if (!response.ok) {
-    throw new Error(`Neo4j health check failed: ${response.status}`)
-  }
-
-  return response.json()
-}
-```
-
-### Sync PostgreSQL Data To Neo4j
-
-Protected demo/bootstrap endpoint.
-
-```txt
-POST /graph/sync
-```
-
-Use this after seeding or creating demo data so existing PostgreSQL records are copied into Neo4j.
-
-This is not needed for every page load.
-
-Example:
-
-```ts
-export async function syncGraphData() {
-  const response = await fetch(`${API_BASE_URL}/graph/sync`, {
-    method: 'POST',
-    credentials: 'include',
-  })
-
-  if (!response.ok) {
-    throw new Error(`Graph sync failed: ${response.status}`)
-  }
-
-  return response.json()
-}
-```
-
-Expected response:
-
-```json
-{
-  "synced": 10,
-  "failed": 0
-}
-```
+## Endpoints
 
 ### Vendor Graph
 
@@ -188,38 +137,9 @@ Expected response:
 GET /graph/vendors/:id
 ```
 
-Returns one vendor and connected graph nodes:
+Returns one vendor and its connected graph nodes, such as email, phone, devices, documents, transactions, bank accounts, transfers, and risk scores.
 
-- email
-- phone
-- devices
-- documents
-- transactions
-- bank accounts
-- transfers
-- risk scores
-
-Example:
-
-```ts
-export async function getVendorGraph(vendorId: string): Promise<GraphResponse> {
-  const response = await fetch(`${API_BASE_URL}/graph/vendors/${vendorId}`, {
-    credentials: 'include',
-  })
-
-  if (!response.ok) {
-    throw new Error(`Vendor graph request failed: ${response.status}`)
-  }
-
-  return response.json()
-}
-```
-
-Use this for:
-
-- vendor detail page
-- investigation view
-- graph visualization around a single vendor
+Use this on the vendor detail or investigation page.
 
 ### Shared Devices
 
@@ -229,27 +149,7 @@ GET /graph/shared-devices
 
 Returns clusters where the same device is linked to multiple vendors.
 
-Example:
-
-```ts
-export async function getSharedDevices(): Promise<GraphResponse> {
-  const response = await fetch(`${API_BASE_URL}/graph/shared-devices`, {
-    credentials: 'include',
-  })
-
-  if (!response.ok) {
-    throw new Error(`Shared devices request failed: ${response.status}`)
-  }
-
-  return response.json()
-}
-```
-
-Use this for:
-
-- shared-device fraud alerts
-- risk dashboard widgets
-- fraud-ring investigation pages
+Use this for device fingerprint fraud review.
 
 ### Shared Bank Accounts
 
@@ -259,29 +159,7 @@ GET /graph/shared-accounts
 
 Returns clusters where multiple vendors are connected to the same account number hash.
 
-The backend stores only account hashes and last four digits. Raw account numbers must never be shown or stored in the frontend.
-
-Example:
-
-```ts
-export async function getSharedAccounts(): Promise<GraphResponse> {
-  const response = await fetch(`${API_BASE_URL}/graph/shared-accounts`, {
-    credentials: 'include',
-  })
-
-  if (!response.ok) {
-    throw new Error(`Shared accounts request failed: ${response.status}`)
-  }
-
-  return response.json()
-}
-```
-
-Use this for:
-
-- reused account detection
-- payout-risk review
-- vendor fraud cluster pages
+The frontend must never display or store raw account numbers.
 
 ### Duplicate Documents
 
@@ -289,29 +167,9 @@ Use this for:
 GET /graph/duplicate-documents
 ```
 
-Returns clusters where multiple vendors submitted documents with the same `documentHash`.
+Returns clusters where multiple vendors submitted documents with the same document hash.
 
-Example:
-
-```ts
-export async function getDuplicateDocuments(): Promise<GraphResponse> {
-  const response = await fetch(`${API_BASE_URL}/graph/duplicate-documents`, {
-    credentials: 'include',
-  })
-
-  if (!response.ok) {
-    throw new Error(`Duplicate documents request failed: ${response.status}`)
-  }
-
-  return response.json()
-}
-```
-
-Use this for:
-
-- duplicate CAC document detection
-- suspicious document review
-- fraud explanation panels
+Use this for duplicate CAC, tax, or identity document review.
 
 ### Fraud Clusters
 
@@ -319,150 +177,101 @@ Use this for:
 GET /graph/fraud-clusters
 ```
 
-Returns a combined graph containing:
+Returns a combined graph containing shared-device clusters, shared-bank-account clusters, and duplicate-document clusters.
 
-- shared-device clusters
-- shared-bank-account clusters
-- duplicate-document clusters
+Use this for the main fraud graph dashboard.
 
-Example:
-
-```ts
-export async function getFraudClusters(): Promise<GraphResponse> {
-  const response = await fetch(`${API_BASE_URL}/graph/fraud-clusters`, {
-    credentials: 'include',
-  })
-
-  if (!response.ok) {
-    throw new Error(`Fraud clusters request failed: ${response.status}`)
-  }
-
-  return response.json()
-}
-```
-
-Use this for:
-
-- main fraud graph page
-- dashboard overview
-- highest-risk cluster visualization
-
-## Suggested Frontend API Client
-
-Create a small graph API file in the client, for example:
+### Sync Existing Data
 
 ```txt
-client/src/api/graph.ts
+POST /graph/sync
 ```
 
-Suggested content:
+Protected demo/bootstrap endpoint. Use this after seeding or creating demo records to sync existing PostgreSQL data into Neo4j.
 
-```ts
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000'
+Do not call this on every page load.
 
-export type GraphResponse = {
-  nodes: GraphNode[]
-  edges: GraphEdge[]
-}
+### Neo4j Health
 
-export type GraphNode = {
-  id: string
-  type: string
-  label: string
-  data: Record<string, unknown>
-}
-
-export type GraphEdge = {
-  id: string
-  source: string
-  target: string
-  label: string
-  type: string
-}
-
-async function requestGraph(path: string, init?: RequestInit): Promise<GraphResponse> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...init,
-    credentials: 'include',
-  })
-
-  if (!response.ok) {
-    throw new Error(`Graph API request failed: ${response.status}`)
-  }
-
-  return response.json()
-}
-
-export function getVendorGraph(vendorId: string) {
-  return requestGraph(`/graph/vendors/${vendorId}`)
-}
-
-export function getSharedDevices() {
-  return requestGraph('/graph/shared-devices')
-}
-
-export function getSharedAccounts() {
-  return requestGraph('/graph/shared-accounts')
-}
-
-export function getDuplicateDocuments() {
-  return requestGraph('/graph/duplicate-documents')
-}
-
-export function getFraudClusters() {
-  return requestGraph('/graph/fraud-clusters')
-}
-
-export async function syncGraphData() {
-  const response = await fetch(`${API_BASE_URL}/graph/sync`, {
-    method: 'POST',
-    credentials: 'include',
-  })
-
-  if (!response.ok) {
-    throw new Error(`Graph sync failed: ${response.status}`)
-  }
-
-  return response.json()
-}
+```txt
+GET /neo4j/health
 ```
 
-## Suggested React Usage
+Protected internal/debug endpoint. Use this only for admin diagnostics.
 
-Example dashboard usage:
+## React Usage
+
+Example fraud clusters panel:
 
 ```tsx
-import { useEffect, useState } from 'react'
-import { getFraudClusters, type GraphResponse } from '../api/graph'
+import { useEffect, useState } from "react";
+import { graphApi, type GraphResponse } from "../lib/graphApi";
 
 export function FraudClustersPanel() {
-  const [graph, setGraph] = useState<GraphResponse | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [graph, setGraph] = useState<GraphResponse | null>(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getFraudClusters()
+    graphApi
+      .getFraudClusters()
       .then(setGraph)
       .catch((err) => setError(err.message))
-      .finally(() => setLoading(false))
-  }, [])
+      .finally(() => setLoading(false));
+  }, []);
 
-  if (loading) return <div>Loading graph...</div>
-  if (error) return <div>{error}</div>
-  if (!graph || graph.nodes.length === 0) return <div>No fraud clusters found.</div>
+  if (loading) return <div>Loading graph...</div>;
+  if (error) return <div>{error}</div>;
+  if (!graph || graph.nodes.length === 0) {
+    return <div>No fraud clusters found.</div>;
+  }
 
   return (
     <div>
       <p>{graph.nodes.length} nodes</p>
       <p>{graph.edges.length} relationships</p>
     </div>
-  )
+  );
 }
+```
+
+Example vendor detail usage:
+
+```tsx
+useEffect(() => {
+  if (!vendorId) return;
+
+  graphApi
+    .getVendorGraph(vendorId)
+    .then(setGraph)
+    .catch((err) => setError(err.message));
+}, [vendorId]);
+```
+
+## Graph Library Conversion
+
+Some visualization libraries expect `links` instead of `edges`. Convert the backend shape like this:
+
+```ts
+const visualGraph = {
+  nodes: graph.nodes.map((node) => ({
+    id: node.id,
+    name: node.label,
+    type: node.type,
+    ...node.data,
+  })),
+  links: graph.edges.map((edge) => ({
+    source: edge.source,
+    target: edge.target,
+    label: edge.label,
+    type: edge.type,
+  })),
+};
 ```
 
 ## Rendering Guidance
 
-Useful node types currently returned:
+Useful node types:
 
 ```txt
 Vendor
@@ -478,7 +287,7 @@ Phone
 Cluster
 ```
 
-Useful edge types currently returned:
+Useful edge types:
 
 ```txt
 HAS_EMAIL
@@ -499,12 +308,12 @@ INCLUDES_VENDOR
 Suggested visual mapping:
 
 - `Vendor`: business/user icon
-- `Device`: laptop/phone icon
+- `Device`: fingerprint/device icon
 - `Document`: file icon
-- `BankAccount`: card/bank icon
+- `BankAccount`: bank/card icon
 - `Transaction`: payment icon
 - `Transfer`: payout icon
-- `RiskScore`: warning/shield icon
+- `RiskScore`: shield/warning icon
 - `Cluster`: alert icon
 
 Suggested risk colors:
@@ -516,20 +325,11 @@ HIGH     -> red
 CRITICAL -> deep red
 ```
 
-## Recommended First Integration Steps
-
-1. Add `VITE_API_BASE_URL=http://localhost:3000` to the client environment.
-2. Log in as an admin/reviewer user.
-3. Call `POST /graph/sync` once after seeding/demo setup.
-4. Call `GET /graph/fraud-clusters` from the dashboard.
-5. Render `nodes` and `edges`.
-6. Add vendor detail graph by calling `GET /graph/vendors/:id`.
-
-## Important Security Rules
+## Security Rules
 
 - Do not put Neo4j credentials in the frontend.
 - Do not connect the browser directly to Neo4j Aura.
 - Do not display raw account numbers.
 - Use only backend graph endpoints.
-- Include cookies with `credentials: 'include'`.
+- Include cookies with `credentials: "include"`.
 - Treat graph endpoints as admin/reviewer-only views.

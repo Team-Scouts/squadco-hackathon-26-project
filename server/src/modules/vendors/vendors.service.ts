@@ -4,10 +4,14 @@ import { CreateVendorDto } from './dto/create-vendor.dto';
 
 import { PrismaService } from '../../prisma/prisma.service';
 import { UpdateVendorDto } from './dto/update-vendor.dto';
+import { GraphService } from '../graph/graph.service';
 
 @Injectable()
 export class VendorsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private graphService: GraphService,
+  ) {}
 
   // CREATE VENDOR
   async createVendor(createVendorDto: CreateVendorDto) {
@@ -16,11 +20,13 @@ export class VendorsService {
         ...createVendorDto,
       },
     });
+    const graphSynced = await this.graphService.safeSyncVendorById(vendor.id);
 
     return {
       success: true,
       message: 'Vendor created successfully',
       data: vendor,
+      graphSynced,
     };
   }
 
@@ -79,11 +85,15 @@ export class VendorsService {
         ...updateVendorDto,
       },
     });
+    const graphSynced = await this.graphService.safeSyncVendorById(
+      updatedVendor.id,
+    );
 
     return {
       success: true,
       message: 'Vendor updated successfully',
       data: updatedVendor,
+      graphSynced,
     };
   }
 }

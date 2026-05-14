@@ -1539,6 +1539,15 @@ export const DocumentScalarFieldEnum = {
   verificationReasons: 'verificationReasons',
   reviewNotes: 'reviewNotes',
   verifiedAt: 'verifiedAt',
+  ocrProvider: 'ocrProvider',
+  ocrStatus: 'ocrStatus',
+  ocrText: 'ocrText',
+  ocrConfidence: 'ocrConfidence',
+  aiGeneratedScore: 'aiGeneratedScore',
+  aiGeneratedDetected: 'aiGeneratedDetected',
+  forensicSignals: 'forensicSignals',
+  processedAt: 'processedAt',
+  processingError: 'processingError',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1888,6 +1897,20 @@ export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'J
  * Reference to a field of type 'QueryMode'
  */
 export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+/**
+ * Reference to a field of type 'OcrStatus'
+ */
+export type EnumOcrStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OcrStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'OcrStatus[]'
+ */
+export type ListEnumOcrStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OcrStatus[]'>
     
 
 

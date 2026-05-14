@@ -37,6 +37,15 @@ export type VendorDocument = {
   verificationReasons?: unknown;
   reviewNotes?: string | null;
   verifiedAt?: string | null;
+  ocrProvider?: string | null;
+  ocrStatus: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
+  ocrText?: string | null;
+  ocrConfidence?: number | null;
+  aiGeneratedScore: number;
+  aiGeneratedDetected: boolean;
+  forensicSignals?: unknown;
+  processedAt?: string | null;
+  processingError?: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -167,6 +176,17 @@ export function runDocumentChecks(id: string) {
     message: string;
     data: VendorDocument;
     duplicateSummary: DuplicateSummary;
+    intelligence: {
+      ocrProvider: string;
+      ocrText: string;
+      ocrConfidence: number;
+      extractedFields: DocumentFieldVerification[];
+      aiGeneratedScore: number;
+      aiGeneratedDetected: boolean;
+      forensicSignals: unknown[];
+      tamperScore: number;
+      reasons: unknown[];
+    } | null;
     graphSynced: boolean;
   }>(`/documents/${encodeURIComponent(id)}/run-checks`, {
     method: "POST",

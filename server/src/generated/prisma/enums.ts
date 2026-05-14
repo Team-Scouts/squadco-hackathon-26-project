@@ -47,3 +47,13 @@ export const DocumentVerificationStatus = {
 } as const
 
 export type DocumentVerificationStatus = (typeof DocumentVerificationStatus)[keyof typeof DocumentVerificationStatus]
+
+
+export const OcrStatus = {
+  PENDING: 'PENDING',
+  PROCESSING: 'PROCESSING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED'
+} as const
+
+export type OcrStatus = (typeof OcrStatus)[keyof typeof OcrStatus]

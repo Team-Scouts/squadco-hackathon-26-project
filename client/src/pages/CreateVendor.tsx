@@ -101,7 +101,6 @@ export default function CreateVendor() {
       email: string;
       phone: string;
     }) => {
-      console.log(JSON.stringify(body));
       const request = await fetch(
         `${import.meta.env.VITE_SERVER_BASE_URL}/vendors`,
         {

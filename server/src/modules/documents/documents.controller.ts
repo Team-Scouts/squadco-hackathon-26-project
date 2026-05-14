@@ -14,7 +14,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { DocumentsService } from './documents.service';
 
 import { UploadDocumentDto } from './dto/upload-document.dto';
+import { OptionalAuth } from '@thallesp/nestjs-better-auth';
 
+@OptionalAuth()
 @Controller('documents')
 export class DocumentsController {
   constructor(private readonly documentsService: DocumentsService) {}
@@ -26,8 +28,6 @@ export class DocumentsController {
     @Body() uploadDocumentDto: UploadDocumentDto,
     @Req() req,
   ) {
-    console.log(req.user);
-    console.log(file);
     return this.documentsService.uploadDocument(file, uploadDocumentDto);
   }
 

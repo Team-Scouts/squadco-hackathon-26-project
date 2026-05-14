@@ -17,22 +17,16 @@ import { PayoutsModule } from './modules/payouts/payouts.module';
 import { auth } from './lib/auth';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { Neo4jModule } from './neo4j/neo4j.module';
-
 import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
     PrismaModule,
-    AuthModule.forRoot({
-      auth,
-    }),
     VendorsModule,
     DocumentsModule,
     UserModule,
     TransactionsModule,
     ConfigModule.forRoot({ isGlobal: true }),
-
-    // Register SquadModule asynchronously so ConfigService is available
     SquadModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (config: ConfigService) => ({
@@ -49,6 +43,14 @@ import { UserModule } from './modules/user/user.module';
     PayoutsModule,
     CloudinaryModule,
     Neo4jModule,
+    AuthModule.forRoot({
+      auth,
+      bodyParser: {
+        json: { limit: '2mb' },
+        urlencoded: { limit: '2mb', extended: true },
+        rawBody: true,
+      },
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -218,7 +218,7 @@ export default function Settings() {
           )}
 
           {/* Profile Tab */}
-          {active === "profile" && (
+          {data && active === "profile" && (
             <div className="glass-panel rounded-3xl p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="border-b border-white/10 pb-6 mb-6">
                 <h2 className="text-xl font-bold text-white mb-2">

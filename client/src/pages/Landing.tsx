@@ -240,7 +240,7 @@ export default function Landing() {
               </div>
 
               {/* Trust Graph Preview */}
-              <div className="relative mt-8 hidden h-[300px] w-full overflow-hidden rounded-2xl border border-white/5 bg-gray-950/50 sm:block" aria-label="Trust graph preview">
+              <div className="relative mt-8 hidden h-[300px] w-full overflow-hidden rounded-2xl border border-white/5 bg-gray-950 sm:block" aria-label="Trust graph preview">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.1)_0,transparent_100%)]"></div>
                 
                 {/* Connecting Lines */}

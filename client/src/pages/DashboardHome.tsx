@@ -112,7 +112,7 @@ export default function DashboardHome() {
               <h2 className="text-lg font-bold text-white">Trust Graph Overview</h2>
               <button className="text-xs text-emerald-400 font-bold hover:underline flex items-center gap-1">Open Full Graph <ExternalLink className="h-3 w-3" /></button>
             </div>
-            <div className="relative h-64 w-full bg-black/40 rounded-xl border border-white/5 overflow-hidden flex items-center justify-center">
+            <div className="relative h-64 w-full bg-gray-950 rounded-xl border border-white/5 overflow-hidden flex items-center justify-center">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.05)_0,transparent_100%)]"></div>
               
               {/* Abstract mini-graph visualization */}

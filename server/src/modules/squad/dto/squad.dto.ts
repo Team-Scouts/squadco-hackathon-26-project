@@ -224,3 +224,30 @@ export class RefundDto {
   @IsOptional()
   refund_amount?: string;
 }
+
+//----Virtual Account ---------------------------------------------------------------
+export class VirtualAccountDto {
+  @IsNotEmpty()
+  customer_identifier: string;
+
+  @IsNotEmpty()
+  first_name: string;
+
+  @IsNotEmpty()
+  last_name: string;
+
+  mobile_num: string;
+
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+
+  @IsNotEmpty()
+  'bvn': 22343211654;
+  dob: string;
+
+  @IsNotEmpty()
+  address: string;
+  gender: 1 | 2;
+  beneficiary_account: string;
+}

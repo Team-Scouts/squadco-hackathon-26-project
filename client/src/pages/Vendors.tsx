@@ -1,63 +1,96 @@
+import { useQuery } from "@tanstack/react-query";
 import { Search, Filter, Download, ArrowRight, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
+import type { VendorEntityFromVendorsList } from "../typesAndInterfaces";
+import { VendorsSkeleton } from "../Skeletons";
 
 export default function Vendors() {
-  const vendors = [
-    {
-      name: "Northline Exports",
-      date: "Oct 24, 2026",
-      type: "Supplier",
-      score: 24,
-      level: "High risk",
-      status: "Rejected",
-      statusColor: "text-red-400 bg-red-500/10 border-red-500/20",
+  // const vendors = [
+  //   {
+  //     name: "Northline Exports",
+  //     date: "Oct 24, 2026",
+  //     type: "Supplier",
+  //     score: 24,
+  //     level: "High risk",
+  //     status: "Rejected",
+  //     statusColor: "text-red-400 bg-red-500/10 border-red-500/20",
+  //   },
+  //   {
+  //     name: "Koro Market Services",
+  //     date: "Oct 24, 2026",
+  //     type: "Contractor",
+  //     score: 59,
+  //     level: "Review",
+  //     status: "Pending",
+  //     statusColor: "text-amber-400 bg-amber-500/10 border-amber-500/20",
+  //   },
+  //   {
+  //     name: "Adenike Supplies Ltd",
+  //     date: "Oct 23, 2026",
+  //     type: "Supplier",
+  //     score: 84,
+  //     level: "Low risk",
+  //     status: "Approved",
+  //     statusColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+  //   },
+  //   {
+  //     name: "Global Tech Ventures",
+  //     date: "Oct 23, 2026",
+  //     type: "Consultant",
+  //     score: 42,
+  //     level: "High risk",
+  //     status: "Rejected",
+  //     statusColor: "text-red-400 bg-red-500/10 border-red-500/20",
+  //   },
+  //   {
+  //     name: "Apex Build Group",
+  //     date: "Oct 22, 2026",
+  //     type: "Contractor",
+  //     score: 91,
+  //     level: "Low risk",
+  //     status: "Approved",
+  //     statusColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+  //   },
+  //   {
+  //     name: "Zenith Logistics",
+  //     date: "Oct 22, 2026",
+  //     type: "Supplier",
+  //     score: 68,
+  //     level: "Review",
+  //     status: "Pending",
+  //     statusColor: "text-amber-400 bg-amber-500/10 border-amber-500/20",
+  //   },
+  // ];
+
+  const {
+    data: allVendors,
+    isLoading,
+    isSuccess,
+  } = useQuery<{
+    data: VendorEntityFromVendorsList[];
+  }>({
+    queryKey: ["vendors_list"],
+    staleTime: 15 * 60 * 1000,
+    queryFn: async () => {
+      const request = await fetch(
+        `${import.meta.env.VITE_SERVER_BASE_URL}/vendors`,
+        {
+          credentials: "include",
+        },
+      );
+      const response = await request.json();
+      return response;
     },
-    {
-      name: "Koro Market Services",
-      date: "Oct 24, 2026",
-      type: "Contractor",
-      score: 59,
-      level: "Review",
-      status: "Pending",
-      statusColor: "text-amber-400 bg-amber-500/10 border-amber-500/20",
-    },
-    {
-      name: "Adenike Supplies Ltd",
-      date: "Oct 23, 2026",
-      type: "Supplier",
-      score: 84,
-      level: "Low risk",
-      status: "Approved",
-      statusColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
-    },
-    {
-      name: "Global Tech Ventures",
-      date: "Oct 23, 2026",
-      type: "Consultant",
-      score: 42,
-      level: "High risk",
-      status: "Rejected",
-      statusColor: "text-red-400 bg-red-500/10 border-red-500/20",
-    },
-    {
-      name: "Apex Build Group",
-      date: "Oct 22, 2026",
-      type: "Contractor",
-      score: 91,
-      level: "Low risk",
-      status: "Approved",
-      statusColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
-    },
-    {
-      name: "Zenith Logistics",
-      date: "Oct 22, 2026",
-      type: "Supplier",
-      score: 68,
-      level: "Review",
-      status: "Pending",
-      statusColor: "text-amber-400 bg-amber-500/10 border-amber-500/20",
-    },
-  ];
+  });
+
+  const makeDate = (string: string) => {
+    const date = new Date(string);
+    return date.toDateString();
+  };
+
+  if (isLoading) {
+    return <VendorsSkeleton />;
+  }
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
@@ -121,41 +154,46 @@ export default function Vendors() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {vendors.map((vendor, i) => (
-                <tr
-                  key={i}
-                  className="hover:bg-white/5 transition-colors group"
-                >
-                  <td className="px-6 py-4">
-                    <div className="font-bold text-white">{vendor.name}</div>
-                    <div className="text-xs text-gray-500">{vendor.type}</div>
-                  </td>
-                  <td className="px-6 py-4 text-gray-400">{vendor.date}</td>
-                  <td className="px-6 py-4 font-black text-white text-lg">
-                    {vendor.score}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold border ${vendor.statusColor}`}
-                    >
-                      {vendor.level}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="text-gray-300 font-semibold">
-                      {vendor.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <Link
-                      to={`/dashboard/vendors/${vendor.name.toLowerCase().replaceAll(" ", "-")}`}
-                      className="inline-flex items-center gap-1 text-emerald-400 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      Review <ArrowRight className="h-3 w-3" />
-                    </Link>
-                  </td>
-                </tr>
-              ))}
+              {isSuccess &&
+                allVendors?.data.map((vendor, i) => (
+                  <tr
+                    key={i}
+                    className="hover:bg-white/5 transition-colors group"
+                  >
+                    <td className="px-6 py-4">
+                      <div className="font-bold text-white">
+                        {vendor.businessName}
+                      </div>
+                      {/* <div className="text-xs text-gray-500">{vendor.}</div> */}
+                    </td>
+                    <td className="px-6 py-4 text-gray-400">
+                      {makeDate(String(vendor.createdAt))}
+                    </td>
+                    <td className="px-6 py-4 font-black text-white text-lg">
+                      {vendor.overallRiskScore}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold border `}
+                      >
+                        {vendor.riskLevel}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-gray-300 font-semibold">
+                        {vendor.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <Link
+                        to={`/dashboard/vendors/${vendor.id}`}
+                        className="inline-flex items-center gap-1 text-emerald-400 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        Review <ArrowRight className="h-3 w-3" />
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>

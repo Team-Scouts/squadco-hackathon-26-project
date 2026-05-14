@@ -29,11 +29,15 @@ export type AggregateDocument = {
 export type DocumentAvgAggregateOutputType = {
   tamperScore: number | null
   duplicateVendorCount: number | null
+  ocrConfidence: number | null
+  aiGeneratedScore: number | null
 }
 
 export type DocumentSumAggregateOutputType = {
   tamperScore: number | null
   duplicateVendorCount: number | null
+  ocrConfidence: number | null
+  aiGeneratedScore: number | null
 }
 
 export type DocumentMinAggregateOutputType = {
@@ -48,6 +52,14 @@ export type DocumentMinAggregateOutputType = {
   duplicateVendorCount: number | null
   reviewNotes: string | null
   verifiedAt: Date | null
+  ocrProvider: string | null
+  ocrStatus: $Enums.OcrStatus | null
+  ocrText: string | null
+  ocrConfidence: number | null
+  aiGeneratedScore: number | null
+  aiGeneratedDetected: boolean | null
+  processedAt: Date | null
+  processingError: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -64,6 +76,14 @@ export type DocumentMaxAggregateOutputType = {
   duplicateVendorCount: number | null
   reviewNotes: string | null
   verifiedAt: Date | null
+  ocrProvider: string | null
+  ocrStatus: $Enums.OcrStatus | null
+  ocrText: string | null
+  ocrConfidence: number | null
+  aiGeneratedScore: number | null
+  aiGeneratedDetected: boolean | null
+  processedAt: Date | null
+  processingError: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -82,6 +102,15 @@ export type DocumentCountAggregateOutputType = {
   verificationReasons: number
   reviewNotes: number
   verifiedAt: number
+  ocrProvider: number
+  ocrStatus: number
+  ocrText: number
+  ocrConfidence: number
+  aiGeneratedScore: number
+  aiGeneratedDetected: number
+  forensicSignals: number
+  processedAt: number
+  processingError: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -91,11 +120,15 @@ export type DocumentCountAggregateOutputType = {
 export type DocumentAvgAggregateInputType = {
   tamperScore?: true
   duplicateVendorCount?: true
+  ocrConfidence?: true
+  aiGeneratedScore?: true
 }
 
 export type DocumentSumAggregateInputType = {
   tamperScore?: true
   duplicateVendorCount?: true
+  ocrConfidence?: true
+  aiGeneratedScore?: true
 }
 
 export type DocumentMinAggregateInputType = {
@@ -110,6 +143,14 @@ export type DocumentMinAggregateInputType = {
   duplicateVendorCount?: true
   reviewNotes?: true
   verifiedAt?: true
+  ocrProvider?: true
+  ocrStatus?: true
+  ocrText?: true
+  ocrConfidence?: true
+  aiGeneratedScore?: true
+  aiGeneratedDetected?: true
+  processedAt?: true
+  processingError?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -126,6 +167,14 @@ export type DocumentMaxAggregateInputType = {
   duplicateVendorCount?: true
   reviewNotes?: true
   verifiedAt?: true
+  ocrProvider?: true
+  ocrStatus?: true
+  ocrText?: true
+  ocrConfidence?: true
+  aiGeneratedScore?: true
+  aiGeneratedDetected?: true
+  processedAt?: true
+  processingError?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -144,6 +193,15 @@ export type DocumentCountAggregateInputType = {
   verificationReasons?: true
   reviewNotes?: true
   verifiedAt?: true
+  ocrProvider?: true
+  ocrStatus?: true
+  ocrText?: true
+  ocrConfidence?: true
+  aiGeneratedScore?: true
+  aiGeneratedDetected?: true
+  forensicSignals?: true
+  processedAt?: true
+  processingError?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -249,6 +307,15 @@ export type DocumentGroupByOutputType = {
   verificationReasons: runtime.JsonValue | null
   reviewNotes: string | null
   verifiedAt: Date | null
+  ocrProvider: string | null
+  ocrStatus: $Enums.OcrStatus
+  ocrText: string | null
+  ocrConfidence: number | null
+  aiGeneratedScore: number
+  aiGeneratedDetected: boolean
+  forensicSignals: runtime.JsonValue | null
+  processedAt: Date | null
+  processingError: string | null
   createdAt: Date
   updatedAt: Date
   _count: DocumentCountAggregateOutputType | null
@@ -290,6 +357,15 @@ export type DocumentWhereInput = {
   verificationReasons?: Prisma.JsonNullableFilter<"Document">
   reviewNotes?: Prisma.StringNullableFilter<"Document"> | string | null
   verifiedAt?: Prisma.DateTimeNullableFilter<"Document"> | Date | string | null
+  ocrProvider?: Prisma.StringNullableFilter<"Document"> | string | null
+  ocrStatus?: Prisma.EnumOcrStatusFilter<"Document"> | $Enums.OcrStatus
+  ocrText?: Prisma.StringNullableFilter<"Document"> | string | null
+  ocrConfidence?: Prisma.FloatNullableFilter<"Document"> | number | null
+  aiGeneratedScore?: Prisma.FloatFilter<"Document"> | number
+  aiGeneratedDetected?: Prisma.BoolFilter<"Document"> | boolean
+  forensicSignals?: Prisma.JsonNullableFilter<"Document">
+  processedAt?: Prisma.DateTimeNullableFilter<"Document"> | Date | string | null
+  processingError?: Prisma.StringNullableFilter<"Document"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Document"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Document"> | Date | string
   vendor?: Prisma.XOR<Prisma.VendorScalarRelationFilter, Prisma.VendorWhereInput>
@@ -309,6 +385,15 @@ export type DocumentOrderByWithRelationInput = {
   verificationReasons?: Prisma.SortOrderInput | Prisma.SortOrder
   reviewNotes?: Prisma.SortOrderInput | Prisma.SortOrder
   verifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  ocrProvider?: Prisma.SortOrderInput | Prisma.SortOrder
+  ocrStatus?: Prisma.SortOrder
+  ocrText?: Prisma.SortOrderInput | Prisma.SortOrder
+  ocrConfidence?: Prisma.SortOrderInput | Prisma.SortOrder
+  aiGeneratedScore?: Prisma.SortOrder
+  aiGeneratedDetected?: Prisma.SortOrder
+  forensicSignals?: Prisma.SortOrderInput | Prisma.SortOrder
+  processedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  processingError?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   vendor?: Prisma.VendorOrderByWithRelationInput
@@ -331,6 +416,15 @@ export type DocumentWhereUniqueInput = Prisma.AtLeast<{
   verificationReasons?: Prisma.JsonNullableFilter<"Document">
   reviewNotes?: Prisma.StringNullableFilter<"Document"> | string | null
   verifiedAt?: Prisma.DateTimeNullableFilter<"Document"> | Date | string | null
+  ocrProvider?: Prisma.StringNullableFilter<"Document"> | string | null
+  ocrStatus?: Prisma.EnumOcrStatusFilter<"Document"> | $Enums.OcrStatus
+  ocrText?: Prisma.StringNullableFilter<"Document"> | string | null
+  ocrConfidence?: Prisma.FloatNullableFilter<"Document"> | number | null
+  aiGeneratedScore?: Prisma.FloatFilter<"Document"> | number
+  aiGeneratedDetected?: Prisma.BoolFilter<"Document"> | boolean
+  forensicSignals?: Prisma.JsonNullableFilter<"Document">
+  processedAt?: Prisma.DateTimeNullableFilter<"Document"> | Date | string | null
+  processingError?: Prisma.StringNullableFilter<"Document"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Document"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Document"> | Date | string
   vendor?: Prisma.XOR<Prisma.VendorScalarRelationFilter, Prisma.VendorWhereInput>
@@ -350,6 +444,15 @@ export type DocumentOrderByWithAggregationInput = {
   verificationReasons?: Prisma.SortOrderInput | Prisma.SortOrder
   reviewNotes?: Prisma.SortOrderInput | Prisma.SortOrder
   verifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  ocrProvider?: Prisma.SortOrderInput | Prisma.SortOrder
+  ocrStatus?: Prisma.SortOrder
+  ocrText?: Prisma.SortOrderInput | Prisma.SortOrder
+  ocrConfidence?: Prisma.SortOrderInput | Prisma.SortOrder
+  aiGeneratedScore?: Prisma.SortOrder
+  aiGeneratedDetected?: Prisma.SortOrder
+  forensicSignals?: Prisma.SortOrderInput | Prisma.SortOrder
+  processedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  processingError?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.DocumentCountOrderByAggregateInput
@@ -376,6 +479,15 @@ export type DocumentScalarWhereWithAggregatesInput = {
   verificationReasons?: Prisma.JsonNullableWithAggregatesFilter<"Document">
   reviewNotes?: Prisma.StringNullableWithAggregatesFilter<"Document"> | string | null
   verifiedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Document"> | Date | string | null
+  ocrProvider?: Prisma.StringNullableWithAggregatesFilter<"Document"> | string | null
+  ocrStatus?: Prisma.EnumOcrStatusWithAggregatesFilter<"Document"> | $Enums.OcrStatus
+  ocrText?: Prisma.StringNullableWithAggregatesFilter<"Document"> | string | null
+  ocrConfidence?: Prisma.FloatNullableWithAggregatesFilter<"Document"> | number | null
+  aiGeneratedScore?: Prisma.FloatWithAggregatesFilter<"Document"> | number
+  aiGeneratedDetected?: Prisma.BoolWithAggregatesFilter<"Document"> | boolean
+  forensicSignals?: Prisma.JsonNullableWithAggregatesFilter<"Document">
+  processedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Document"> | Date | string | null
+  processingError?: Prisma.StringNullableWithAggregatesFilter<"Document"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Document"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Document"> | Date | string
 }
@@ -393,6 +505,15 @@ export type DocumentCreateInput = {
   verificationReasons?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   reviewNotes?: string | null
   verifiedAt?: Date | string | null
+  ocrProvider?: string | null
+  ocrStatus?: $Enums.OcrStatus
+  ocrText?: string | null
+  ocrConfidence?: number | null
+  aiGeneratedScore?: number
+  aiGeneratedDetected?: boolean
+  forensicSignals?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  processedAt?: Date | string | null
+  processingError?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   vendor: Prisma.VendorCreateNestedOneWithoutDocumentsInput
@@ -412,6 +533,15 @@ export type DocumentUncheckedCreateInput = {
   verificationReasons?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   reviewNotes?: string | null
   verifiedAt?: Date | string | null
+  ocrProvider?: string | null
+  ocrStatus?: $Enums.OcrStatus
+  ocrText?: string | null
+  ocrConfidence?: number | null
+  aiGeneratedScore?: number
+  aiGeneratedDetected?: boolean
+  forensicSignals?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  processedAt?: Date | string | null
+  processingError?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -429,6 +559,15 @@ export type DocumentUpdateInput = {
   verificationReasons?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   reviewNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ocrProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrStatus?: Prisma.EnumOcrStatusFieldUpdateOperationsInput | $Enums.OcrStatus
+  ocrText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  aiGeneratedScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  aiGeneratedDetected?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  forensicSignals?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  processedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  processingError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   vendor?: Prisma.VendorUpdateOneRequiredWithoutDocumentsNestedInput
@@ -448,6 +587,15 @@ export type DocumentUncheckedUpdateInput = {
   verificationReasons?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   reviewNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ocrProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrStatus?: Prisma.EnumOcrStatusFieldUpdateOperationsInput | $Enums.OcrStatus
+  ocrText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  aiGeneratedScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  aiGeneratedDetected?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  forensicSignals?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  processedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  processingError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -466,6 +614,15 @@ export type DocumentCreateManyInput = {
   verificationReasons?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   reviewNotes?: string | null
   verifiedAt?: Date | string | null
+  ocrProvider?: string | null
+  ocrStatus?: $Enums.OcrStatus
+  ocrText?: string | null
+  ocrConfidence?: number | null
+  aiGeneratedScore?: number
+  aiGeneratedDetected?: boolean
+  forensicSignals?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  processedAt?: Date | string | null
+  processingError?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -483,6 +640,15 @@ export type DocumentUpdateManyMutationInput = {
   verificationReasons?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   reviewNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ocrProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrStatus?: Prisma.EnumOcrStatusFieldUpdateOperationsInput | $Enums.OcrStatus
+  ocrText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  aiGeneratedScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  aiGeneratedDetected?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  forensicSignals?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  processedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  processingError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -501,6 +667,15 @@ export type DocumentUncheckedUpdateManyInput = {
   verificationReasons?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   reviewNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ocrProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrStatus?: Prisma.EnumOcrStatusFieldUpdateOperationsInput | $Enums.OcrStatus
+  ocrText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  aiGeneratedScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  aiGeneratedDetected?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  forensicSignals?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  processedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  processingError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -529,6 +704,15 @@ export type DocumentCountOrderByAggregateInput = {
   verificationReasons?: Prisma.SortOrder
   reviewNotes?: Prisma.SortOrder
   verifiedAt?: Prisma.SortOrder
+  ocrProvider?: Prisma.SortOrder
+  ocrStatus?: Prisma.SortOrder
+  ocrText?: Prisma.SortOrder
+  ocrConfidence?: Prisma.SortOrder
+  aiGeneratedScore?: Prisma.SortOrder
+  aiGeneratedDetected?: Prisma.SortOrder
+  forensicSignals?: Prisma.SortOrder
+  processedAt?: Prisma.SortOrder
+  processingError?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -536,6 +720,8 @@ export type DocumentCountOrderByAggregateInput = {
 export type DocumentAvgOrderByAggregateInput = {
   tamperScore?: Prisma.SortOrder
   duplicateVendorCount?: Prisma.SortOrder
+  ocrConfidence?: Prisma.SortOrder
+  aiGeneratedScore?: Prisma.SortOrder
 }
 
 export type DocumentMaxOrderByAggregateInput = {
@@ -550,6 +736,14 @@ export type DocumentMaxOrderByAggregateInput = {
   duplicateVendorCount?: Prisma.SortOrder
   reviewNotes?: Prisma.SortOrder
   verifiedAt?: Prisma.SortOrder
+  ocrProvider?: Prisma.SortOrder
+  ocrStatus?: Prisma.SortOrder
+  ocrText?: Prisma.SortOrder
+  ocrConfidence?: Prisma.SortOrder
+  aiGeneratedScore?: Prisma.SortOrder
+  aiGeneratedDetected?: Prisma.SortOrder
+  processedAt?: Prisma.SortOrder
+  processingError?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -566,6 +760,14 @@ export type DocumentMinOrderByAggregateInput = {
   duplicateVendorCount?: Prisma.SortOrder
   reviewNotes?: Prisma.SortOrder
   verifiedAt?: Prisma.SortOrder
+  ocrProvider?: Prisma.SortOrder
+  ocrStatus?: Prisma.SortOrder
+  ocrText?: Prisma.SortOrder
+  ocrConfidence?: Prisma.SortOrder
+  aiGeneratedScore?: Prisma.SortOrder
+  aiGeneratedDetected?: Prisma.SortOrder
+  processedAt?: Prisma.SortOrder
+  processingError?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -573,6 +775,8 @@ export type DocumentMinOrderByAggregateInput = {
 export type DocumentSumOrderByAggregateInput = {
   tamperScore?: Prisma.SortOrder
   duplicateVendorCount?: Prisma.SortOrder
+  ocrConfidence?: Prisma.SortOrder
+  aiGeneratedScore?: Prisma.SortOrder
 }
 
 export type DocumentCreateNestedManyWithoutVendorInput = {
@@ -629,6 +833,18 @@ export type IntFieldUpdateOperationsInput = {
   divide?: number
 }
 
+export type EnumOcrStatusFieldUpdateOperationsInput = {
+  set?: $Enums.OcrStatus
+}
+
+export type NullableFloatFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type DocumentCreateWithoutVendorInput = {
   id?: string
   documentType: string
@@ -642,6 +858,15 @@ export type DocumentCreateWithoutVendorInput = {
   verificationReasons?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   reviewNotes?: string | null
   verifiedAt?: Date | string | null
+  ocrProvider?: string | null
+  ocrStatus?: $Enums.OcrStatus
+  ocrText?: string | null
+  ocrConfidence?: number | null
+  aiGeneratedScore?: number
+  aiGeneratedDetected?: boolean
+  forensicSignals?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  processedAt?: Date | string | null
+  processingError?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -659,6 +884,15 @@ export type DocumentUncheckedCreateWithoutVendorInput = {
   verificationReasons?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   reviewNotes?: string | null
   verifiedAt?: Date | string | null
+  ocrProvider?: string | null
+  ocrStatus?: $Enums.OcrStatus
+  ocrText?: string | null
+  ocrConfidence?: number | null
+  aiGeneratedScore?: number
+  aiGeneratedDetected?: boolean
+  forensicSignals?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  processedAt?: Date | string | null
+  processingError?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -706,6 +940,15 @@ export type DocumentScalarWhereInput = {
   verificationReasons?: Prisma.JsonNullableFilter<"Document">
   reviewNotes?: Prisma.StringNullableFilter<"Document"> | string | null
   verifiedAt?: Prisma.DateTimeNullableFilter<"Document"> | Date | string | null
+  ocrProvider?: Prisma.StringNullableFilter<"Document"> | string | null
+  ocrStatus?: Prisma.EnumOcrStatusFilter<"Document"> | $Enums.OcrStatus
+  ocrText?: Prisma.StringNullableFilter<"Document"> | string | null
+  ocrConfidence?: Prisma.FloatNullableFilter<"Document"> | number | null
+  aiGeneratedScore?: Prisma.FloatFilter<"Document"> | number
+  aiGeneratedDetected?: Prisma.BoolFilter<"Document"> | boolean
+  forensicSignals?: Prisma.JsonNullableFilter<"Document">
+  processedAt?: Prisma.DateTimeNullableFilter<"Document"> | Date | string | null
+  processingError?: Prisma.StringNullableFilter<"Document"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Document"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Document"> | Date | string
 }
@@ -723,6 +966,15 @@ export type DocumentCreateManyVendorInput = {
   verificationReasons?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   reviewNotes?: string | null
   verifiedAt?: Date | string | null
+  ocrProvider?: string | null
+  ocrStatus?: $Enums.OcrStatus
+  ocrText?: string | null
+  ocrConfidence?: number | null
+  aiGeneratedScore?: number
+  aiGeneratedDetected?: boolean
+  forensicSignals?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  processedAt?: Date | string | null
+  processingError?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -740,6 +992,15 @@ export type DocumentUpdateWithoutVendorInput = {
   verificationReasons?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   reviewNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ocrProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrStatus?: Prisma.EnumOcrStatusFieldUpdateOperationsInput | $Enums.OcrStatus
+  ocrText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  aiGeneratedScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  aiGeneratedDetected?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  forensicSignals?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  processedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  processingError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -757,6 +1018,15 @@ export type DocumentUncheckedUpdateWithoutVendorInput = {
   verificationReasons?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   reviewNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ocrProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrStatus?: Prisma.EnumOcrStatusFieldUpdateOperationsInput | $Enums.OcrStatus
+  ocrText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  aiGeneratedScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  aiGeneratedDetected?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  forensicSignals?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  processedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  processingError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -774,6 +1044,15 @@ export type DocumentUncheckedUpdateManyWithoutVendorInput = {
   verificationReasons?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   reviewNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ocrProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrStatus?: Prisma.EnumOcrStatusFieldUpdateOperationsInput | $Enums.OcrStatus
+  ocrText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  aiGeneratedScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  aiGeneratedDetected?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  forensicSignals?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  processedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  processingError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -794,6 +1073,15 @@ export type DocumentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   verificationReasons?: boolean
   reviewNotes?: boolean
   verifiedAt?: boolean
+  ocrProvider?: boolean
+  ocrStatus?: boolean
+  ocrText?: boolean
+  ocrConfidence?: boolean
+  aiGeneratedScore?: boolean
+  aiGeneratedDetected?: boolean
+  forensicSignals?: boolean
+  processedAt?: boolean
+  processingError?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   vendor?: boolean | Prisma.VendorDefaultArgs<ExtArgs>
@@ -813,6 +1101,15 @@ export type DocumentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   verificationReasons?: boolean
   reviewNotes?: boolean
   verifiedAt?: boolean
+  ocrProvider?: boolean
+  ocrStatus?: boolean
+  ocrText?: boolean
+  ocrConfidence?: boolean
+  aiGeneratedScore?: boolean
+  aiGeneratedDetected?: boolean
+  forensicSignals?: boolean
+  processedAt?: boolean
+  processingError?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   vendor?: boolean | Prisma.VendorDefaultArgs<ExtArgs>
@@ -832,6 +1129,15 @@ export type DocumentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   verificationReasons?: boolean
   reviewNotes?: boolean
   verifiedAt?: boolean
+  ocrProvider?: boolean
+  ocrStatus?: boolean
+  ocrText?: boolean
+  ocrConfidence?: boolean
+  aiGeneratedScore?: boolean
+  aiGeneratedDetected?: boolean
+  forensicSignals?: boolean
+  processedAt?: boolean
+  processingError?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   vendor?: boolean | Prisma.VendorDefaultArgs<ExtArgs>
@@ -851,11 +1157,20 @@ export type DocumentSelectScalar = {
   verificationReasons?: boolean
   reviewNotes?: boolean
   verifiedAt?: boolean
+  ocrProvider?: boolean
+  ocrStatus?: boolean
+  ocrText?: boolean
+  ocrConfidence?: boolean
+  aiGeneratedScore?: boolean
+  aiGeneratedDetected?: boolean
+  forensicSignals?: boolean
+  processedAt?: boolean
+  processingError?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type DocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "vendorId" | "documentType" | "fileUrl" | "documentHash" | "tamperScore" | "verificationStatus" | "duplicateDetected" | "duplicateVendorCount" | "extractedFields" | "verificationReasons" | "reviewNotes" | "verifiedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["document"]>
+export type DocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "vendorId" | "documentType" | "fileUrl" | "documentHash" | "tamperScore" | "verificationStatus" | "duplicateDetected" | "duplicateVendorCount" | "extractedFields" | "verificationReasons" | "reviewNotes" | "verifiedAt" | "ocrProvider" | "ocrStatus" | "ocrText" | "ocrConfidence" | "aiGeneratedScore" | "aiGeneratedDetected" | "forensicSignals" | "processedAt" | "processingError" | "createdAt" | "updatedAt", ExtArgs["result"]["document"]>
 export type DocumentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   vendor?: boolean | Prisma.VendorDefaultArgs<ExtArgs>
 }
@@ -885,6 +1200,15 @@ export type $DocumentPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     verificationReasons: runtime.JsonValue | null
     reviewNotes: string | null
     verifiedAt: Date | null
+    ocrProvider: string | null
+    ocrStatus: $Enums.OcrStatus
+    ocrText: string | null
+    ocrConfidence: number | null
+    aiGeneratedScore: number
+    aiGeneratedDetected: boolean
+    forensicSignals: runtime.JsonValue | null
+    processedAt: Date | null
+    processingError: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["document"]>
@@ -1324,6 +1648,15 @@ export interface DocumentFieldRefs {
   readonly verificationReasons: Prisma.FieldRef<"Document", 'Json'>
   readonly reviewNotes: Prisma.FieldRef<"Document", 'String'>
   readonly verifiedAt: Prisma.FieldRef<"Document", 'DateTime'>
+  readonly ocrProvider: Prisma.FieldRef<"Document", 'String'>
+  readonly ocrStatus: Prisma.FieldRef<"Document", 'OcrStatus'>
+  readonly ocrText: Prisma.FieldRef<"Document", 'String'>
+  readonly ocrConfidence: Prisma.FieldRef<"Document", 'Float'>
+  readonly aiGeneratedScore: Prisma.FieldRef<"Document", 'Float'>
+  readonly aiGeneratedDetected: Prisma.FieldRef<"Document", 'Boolean'>
+  readonly forensicSignals: Prisma.FieldRef<"Document", 'Json'>
+  readonly processedAt: Prisma.FieldRef<"Document", 'DateTime'>
+  readonly processingError: Prisma.FieldRef<"Document", 'String'>
   readonly createdAt: Prisma.FieldRef<"Document", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Document", 'DateTime'>
 }

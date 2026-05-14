@@ -4,6 +4,7 @@ import { SquadController } from './squad.controller';
 import { SquadModuleOptions, SQUAD_MODULE_OPTIONS } from './squad.config';
 import { PrismaModule } from '../../prisma/prisma.module';
 import { GraphModule } from '../graph/graph.module';
+import { TransactionsModule } from '../transactions/transactions.module';
 
 /**
  * SquadModule
@@ -36,7 +37,7 @@ export class SquadModule {
   static register(options: SquadModuleOptions): DynamicModule {
     return {
       module: SquadModule,
-      imports: [PrismaModule, GraphModule],
+      imports: [PrismaModule, GraphModule, TransactionsModule],
       controllers: [SquadController],
       providers: [
         { provide: SQUAD_MODULE_OPTIONS, useValue: options },
@@ -55,7 +56,12 @@ export class SquadModule {
   }): DynamicModule {
     return {
       module: SquadModule,
-      imports: [...(asyncOptions.imports ?? []), PrismaModule, GraphModule],
+      imports: [
+        ...(asyncOptions.imports ?? []),
+        PrismaModule,
+        GraphModule,
+        TransactionsModule,
+      ],
       controllers: [SquadController],
       providers: [
         {

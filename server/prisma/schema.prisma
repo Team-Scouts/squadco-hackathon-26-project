@@ -41,6 +41,13 @@ enum DocumentVerificationStatus {
   REJECTED
 }
 
+enum OcrStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
 model User {
   id       String  @id @default(uuid())
   email    String  @unique
@@ -103,6 +110,15 @@ model Document {
   verificationReasons  Json?
   reviewNotes          String?
   verifiedAt           DateTime?
+  ocrProvider          String?
+  ocrStatus            OcrStatus                  @default(PENDING)
+  ocrText              String?
+  ocrConfidence        Float?
+  aiGeneratedScore     Float                      @default(0)
+  aiGeneratedDetected  Boolean                    @default(false)
+  forensicSignals      Json?
+  processedAt          DateTime?
+  processingError      String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -110,6 +126,7 @@ model Document {
   @@index([vendorId])
   @@index([documentHash])
   @@index([verificationStatus])
+  @@index([ocrStatus])
 }
 
 model Device {

@@ -10,6 +10,7 @@ import axios, { AxiosInstance, AxiosError } from 'axios';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { GraphService } from '../graph/graph.service';
+import { TransactionsService } from '../transactions/transactions.service';
 
 import {
   SQUAD_MODULE_OPTIONS,
@@ -53,6 +54,7 @@ export class SquadService {
     @Inject(SQUAD_MODULE_OPTIONS) private readonly options: SquadModuleOptions,
     private readonly prisma: PrismaService,
     private readonly graphService: GraphService,
+    private readonly transactionsService: TransactionsService,
   ) {
     const baseURL = options.isProduction
       ? SQUAD_PRODUCTION_BASE_URL
@@ -140,6 +142,14 @@ export class SquadService {
       await this.persistTransferFromWebhook(vendorId, transferReference, data);
     }
 
+    const financialRisk = vendorId
+      ? await this.transactionsService.evaluateVendorFinancialRisk(vendorId, {
+          transactionRef: transactionReference,
+          transferReference,
+          webhookEventId: webhookEvent.id,
+        })
+      : null;
+
     let graphSynced = false;
     if (vendorId) {
       graphSynced = await this.graphService.safeSyncVendorById(vendorId);
@@ -165,6 +175,7 @@ export class SquadService {
       eventId: webhookEvent.id,
       transactionReference,
       transferReference,
+      financialRisk,
       graphSynced,
     };
   }

@@ -229,6 +229,8 @@ export class GraphService {
           verificationStatus: document.verificationStatus,
           duplicateDetected: document.duplicateDetected,
           duplicateVendorCount: document.duplicateVendorCount,
+          verificationReasons: this.stringifyJson(document.verificationReasons),
+          forensicSignals: this.stringifyJson(document.forensicSignals),
           ocrProvider: document.ocrProvider,
           ocrStatus: document.ocrStatus,
           ocrConfidence: document.ocrConfidence,

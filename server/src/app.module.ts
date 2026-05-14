@@ -10,14 +10,13 @@ import { SquadModule } from './modules/squad/squad.module';
 import { RiskModule } from './modules/risk/risk.module';
 import { GraphModule } from './modules/graph/graph.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-// import { DeviceIntelligenceModule } from './modules/device-intelligence/device-intelligence.module';
 import { AlertsModule } from './modules/alerts/alerts.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { PayoutsModule } from './modules/payouts/payouts.module';
 import { auth } from './lib/auth';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { Neo4jModule } from './neo4j/neo4j.module';
->>>>>>> c7f473d7a8d189e9a02ea1da369688ad2a4d3402
+import { DeviceIntelligenceModule } from './modules/device-intelligence/device-intelligence.module';
 import { UserModule } from './modules/user/user.module';
 
 @Module({
@@ -28,10 +27,9 @@ import { UserModule } from './modules/user/user.module';
     }),
     VendorsModule,
     DocumentsModule,
-    UserModule,
     TransactionsModule,
     ConfigModule.forRoot({ isGlobal: true }),
-
+    UserModule,
     // Register SquadModule asynchronously so ConfigService is available
     SquadModule.registerAsync({
       imports: [ConfigModule],
@@ -43,7 +41,7 @@ import { UserModule } from './modules/user/user.module';
     }),
     RiskModule,
     GraphModule,
-    // DeviceIntelligenceModule,
+    DeviceIntelligenceModule,
     AlertsModule,
     AdminModule,
     PayoutsModule,

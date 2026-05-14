@@ -12,6 +12,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { UploadingDocumentSkeleton } from "../Skeletons";
+import FingerprintJS from "@fingerprintjs/fingerprintjs";
 
 type FormState = {
   businessName: string;
@@ -69,6 +70,8 @@ export default function CreateVendor() {
   const [formStage, updateFormStage] = useState(1);
   const [file, updateFile] = useState<File | null>();
   const navigate = useNavigate();
+  const browser = navigator.userAgent;
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const updateField = <K extends keyof FormState>(
     field: K,
@@ -114,8 +117,27 @@ export default function CreateVendor() {
       updateVendorID(response.data.id);
       return response;
     },
-    onSuccess: () => {
+    onSuccess: async (response) => {
       updateFormStage(2);
+
+      const vendorId = response.data.id || vendorID;
+
+      const fp = await FingerprintJS.load();
+      const result = await fp.get();
+
+      await fetch(`${import.meta.env.VITE_SERVER_BASE_URL}/devices`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          vendorId,
+          deviceHash: result.visitorId,
+          browser,
+          timezone,
+        }),
+      });
     },
   });
 

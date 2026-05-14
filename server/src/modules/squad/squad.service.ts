@@ -29,6 +29,7 @@ import {
   RequeryTransferDto,
   GetAllTransfersDto,
   RefundDto,
+  VirtualAccountDto,
 } from './dto/squad.dto';
 
 import {
@@ -151,7 +152,9 @@ export class SquadService {
         processedAt: new Date(),
         graphSynced,
         graphSyncAttempts: { increment: 1 },
-        graphSyncError: graphSynced ? null : 'Graph sync failed; queued for retry',
+        graphSyncError: graphSynced
+          ? null
+          : 'Graph sync failed; queued for retry',
       },
     });
 
@@ -367,6 +370,12 @@ export class SquadService {
       '/virtual-account/simulate/payment',
       dto,
     );
+    return data;
+  }
+
+  //Virtual Account Generation for users
+  async virtualAccount(dto: VirtualAccountDto): Promise<SquadApiResponse<any>> {
+    const { data } = await this.http.post('/virtual-account', dto);
     return data;
   }
 

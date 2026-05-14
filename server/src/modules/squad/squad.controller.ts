@@ -22,6 +22,7 @@ import {
   RequeryTransferDto,
   GetAllTransfersDto,
   RefundDto,
+  VirtualAccountDto,
 } from './dto/squad.dto';
 import { AllowAnonymous, OptionalAuth } from '@thallesp/nestjs-better-auth';
 
@@ -96,6 +97,10 @@ export class SquadController {
     return this.squadService.queryTransactions(query);
   }
 
+  @Post('/virtual')
+  postVirtualAccount(@Body() dto: VirtualAccountDto) {
+    return this.squadService.virtualAccount(dto);
+  }
   // ──────────────────────────────────────────────────────────────────────────
   // SANDBOX HELPERS
   // ──────────────────────────────────────────────────────────────────────────

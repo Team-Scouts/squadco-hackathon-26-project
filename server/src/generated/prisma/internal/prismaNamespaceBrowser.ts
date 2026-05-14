@@ -56,6 +56,11 @@ export const ModelName = {
   Document: 'Document',
   Device: 'Device',
   Transaction: 'Transaction',
+  BankAccount: 'BankAccount',
+  Transfer: 'Transfer',
+  WebhookEvent: 'WebhookEvent',
+  RiskScore: 'RiskScore',
+  GraphSyncFailure: 'GraphSyncFailure',
   Alert: 'Alert',
   Session: 'Session',
   Account: 'Account',
@@ -87,7 +92,10 @@ export const UserScalarFieldEnum = {
   updatedAt: 'updatedAt',
   name: 'name',
   emailVerified: 'emailVerified',
-  image: 'image'
+  image: 'image',
+  banned: 'banned',
+  banReason: 'banReason',
+  banExpires: 'banExpires'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -115,7 +123,15 @@ export const DocumentScalarFieldEnum = {
   fileUrl: 'fileUrl',
   documentHash: 'documentHash',
   tamperScore: 'tamperScore',
-  createdAt: 'createdAt'
+  verificationStatus: 'verificationStatus',
+  duplicateDetected: 'duplicateDetected',
+  duplicateVendorCount: 'duplicateVendorCount',
+  extractedFields: 'extractedFields',
+  verificationReasons: 'verificationReasons',
+  reviewNotes: 'reviewNotes',
+  verifiedAt: 'verifiedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]
@@ -149,6 +165,92 @@ export const TransactionScalarFieldEnum = {
 export type TransactionScalarFieldEnum = (typeof TransactionScalarFieldEnum)[keyof typeof TransactionScalarFieldEnum]
 
 
+export const BankAccountScalarFieldEnum = {
+  id: 'id',
+  vendorId: 'vendorId',
+  bankCode: 'bankCode',
+  bankName: 'bankName',
+  accountNumberHash: 'accountNumberHash',
+  accountNumberLast4: 'accountNumberLast4',
+  accountName: 'accountName',
+  lookupStatus: 'lookupStatus',
+  identityMatchScore: 'identityMatchScore',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BankAccountScalarFieldEnum = (typeof BankAccountScalarFieldEnum)[keyof typeof BankAccountScalarFieldEnum]
+
+
+export const TransferScalarFieldEnum = {
+  id: 'id',
+  vendorId: 'vendorId',
+  bankAccountId: 'bankAccountId',
+  transferReference: 'transferReference',
+  amount: 'amount',
+  currency: 'currency',
+  status: 'status',
+  rawPayload: 'rawPayload',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TransferScalarFieldEnum = (typeof TransferScalarFieldEnum)[keyof typeof TransferScalarFieldEnum]
+
+
+export const WebhookEventScalarFieldEnum = {
+  id: 'id',
+  provider: 'provider',
+  eventType: 'eventType',
+  transactionReference: 'transactionReference',
+  transferReference: 'transferReference',
+  rawPayload: 'rawPayload',
+  signature: 'signature',
+  processed: 'processed',
+  processedAt: 'processedAt',
+  graphSynced: 'graphSynced',
+  graphSyncAttempts: 'graphSyncAttempts',
+  graphSyncError: 'graphSyncError',
+  createdAt: 'createdAt'
+} as const
+
+export type WebhookEventScalarFieldEnum = (typeof WebhookEventScalarFieldEnum)[keyof typeof WebhookEventScalarFieldEnum]
+
+
+export const RiskScoreScalarFieldEnum = {
+  id: 'id',
+  vendorId: 'vendorId',
+  documentRisk: 'documentRisk',
+  networkFraudRisk: 'networkFraudRisk',
+  financialAnomalyRisk: 'financialAnomalyRisk',
+  deviceRisk: 'deviceRisk',
+  identityMismatchRisk: 'identityMismatchRisk',
+  manualReviewPenalty: 'manualReviewPenalty',
+  overallRisk: 'overallRisk',
+  riskLevel: 'riskLevel',
+  recommendedAction: 'recommendedAction',
+  reasons: 'reasons',
+  createdAt: 'createdAt'
+} as const
+
+export type RiskScoreScalarFieldEnum = (typeof RiskScoreScalarFieldEnum)[keyof typeof RiskScoreScalarFieldEnum]
+
+
+export const GraphSyncFailureScalarFieldEnum = {
+  id: 'id',
+  entityType: 'entityType',
+  entityId: 'entityId',
+  operation: 'operation',
+  error: 'error',
+  retryCount: 'retryCount',
+  resolved: 'resolved',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type GraphSyncFailureScalarFieldEnum = (typeof GraphSyncFailureScalarFieldEnum)[keyof typeof GraphSyncFailureScalarFieldEnum]
+
+
 export const AlertScalarFieldEnum = {
   id: 'id',
   vendorId: 'vendorId',
@@ -169,7 +271,8 @@ export const SessionScalarFieldEnum = {
   updatedAt: 'updatedAt',
   ipAddress: 'ipAddress',
   userAgent: 'userAgent',
-  userId: 'userId'
+  userId: 'userId',
+  impersonatedBy: 'impersonatedBy'
 } as const
 
 export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
@@ -214,6 +317,21 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
 export const QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
@@ -228,4 +346,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

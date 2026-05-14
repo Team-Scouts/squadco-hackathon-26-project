@@ -1,42 +1,109 @@
-import { Search, Filter, Download, ArrowRight } from 'lucide-react'
+import { Search, Filter, Download, ArrowRight, Plus } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function Vendors() {
   const vendors = [
-    { name: 'Northline Exports', date: 'Oct 24, 2026', type: 'Supplier', score: 24, level: 'High risk', status: 'Rejected', statusColor: 'text-red-400 bg-red-500/10 border-red-500/20' },
-    { name: 'Koro Market Services', date: 'Oct 24, 2026', type: 'Contractor', score: 59, level: 'Review', status: 'Pending', statusColor: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
-    { name: 'Adenike Supplies Ltd', date: 'Oct 23, 2026', type: 'Supplier', score: 84, level: 'Low risk', status: 'Approved', statusColor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
-    { name: 'Global Tech Ventures', date: 'Oct 23, 2026', type: 'Consultant', score: 42, level: 'High risk', status: 'Rejected', statusColor: 'text-red-400 bg-red-500/10 border-red-500/20' },
-    { name: 'Apex Build Group', date: 'Oct 22, 2026', type: 'Contractor', score: 91, level: 'Low risk', status: 'Approved', statusColor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
-    { name: 'Zenith Logistics', date: 'Oct 22, 2026', type: 'Supplier', score: 68, level: 'Review', status: 'Pending', statusColor: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
-  ]
+    {
+      name: "Northline Exports",
+      date: "Oct 24, 2026",
+      type: "Supplier",
+      score: 24,
+      level: "High risk",
+      status: "Rejected",
+      statusColor: "text-red-400 bg-red-500/10 border-red-500/20",
+    },
+    {
+      name: "Koro Market Services",
+      date: "Oct 24, 2026",
+      type: "Contractor",
+      score: 59,
+      level: "Review",
+      status: "Pending",
+      statusColor: "text-amber-400 bg-amber-500/10 border-amber-500/20",
+    },
+    {
+      name: "Adenike Supplies Ltd",
+      date: "Oct 23, 2026",
+      type: "Supplier",
+      score: 84,
+      level: "Low risk",
+      status: "Approved",
+      statusColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+    },
+    {
+      name: "Global Tech Ventures",
+      date: "Oct 23, 2026",
+      type: "Consultant",
+      score: 42,
+      level: "High risk",
+      status: "Rejected",
+      statusColor: "text-red-400 bg-red-500/10 border-red-500/20",
+    },
+    {
+      name: "Apex Build Group",
+      date: "Oct 22, 2026",
+      type: "Contractor",
+      score: 91,
+      level: "Low risk",
+      status: "Approved",
+      statusColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+    },
+    {
+      name: "Zenith Logistics",
+      date: "Oct 22, 2026",
+      type: "Supplier",
+      score: 68,
+      level: "Review",
+      status: "Pending",
+      statusColor: "text-amber-400 bg-amber-500/10 border-amber-500/20",
+    },
+  ];
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">Vendors Directory</h1>
-          <p className="text-sm text-gray-400 mt-1">Manage and review all vendor applications.</p>
+          <h1 className="text-3xl font-black text-white tracking-tight">
+            Vendors Directory
+          </h1>
+          <p className="text-sm text-gray-400 mt-1">
+            Manage and review all vendor applications.
+          </p>
         </div>
-        <button className="flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm font-bold text-white transition-colors">
-          <Download className="h-4 w-4 text-emerald-400" />
-          Export CSV
-        </button>
+        <div className="flex items-center gap-3">
+          <Link
+            to="/dashboard/vendors/new"
+            className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-gray-950 rounded-lg text-sm font-black shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:bg-emerald-400 transition-all hover:-translate-y-0.5"
+          >
+            <Plus className="h-4 w-4" />
+            New Vendor
+          </Link>
+          <button className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm font-bold text-white transition-colors">
+            <Download className="h-4 w-4 text-emerald-400" />
+            Export CSV
+          </button>
+        </div>
       </div>
 
       <div className="glass-panel rounded-2xl overflow-hidden">
         {/* Toolbar */}
-        <div className="p-4 border-b border-white/5 flex flex-col sm:flex-row gap-4 bg-black/20">
-          <div className="relative flex-1 w-full sm:max-w-md">
+        <div className="p-4 border-b border-white/5 flex gap-4 bg-black/20">
+          <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-            <input 
-              type="text" 
-              placeholder="Search by vendor name, ID, or email..." 
+            <input
+              type="text"
+              placeholder="Search by vendor name, ID, or email..."
               className="w-full bg-white/5 border border-white/10 rounded-lg py-2 pl-10 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 transition-all"
             />
           </div>
-          <button className="flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-semibold text-gray-300 hover:text-white transition-colors">
+          <button className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-semibold text-gray-300 hover:text-white transition-colors">
             <Filter className="h-4 w-4" />
             Filter by Risk Level
+          </button>
+
+          <button className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-semibold text-gray-300 hover:text-white transition-colors">
+            <Filter className="h-4 w-4" />
+            Filter by Application Status
           </button>
         </div>
 
@@ -55,25 +122,37 @@ export default function Vendors() {
             </thead>
             <tbody className="divide-y divide-white/5">
               {vendors.map((vendor, i) => (
-                <tr key={i} className="hover:bg-white/5 transition-colors group">
+                <tr
+                  key={i}
+                  className="hover:bg-white/5 transition-colors group"
+                >
                   <td className="px-6 py-4">
                     <div className="font-bold text-white">{vendor.name}</div>
                     <div className="text-xs text-gray-500">{vendor.type}</div>
                   </td>
                   <td className="px-6 py-4 text-gray-400">{vendor.date}</td>
-                  <td className="px-6 py-4 font-black text-white text-lg">{vendor.score}</td>
+                  <td className="px-6 py-4 font-black text-white text-lg">
+                    {vendor.score}
+                  </td>
                   <td className="px-6 py-4">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold border ${vendor.statusColor}`}>
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold border ${vendor.statusColor}`}
+                    >
                       {vendor.level}
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-gray-300 font-semibold">{vendor.status}</span>
+                    <span className="text-gray-300 font-semibold">
+                      {vendor.status}
+                    </span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <button className="inline-flex items-center gap-1 text-emerald-400 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Link
+                      to={`/dashboard/vendors/${vendor.name.toLowerCase().replaceAll(" ", "-")}`}
+                      className="inline-flex items-center gap-1 text-emerald-400 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
                       Review <ArrowRight className="h-3 w-3" />
-                    </button>
+                    </Link>
                   </td>
                 </tr>
               ))}
@@ -85,5 +164,5 @@ export default function Vendors() {
         </div>
       </div>
     </div>
-  )
+  );
 }

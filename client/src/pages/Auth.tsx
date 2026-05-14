@@ -8,10 +8,8 @@ import {
   ArrowRight,
   Eye,
   EyeOff,
-  AlertCircle,
-  X,
 } from "lucide-react";
-import { signIn, signUp } from "../lib/authClient";
+import { signIn, signUp, useSession } from "../lib/authClient";
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -20,34 +18,32 @@ export default function Auth() {
   const [password, updatePassword] = useState("");
   const [firstName, updateFirstName] = useState("");
   const [lastName, updateLastName] = useState("");
-  const [errorToast, setErrorToast] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { data } = useSession();
+  if (data && data.user) {
+    navigate("/dashboard");
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorToast(null);
-
+    // Simulated auth delay
     if (isLogin) {
       try {
-        const { data, error } = await signIn.email(
+        await signIn.email(
           {
             email: email,
             password: password,
           },
           {
             onSuccess: () => navigate("/dashboard"),
-            onError: (ctx) => setErrorToast(ctx.error.message || "Invalid email or password. Please try again.")
           },
         );
-        if (error) {
-           setErrorToast(error.message || "Invalid email or password. Please try again.");
-        }
-      } catch (error: any) {
-        setErrorToast(error?.message || "Unable to connect to the authentication server. Please check your connection.");
+      } catch (error) {
+        console.log(error);
       }
     } else {
       try {
-        const { data, error } = await signUp.email(
+        await signUp.email(
           {
             email: email,
             password: password,
@@ -55,14 +51,10 @@ export default function Auth() {
           },
           {
             onSuccess: () => navigate("/dashboard"),
-            onError: (ctx) => setErrorToast(ctx.error.message || "Failed to create account. Please try again.")
           },
         );
-        if (error) {
-          setErrorToast(error.message || "Failed to create account. Please try again.");
-        }
-      } catch (error: any) {
-        setErrorToast(error?.message || "Unable to connect to the authentication server. Please check your connection.");
+      } catch (error) {
+        console.log(error);
       }
     }
   };
@@ -74,17 +66,6 @@ export default function Auth() {
         <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-emerald-900/20 blur-[150px] animate-float-slow"></div>
         <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] rounded-full bg-cyan-900/10 blur-[180px] animate-float-slower"></div>
       </div>
-
-      {/* Error Toast */}
-      {errorToast && (
-        <div className="absolute top-6 left-1/2 -translate-x-1/2 z-50 bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl flex items-start gap-3 shadow-2xl shadow-red-500/10 max-w-sm w-full backdrop-blur-md animate-in slide-in-from-top-4 fade-in duration-300">
-          <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
-          <p className="text-sm font-semibold leading-snug">{errorToast}</p>
-          <button onClick={() => setErrorToast(null)} className="ml-auto text-red-400/50 hover:text-red-400 transition-colors p-0.5 rounded-md hover:bg-red-500/10">
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-      )}
 
       <div className="glass-panel w-full max-w-md relative z-10 rounded-3xl p-8 shadow-2xl border border-white/10 backdrop-blur-xl">
         <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-emerald-500 to-cyan-500 rounded-t-3xl"></div>

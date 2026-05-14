@@ -1,34 +1,59 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { DocumentsService } from './documents.service';
-import { CreateDocumentDto } from './dto/create-document.dto';
-import { UpdateDocumentDto } from './dto/update-document.dto';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { Roles } from '@thallesp/nestjs-better-auth';
 
+import { FileInterceptor } from '@nestjs/platform-express';
+
+import { DocumentsService } from './documents.service';
+
+import { UploadDocumentDto } from './dto/upload-document.dto';
+import { UpdateDocumentVerificationDto } from './dto/update-document-verification.dto';
+
+@Roles(['admin', 'reviewer'])
 @Controller('documents')
 export class DocumentsController {
   constructor(private readonly documentsService: DocumentsService) {}
 
-  @Post()
-  create(@Body() createDocumentDto: CreateDocumentDto) {
-    return this.documentsService.create(createDocumentDto);
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadDocument(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() uploadDocumentDto: UploadDocumentDto,
+  ) {
+    return this.documentsService.uploadDocument(file, uploadDocumentDto);
   }
 
-  @Get()
-  findAll() {
-    return this.documentsService.findAll();
+  @Get('vendor/:vendorId')
+  getVendorDocuments(@Param('vendorId') vendorId: string) {
+    return this.documentsService.getVendorDocuments(vendorId);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.documentsService.findOne(+id);
+  getDocumentById(@Param('id') id: string) {
+    return this.documentsService.getDocumentById(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateDocumentDto: UpdateDocumentDto) {
-    return this.documentsService.update(+id, updateDocumentDto);
+  @Patch(':id/verification')
+  updateVerification(
+    @Param('id') id: string,
+    @Body() updateDocumentVerificationDto: UpdateDocumentVerificationDto,
+  ) {
+    return this.documentsService.updateVerification(
+      id,
+      updateDocumentVerificationDto,
+    );
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.documentsService.remove(+id);
+  @Post(':id/run-checks')
+  runChecks(@Param('id') id: string) {
+    return this.documentsService.runChecks(id);
   }
 }

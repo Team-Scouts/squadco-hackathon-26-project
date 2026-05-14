@@ -1,5 +1,6 @@
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
+import { admin } from 'better-auth/plugins/admin';
 import { PrismaClient } from '../generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import dotenv from 'dotenv';
@@ -19,5 +20,16 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
   }),
-  trustedOrigins: ['http://localhost:5173'],
+  plugins: [
+    admin({
+      defaultRole: 'admin',
+      adminRoles: ['admin'],
+    }),
+  ],
+  trustedOrigins: ['http://localhost:5173', 'http://localhost:3000'],
+  //REMOVE BEFORE DEPLOYMENT!!!!
+  advanced: {
+    disableOriginCheck: true,
+  },
+  //REMOVE ABEG
 });

@@ -8,6 +8,7 @@ node_modules/
 client/node_modules/
 backend/node_modules/
 .npm-cache/
+/client/src/typesAndInterfaces.ts
 
 # Build output
 dist/

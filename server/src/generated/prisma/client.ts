@@ -65,6 +65,31 @@ export type Device = Prisma.DeviceModel
  */
 export type Transaction = Prisma.TransactionModel
 /**
+ * Model BankAccount
+ * 
+ */
+export type BankAccount = Prisma.BankAccountModel
+/**
+ * Model Transfer
+ * 
+ */
+export type Transfer = Prisma.TransferModel
+/**
+ * Model WebhookEvent
+ * 
+ */
+export type WebhookEvent = Prisma.WebhookEventModel
+/**
+ * Model RiskScore
+ * 
+ */
+export type RiskScore = Prisma.RiskScoreModel
+/**
+ * Model GraphSyncFailure
+ * 
+ */
+export type GraphSyncFailure = Prisma.GraphSyncFailureModel
+/**
  * Model Alert
  * 
  */

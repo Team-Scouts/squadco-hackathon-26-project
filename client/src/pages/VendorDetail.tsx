@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -15,15 +15,12 @@ import {
   FileText,
   Fingerprint,
   GitBranch,
-  Globe2,
   History,
   Link2,
+  LucideClockArrowUp,
   MapPin,
-  MessageSquareText,
   MoreHorizontal,
-  RefreshCw,
   Save,
-  Search,
   ShieldAlert,
   ShieldCheck,
   UserRound,
@@ -31,8 +28,11 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import type { VendorFromQuery } from "../typesAndInterfaces";
+import { QueryClient, useMutation, useQuery } from "@tanstack/react-query";
+import type { IndividualVendorDetails } from "../typesAndInterfaces";
+import GraphApi, { transformNeo4jToNVL } from "../lib/graphLib";
+import { InteractiveNvlWrapper } from "@neo4j-nvl/react";
+import { VendorDetailSkeleton, SkeletonGraphPanel } from "../Skeletons";
 
 type DocumentField = {
   label: string;
@@ -42,14 +42,14 @@ type DocumentField = {
   status: "match" | "edited" | "flagged";
 };
 
-type GraphNode = {
-  id: string;
-  label: string;
-  type: string;
-  x: number;
-  y: number;
-  tone: "vendor" | "risk" | "safe" | "warn" | "neutral";
-};
+// type GraphNode = {
+//   id: string;
+//   label: string;
+//   type: string;
+//   x: number;
+//   y: number;
+//   tone: "vendor" | "risk" | "safe" | "warn" | "neutral";
+// };
 
 type SnapshotItem = [LucideIcon, string];
 type ChecklistItem = [LucideIcon, string, boolean];
@@ -116,171 +116,6 @@ const initialFields: DocumentField[] = [
     status: "flagged",
   },
 ];
-
-const graphNodes: GraphNode[] = [
-  {
-    id: "vendor",
-    label: "Northline",
-    type: "Vendor",
-    x: 50,
-    y: 50,
-    tone: "vendor",
-  },
-  {
-    id: "device",
-    label: "iPhone 14",
-    type: "Device",
-    x: 24,
-    y: 30,
-    tone: "risk",
-  },
-  { id: "bank", label: "Acct 0192", type: "Bank", x: 78, y: 36, tone: "warn" },
-  {
-    id: "doc",
-    label: "CAC hash",
-    type: "Document",
-    x: 74,
-    y: 70,
-    tone: "risk",
-  },
-  {
-    id: "ip",
-    label: "IP cluster",
-    type: "Network",
-    x: 30,
-    y: 76,
-    tone: "neutral",
-  },
-  { id: "clean", label: "TIN", type: "Document", x: 50, y: 18, tone: "safe" },
-];
-
-const graphLinks = [
-  ["vendor", "device", "critical"],
-  ["vendor", "bank", "warning"],
-  ["vendor", "doc", "critical"],
-  ["vendor", "ip", "neutral"],
-  ["vendor", "clean", "safe"],
-  ["device", "ip", "critical"],
-  ["bank", "doc", "warning"],
-];
-
-function getNodeTone(tone: GraphNode["tone"]) {
-  const tones = {
-    vendor:
-      "bg-cyan-500/20 border-cyan-400/60 text-cyan-300 shadow-[0_0_24px_rgba(34,211,238,0.28)]",
-    risk: "bg-red-500/20 border-red-400/60 text-red-300 shadow-[0_0_24px_rgba(248,113,113,0.28)]",
-    safe: "bg-emerald-500/20 border-emerald-400/60 text-emerald-300 shadow-[0_0_24px_rgba(16,185,129,0.24)]",
-    warn: "bg-amber-500/20 border-amber-400/60 text-amber-200 shadow-[0_0_24px_rgba(251,191,36,0.2)]",
-    neutral: "bg-white/10 border-white/20 text-gray-300",
-  };
-
-  return tones[tone];
-}
-
-function getLinkColor(kind: string) {
-  if (kind === "critical") return "#f87171";
-  if (kind === "warning") return "#fbbf24";
-  if (kind === "safe") return "#10b981";
-  return "#64748b";
-}
-
-function TrustGraph() {
-  const nodeById = useMemo(
-    () => Object.fromEntries(graphNodes.map((node) => [node.id, node])),
-    [],
-  );
-
-  return (
-    <section className="glass-panel rounded-2xl p-6">
-      <div className="flex flex-col gap-4 border-b border-white/10 pb-5 md:flex-row md:items-center md:justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <GitBranch className="h-5 w-5 text-cyan-400" />
-            <h2 className="text-xl font-bold text-white">Trust Graph</h2>
-          </div>
-          <p className="mt-1 text-sm text-gray-400">
-            Entity links explaining the current vendor risk score.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold text-gray-300 transition-colors hover:bg-white/10 hover:text-white">
-            <Search className="h-4 w-4" />
-            Trace
-          </button>
-          <button className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-3 py-2 text-xs font-black text-gray-950 transition-all hover:-translate-y-0.5 hover:bg-emerald-400">
-            <RefreshCw className="h-4 w-4" />
-            Re-score
-          </button>
-        </div>
-      </div>
-
-      <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-[1fr_16rem]">
-        <div className="relative min-h-90 overflow-hidden rounded-2xl border border-white/10 bg-black/40">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.08)_0,transparent_60%)]" />
-          <svg className="absolute inset-0 h-full w-full">
-            {graphLinks.map(([from, to, kind]) => {
-              const fromNode = nodeById[from];
-              const toNode = nodeById[to];
-              return (
-                <line
-                  key={`${from}-${to}`}
-                  x1={`${fromNode.x}%`}
-                  y1={`${fromNode.y}%`}
-                  x2={`${toNode.x}%`}
-                  y2={`${toNode.y}%`}
-                  stroke={getLinkColor(kind)}
-                  strokeWidth={kind === "critical" ? 2.5 : 1.5}
-                  strokeDasharray={kind === "neutral" ? "5 6" : undefined}
-                  opacity={kind === "critical" ? 0.72 : 0.45}
-                />
-              );
-            })}
-          </svg>
-
-          {graphNodes.map((node) => (
-            <div
-              key={node.id}
-              className="absolute -translate-x-1/2 -translate-y-1/2 text-center"
-              style={{ left: `${node.x}%`, top: `${node.y}%` }}
-            >
-              <div
-                className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full border ${getNodeTone(node.tone)}`}
-              >
-                {node.type === "Vendor" && <Building2 className="h-6 w-6" />}
-                {node.type === "Device" && <Fingerprint className="h-6 w-6" />}
-                {node.type === "Bank" && <Banknote className="h-6 w-6" />}
-                {node.type === "Document" && <FileText className="h-6 w-6" />}
-                {node.type === "Network" && <Globe2 className="h-6 w-6" />}
-              </div>
-              <span className="mt-2 block rounded-full bg-gray-950/80 px-2 py-1 text-[10px] font-bold text-gray-300">
-                {node.label}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        <div className="space-y-3">
-          {[
-            ["Critical links", "3", "text-red-400"],
-            ["Shared devices", "6", "text-red-400"],
-            ["Document collisions", "2", "text-amber-400"],
-            ["Clean anchors", "1", "text-emerald-400"],
-          ].map(([label, value, color]) => (
-            <div
-              key={label}
-              className="rounded-xl border border-white/10 bg-black/30 p-4"
-            >
-              <p className="text-xs font-bold uppercase tracking-wider text-gray-500">
-                {label}
-              </p>
-              <p className={`mt-1 text-2xl font-black ${color}`}>{value}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 
 function DocumentModification() {
   const [activeDocument, setActiveDocument] = useState(documents[0].id);
@@ -371,8 +206,8 @@ function DocumentModification() {
                 </button>
               </div>
             </div>
-            <div className="mt-4 aspect-[4/5] rounded-xl border border-white/10 bg-gray-950 p-5">
-              <div className="h-full rounded-lg border border-dashed border-white/15 bg-white/[0.03] p-5">
+            <div className="mt-4 aspect-4/5 rounded-xl border border-white/10 bg-gray-950 p-5">
+              <div className="h-full rounded-lg border border-dashed border-white/15 bg-white/3 p-5">
                 <div className="mb-6 h-8 w-32 rounded bg-white/10" />
                 <div className="space-y-3">
                   <div className="h-3 w-full rounded bg-white/10" />
@@ -461,8 +296,12 @@ function DocumentModification() {
 
 export default function VendorDetail() {
   const { vendorId } = useParams();
-  const { data: vendorDetails, isSuccess } = useQuery<{
-    data: VendorFromQuery;
+  const {
+    data: vendorDetails,
+    isLoading,
+    isSuccess,
+  } = useQuery<{
+    data: IndividualVendorDetails;
   }>({
     queryKey: ["vendor_details", vendorId],
     staleTime: 30 * 60 * 1000,
@@ -479,16 +318,50 @@ export default function VendorDetail() {
     },
   });
 
+  const {
+    data: userGraph,
+    isLoading: loadingGraph,
+    isSuccess: graphLoaded,
+  } = useQuery({
+    queryKey: ["vendorGraph", vendorId],
+    queryFn: async () => {
+      const neo4jRawResponse = await GraphApi.getGraph(String(vendorId));
+      console.log(neo4jRawResponse);
+      return transformNeo4jToNVL(neo4jRawResponse);
+    },
+    staleTime: 30 * 60 * 1000,
+  });
+
+  const queryClient = new QueryClient();
+
+  const { isPending: isSyncing, mutateAsync: synchronise } = useMutation({
+    mutationFn: async () => {
+      const request = await fetch(
+        `${import.meta.env.VITE_SERVER_BASE_URL}/graph/sync`,
+        {
+          method: "POST",
+          credentials: "include",
+        },
+      );
+      const response = await request.json();
+      return response;
+    },
+    onSuccess: async () =>
+      queryClient.invalidateQueries({
+        queryKey: ["vendorGraph", vendorId],
+      }),
+  });
+
   const metrics = [
     {
       label: "Trust score",
-      value: vendorDetails?.data.riskLevel,
+      value: vendorDetails?.data.overallRiskScore,
       icon: ShieldAlert,
       color: "text-red-400",
     },
     {
       label: "Documents",
-      value: "7",
+      value: vendorDetails?.data.documents.length,
       icon: FileText,
       color: "text-emerald-400",
     },
@@ -533,6 +406,10 @@ export default function VendorDetail() {
     ],
   ];
 
+  if (isLoading) {
+    return <VendorDetailSkeleton />;
+  }
+
   return (
     isSuccess && (
       <div className="mx-auto max-w-7xl space-y-6">
@@ -550,10 +427,10 @@ export default function VendorDetail() {
                 {vendorDetails.data.businessName}
               </h1>
               <span className="rounded border border-red-500/20 bg-red-500/10 px-2.5 py-1 text-xs font-black uppercase tracking-wider text-red-400">
-                High risk
+                {vendorDetails.data.riskLevel?.toUpperCase()} risk
               </span>
               <span className="rounded border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-bold text-gray-300">
-                {vendorId ?? "vendor"} profile
+                Vendor ID: {vendorId ?? "Unknown"}
               </span>
             </div>
             <p className="mt-2 max-w-2xl text-sm text-gray-400">
@@ -564,9 +441,12 @@ export default function VendorDetail() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <button className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-white/10">
-              <MessageSquareText className="h-4 w-4 text-gray-400" />
-              Add note
+            <button
+              onClick={() => synchronise()}
+              className={`inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-white/10 ${isSyncing ? "opacity-70" : "opacity-100"}`}
+            >
+              <LucideClockArrowUp className="h-4 w-4 text-gray-400" />
+              {isSyncing ? "Syncing..." : "Update Vendor Graph"}
             </button>
             <button className="inline-flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-300 transition-colors hover:bg-red-500/20">
               <X className="h-4 w-4" />
@@ -597,7 +477,16 @@ export default function VendorDetail() {
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_22rem]">
           <div className="space-y-6">
-            <TrustGraph />
+            <p className="text-2xl font-bold">Vendor Graph</p>
+            {graphLoaded && userGraph && (
+              <div className="h-125">
+                <InteractiveNvlWrapper
+                  nodes={userGraph?.nodes}
+                  rels={userGraph.relationships}
+                />
+              </div>
+            )}
+            {loadingGraph && <SkeletonGraphPanel />}
             <DocumentModification />
           </div>
 

@@ -26,7 +26,11 @@ export const auth = betterAuth({
       adminRoles: ['admin'],
     }),
   ],
-  trustedOrigins: ['http://localhost:5173', 'http://localhost:3000'],
+  trustedOrigins: [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'http://localhost:5190',
+  ],
   //REMOVE BEFORE DEPLOYMENT!!!!
   advanced: {
     disableOriginCheck: true,

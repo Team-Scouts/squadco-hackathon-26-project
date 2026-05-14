@@ -1,25 +1,17 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
-  AlertTriangle,
   ArrowLeft,
-  Banknote,
   Building2,
   CheckCircle2,
-  CreditCard,
-  FileCheck2,
   FileUp,
-  Fingerprint,
-  Info,
   Mail,
-  MapPin,
   Phone,
-  Save,
   Send,
-  ShieldCheck,
   User,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { UploadingDocumentSkeleton } from "../Skeletons";
 
 type FormState = {
   businessName: string;
@@ -70,13 +62,6 @@ const initialForm: FormState = {
   notes: "",
 };
 
-const documentRequirements = [
-  "CAC certificate or equivalent registration document",
-  "Tax identification document",
-  "Director or owner government ID",
-  "Proof of business address",
-];
-
 export default function CreateVendor() {
   const [form, setForm] = useState<FormState>(initialForm);
   const [submitted, setSubmitted] = useState(false);
@@ -84,24 +69,6 @@ export default function CreateVendor() {
   const [formStage, updateFormStage] = useState(1);
   const [file, updateFile] = useState<File | null>();
   const navigate = useNavigate();
-
-  const completion = useMemo(() => {
-    const requiredFields = [
-      form.businessName,
-      form.registrationNumber,
-      form.sector,
-      form.contactName,
-      form.contactEmail,
-      form.contactPhone,
-      form.address,
-      // form.bankName,
-      // form.accountNumber,
-      // form.accountName,
-    ];
-
-    const completed = requiredFields.filter(Boolean).length;
-    return Math.round((completed / requiredFields.length) * 100);
-  }, [form]);
 
   const updateField = <K extends keyof FormState>(
     field: K,
@@ -134,7 +101,6 @@ export default function CreateVendor() {
       email: string;
       phone: string;
     }) => {
-      console.log(JSON.stringify(body));
       const request = await fetch(
         `${import.meta.env.VITE_SERVER_BASE_URL}/vendors`,
         {
@@ -154,7 +120,7 @@ export default function CreateVendor() {
   });
 
   const uploadDocumentsMutation = useMutation({
-    mutationFn: async (body: any) => {
+    mutationFn: async (body: FormData) => {
       const postRequest = await fetch(
         `${import.meta.env.VITE_SERVER_BASE_URL}/documents/upload`,
         {
@@ -171,11 +137,13 @@ export default function CreateVendor() {
     },
   });
 
-  const handleDocumentSubmit = async (e: any) => {
+  const handleDocumentSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData();
     formData.append("vendorId", vendorID);
-    file && formData.append("file", file);
+    if (file) {
+      formData.append("file", file);
+    }
     formData.append("documentType", "CAC");
     await uploadDocumentsMutation.mutateAsync(formData);
   };
@@ -186,7 +154,7 @@ export default function CreateVendor() {
     }
   };
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     vendorCreateMutation.mutateAsync({
       businessName: form.businessName,
@@ -365,13 +333,7 @@ export default function CreateVendor() {
         )}
 
         {formStage === 2 && uploadDocumentsMutation.isPending && (
-          <div className="h-full bg-inherit grid place-items-center rounded-xl ">
-            <p>Your document is uploading...</p>
-            <p>
-              You will be redirected to the vendor's profile once this operation
-              is completed!
-            </p>
-          </div>
+          <UploadingDocumentSkeleton />
         )}
 
         {formStage === 1 && (

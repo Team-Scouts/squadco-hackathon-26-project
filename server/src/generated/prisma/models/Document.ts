@@ -28,10 +28,12 @@ export type AggregateDocument = {
 
 export type DocumentAvgAggregateOutputType = {
   tamperScore: number | null
+  duplicateVendorCount: number | null
 }
 
 export type DocumentSumAggregateOutputType = {
   tamperScore: number | null
+  duplicateVendorCount: number | null
 }
 
 export type DocumentMinAggregateOutputType = {
@@ -41,7 +43,13 @@ export type DocumentMinAggregateOutputType = {
   fileUrl: string | null
   documentHash: string | null
   tamperScore: number | null
+  verificationStatus: $Enums.DocumentVerificationStatus | null
+  duplicateDetected: boolean | null
+  duplicateVendorCount: number | null
+  reviewNotes: string | null
+  verifiedAt: Date | null
   createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type DocumentMaxAggregateOutputType = {
@@ -51,7 +59,13 @@ export type DocumentMaxAggregateOutputType = {
   fileUrl: string | null
   documentHash: string | null
   tamperScore: number | null
+  verificationStatus: $Enums.DocumentVerificationStatus | null
+  duplicateDetected: boolean | null
+  duplicateVendorCount: number | null
+  reviewNotes: string | null
+  verifiedAt: Date | null
   createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type DocumentCountAggregateOutputType = {
@@ -61,17 +75,27 @@ export type DocumentCountAggregateOutputType = {
   fileUrl: number
   documentHash: number
   tamperScore: number
+  verificationStatus: number
+  duplicateDetected: number
+  duplicateVendorCount: number
+  extractedFields: number
+  verificationReasons: number
+  reviewNotes: number
+  verifiedAt: number
   createdAt: number
+  updatedAt: number
   _all: number
 }
 
 
 export type DocumentAvgAggregateInputType = {
   tamperScore?: true
+  duplicateVendorCount?: true
 }
 
 export type DocumentSumAggregateInputType = {
   tamperScore?: true
+  duplicateVendorCount?: true
 }
 
 export type DocumentMinAggregateInputType = {
@@ -81,7 +105,13 @@ export type DocumentMinAggregateInputType = {
   fileUrl?: true
   documentHash?: true
   tamperScore?: true
+  verificationStatus?: true
+  duplicateDetected?: true
+  duplicateVendorCount?: true
+  reviewNotes?: true
+  verifiedAt?: true
   createdAt?: true
+  updatedAt?: true
 }
 
 export type DocumentMaxAggregateInputType = {
@@ -91,7 +121,13 @@ export type DocumentMaxAggregateInputType = {
   fileUrl?: true
   documentHash?: true
   tamperScore?: true
+  verificationStatus?: true
+  duplicateDetected?: true
+  duplicateVendorCount?: true
+  reviewNotes?: true
+  verifiedAt?: true
   createdAt?: true
+  updatedAt?: true
 }
 
 export type DocumentCountAggregateInputType = {
@@ -101,7 +137,15 @@ export type DocumentCountAggregateInputType = {
   fileUrl?: true
   documentHash?: true
   tamperScore?: true
+  verificationStatus?: true
+  duplicateDetected?: true
+  duplicateVendorCount?: true
+  extractedFields?: true
+  verificationReasons?: true
+  reviewNotes?: true
+  verifiedAt?: true
   createdAt?: true
+  updatedAt?: true
   _all?: true
 }
 
@@ -198,7 +242,15 @@ export type DocumentGroupByOutputType = {
   fileUrl: string
   documentHash: string | null
   tamperScore: number
+  verificationStatus: $Enums.DocumentVerificationStatus
+  duplicateDetected: boolean
+  duplicateVendorCount: number
+  extractedFields: runtime.JsonValue | null
+  verificationReasons: runtime.JsonValue | null
+  reviewNotes: string | null
+  verifiedAt: Date | null
   createdAt: Date
+  updatedAt: Date
   _count: DocumentCountAggregateOutputType | null
   _avg: DocumentAvgAggregateOutputType | null
   _sum: DocumentSumAggregateOutputType | null
@@ -231,7 +283,15 @@ export type DocumentWhereInput = {
   fileUrl?: Prisma.StringFilter<"Document"> | string
   documentHash?: Prisma.StringNullableFilter<"Document"> | string | null
   tamperScore?: Prisma.FloatFilter<"Document"> | number
+  verificationStatus?: Prisma.EnumDocumentVerificationStatusFilter<"Document"> | $Enums.DocumentVerificationStatus
+  duplicateDetected?: Prisma.BoolFilter<"Document"> | boolean
+  duplicateVendorCount?: Prisma.IntFilter<"Document"> | number
+  extractedFields?: Prisma.JsonNullableFilter<"Document">
+  verificationReasons?: Prisma.JsonNullableFilter<"Document">
+  reviewNotes?: Prisma.StringNullableFilter<"Document"> | string | null
+  verifiedAt?: Prisma.DateTimeNullableFilter<"Document"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Document"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Document"> | Date | string
   vendor?: Prisma.XOR<Prisma.VendorScalarRelationFilter, Prisma.VendorWhereInput>
 }
 
@@ -242,7 +302,15 @@ export type DocumentOrderByWithRelationInput = {
   fileUrl?: Prisma.SortOrder
   documentHash?: Prisma.SortOrderInput | Prisma.SortOrder
   tamperScore?: Prisma.SortOrder
+  verificationStatus?: Prisma.SortOrder
+  duplicateDetected?: Prisma.SortOrder
+  duplicateVendorCount?: Prisma.SortOrder
+  extractedFields?: Prisma.SortOrderInput | Prisma.SortOrder
+  verificationReasons?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewNotes?: Prisma.SortOrderInput | Prisma.SortOrder
+  verifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   vendor?: Prisma.VendorOrderByWithRelationInput
 }
 
@@ -256,7 +324,15 @@ export type DocumentWhereUniqueInput = Prisma.AtLeast<{
   fileUrl?: Prisma.StringFilter<"Document"> | string
   documentHash?: Prisma.StringNullableFilter<"Document"> | string | null
   tamperScore?: Prisma.FloatFilter<"Document"> | number
+  verificationStatus?: Prisma.EnumDocumentVerificationStatusFilter<"Document"> | $Enums.DocumentVerificationStatus
+  duplicateDetected?: Prisma.BoolFilter<"Document"> | boolean
+  duplicateVendorCount?: Prisma.IntFilter<"Document"> | number
+  extractedFields?: Prisma.JsonNullableFilter<"Document">
+  verificationReasons?: Prisma.JsonNullableFilter<"Document">
+  reviewNotes?: Prisma.StringNullableFilter<"Document"> | string | null
+  verifiedAt?: Prisma.DateTimeNullableFilter<"Document"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Document"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Document"> | Date | string
   vendor?: Prisma.XOR<Prisma.VendorScalarRelationFilter, Prisma.VendorWhereInput>
 }, "id">
 
@@ -267,7 +343,15 @@ export type DocumentOrderByWithAggregationInput = {
   fileUrl?: Prisma.SortOrder
   documentHash?: Prisma.SortOrderInput | Prisma.SortOrder
   tamperScore?: Prisma.SortOrder
+  verificationStatus?: Prisma.SortOrder
+  duplicateDetected?: Prisma.SortOrder
+  duplicateVendorCount?: Prisma.SortOrder
+  extractedFields?: Prisma.SortOrderInput | Prisma.SortOrder
+  verificationReasons?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewNotes?: Prisma.SortOrderInput | Prisma.SortOrder
+  verifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   _count?: Prisma.DocumentCountOrderByAggregateInput
   _avg?: Prisma.DocumentAvgOrderByAggregateInput
   _max?: Prisma.DocumentMaxOrderByAggregateInput
@@ -285,7 +369,15 @@ export type DocumentScalarWhereWithAggregatesInput = {
   fileUrl?: Prisma.StringWithAggregatesFilter<"Document"> | string
   documentHash?: Prisma.StringNullableWithAggregatesFilter<"Document"> | string | null
   tamperScore?: Prisma.FloatWithAggregatesFilter<"Document"> | number
+  verificationStatus?: Prisma.EnumDocumentVerificationStatusWithAggregatesFilter<"Document"> | $Enums.DocumentVerificationStatus
+  duplicateDetected?: Prisma.BoolWithAggregatesFilter<"Document"> | boolean
+  duplicateVendorCount?: Prisma.IntWithAggregatesFilter<"Document"> | number
+  extractedFields?: Prisma.JsonNullableWithAggregatesFilter<"Document">
+  verificationReasons?: Prisma.JsonNullableWithAggregatesFilter<"Document">
+  reviewNotes?: Prisma.StringNullableWithAggregatesFilter<"Document"> | string | null
+  verifiedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Document"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Document"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Document"> | Date | string
 }
 
 export type DocumentCreateInput = {
@@ -294,7 +386,15 @@ export type DocumentCreateInput = {
   fileUrl: string
   documentHash?: string | null
   tamperScore?: number
+  verificationStatus?: $Enums.DocumentVerificationStatus
+  duplicateDetected?: boolean
+  duplicateVendorCount?: number
+  extractedFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  verificationReasons?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  reviewNotes?: string | null
+  verifiedAt?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   vendor: Prisma.VendorCreateNestedOneWithoutDocumentsInput
 }
 
@@ -305,7 +405,15 @@ export type DocumentUncheckedCreateInput = {
   fileUrl: string
   documentHash?: string | null
   tamperScore?: number
+  verificationStatus?: $Enums.DocumentVerificationStatus
+  duplicateDetected?: boolean
+  duplicateVendorCount?: number
+  extractedFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  verificationReasons?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  reviewNotes?: string | null
+  verifiedAt?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type DocumentUpdateInput = {
@@ -314,7 +422,15 @@ export type DocumentUpdateInput = {
   fileUrl?: Prisma.StringFieldUpdateOperationsInput | string
   documentHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tamperScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  verificationStatus?: Prisma.EnumDocumentVerificationStatusFieldUpdateOperationsInput | $Enums.DocumentVerificationStatus
+  duplicateDetected?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateVendorCount?: Prisma.IntFieldUpdateOperationsInput | number
+  extractedFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  verificationReasons?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  reviewNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   vendor?: Prisma.VendorUpdateOneRequiredWithoutDocumentsNestedInput
 }
 
@@ -325,7 +441,15 @@ export type DocumentUncheckedUpdateInput = {
   fileUrl?: Prisma.StringFieldUpdateOperationsInput | string
   documentHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tamperScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  verificationStatus?: Prisma.EnumDocumentVerificationStatusFieldUpdateOperationsInput | $Enums.DocumentVerificationStatus
+  duplicateDetected?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateVendorCount?: Prisma.IntFieldUpdateOperationsInput | number
+  extractedFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  verificationReasons?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  reviewNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type DocumentCreateManyInput = {
@@ -335,7 +459,15 @@ export type DocumentCreateManyInput = {
   fileUrl: string
   documentHash?: string | null
   tamperScore?: number
+  verificationStatus?: $Enums.DocumentVerificationStatus
+  duplicateDetected?: boolean
+  duplicateVendorCount?: number
+  extractedFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  verificationReasons?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  reviewNotes?: string | null
+  verifiedAt?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type DocumentUpdateManyMutationInput = {
@@ -344,7 +476,15 @@ export type DocumentUpdateManyMutationInput = {
   fileUrl?: Prisma.StringFieldUpdateOperationsInput | string
   documentHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tamperScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  verificationStatus?: Prisma.EnumDocumentVerificationStatusFieldUpdateOperationsInput | $Enums.DocumentVerificationStatus
+  duplicateDetected?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateVendorCount?: Prisma.IntFieldUpdateOperationsInput | number
+  extractedFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  verificationReasons?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  reviewNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type DocumentUncheckedUpdateManyInput = {
@@ -354,7 +494,15 @@ export type DocumentUncheckedUpdateManyInput = {
   fileUrl?: Prisma.StringFieldUpdateOperationsInput | string
   documentHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tamperScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  verificationStatus?: Prisma.EnumDocumentVerificationStatusFieldUpdateOperationsInput | $Enums.DocumentVerificationStatus
+  duplicateDetected?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateVendorCount?: Prisma.IntFieldUpdateOperationsInput | number
+  extractedFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  verificationReasons?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  reviewNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type DocumentListRelationFilter = {
@@ -374,11 +522,20 @@ export type DocumentCountOrderByAggregateInput = {
   fileUrl?: Prisma.SortOrder
   documentHash?: Prisma.SortOrder
   tamperScore?: Prisma.SortOrder
+  verificationStatus?: Prisma.SortOrder
+  duplicateDetected?: Prisma.SortOrder
+  duplicateVendorCount?: Prisma.SortOrder
+  extractedFields?: Prisma.SortOrder
+  verificationReasons?: Prisma.SortOrder
+  reviewNotes?: Prisma.SortOrder
+  verifiedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type DocumentAvgOrderByAggregateInput = {
   tamperScore?: Prisma.SortOrder
+  duplicateVendorCount?: Prisma.SortOrder
 }
 
 export type DocumentMaxOrderByAggregateInput = {
@@ -388,7 +545,13 @@ export type DocumentMaxOrderByAggregateInput = {
   fileUrl?: Prisma.SortOrder
   documentHash?: Prisma.SortOrder
   tamperScore?: Prisma.SortOrder
+  verificationStatus?: Prisma.SortOrder
+  duplicateDetected?: Prisma.SortOrder
+  duplicateVendorCount?: Prisma.SortOrder
+  reviewNotes?: Prisma.SortOrder
+  verifiedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type DocumentMinOrderByAggregateInput = {
@@ -398,11 +561,18 @@ export type DocumentMinOrderByAggregateInput = {
   fileUrl?: Prisma.SortOrder
   documentHash?: Prisma.SortOrder
   tamperScore?: Prisma.SortOrder
+  verificationStatus?: Prisma.SortOrder
+  duplicateDetected?: Prisma.SortOrder
+  duplicateVendorCount?: Prisma.SortOrder
+  reviewNotes?: Prisma.SortOrder
+  verifiedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type DocumentSumOrderByAggregateInput = {
   tamperScore?: Prisma.SortOrder
+  duplicateVendorCount?: Prisma.SortOrder
 }
 
 export type DocumentCreateNestedManyWithoutVendorInput = {
@@ -447,13 +617,33 @@ export type DocumentUncheckedUpdateManyWithoutVendorNestedInput = {
   deleteMany?: Prisma.DocumentScalarWhereInput | Prisma.DocumentScalarWhereInput[]
 }
 
+export type EnumDocumentVerificationStatusFieldUpdateOperationsInput = {
+  set?: $Enums.DocumentVerificationStatus
+}
+
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type DocumentCreateWithoutVendorInput = {
   id?: string
   documentType: string
   fileUrl: string
   documentHash?: string | null
   tamperScore?: number
+  verificationStatus?: $Enums.DocumentVerificationStatus
+  duplicateDetected?: boolean
+  duplicateVendorCount?: number
+  extractedFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  verificationReasons?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  reviewNotes?: string | null
+  verifiedAt?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type DocumentUncheckedCreateWithoutVendorInput = {
@@ -462,7 +652,15 @@ export type DocumentUncheckedCreateWithoutVendorInput = {
   fileUrl: string
   documentHash?: string | null
   tamperScore?: number
+  verificationStatus?: $Enums.DocumentVerificationStatus
+  duplicateDetected?: boolean
+  duplicateVendorCount?: number
+  extractedFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  verificationReasons?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  reviewNotes?: string | null
+  verifiedAt?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type DocumentCreateOrConnectWithoutVendorInput = {
@@ -501,7 +699,15 @@ export type DocumentScalarWhereInput = {
   fileUrl?: Prisma.StringFilter<"Document"> | string
   documentHash?: Prisma.StringNullableFilter<"Document"> | string | null
   tamperScore?: Prisma.FloatFilter<"Document"> | number
+  verificationStatus?: Prisma.EnumDocumentVerificationStatusFilter<"Document"> | $Enums.DocumentVerificationStatus
+  duplicateDetected?: Prisma.BoolFilter<"Document"> | boolean
+  duplicateVendorCount?: Prisma.IntFilter<"Document"> | number
+  extractedFields?: Prisma.JsonNullableFilter<"Document">
+  verificationReasons?: Prisma.JsonNullableFilter<"Document">
+  reviewNotes?: Prisma.StringNullableFilter<"Document"> | string | null
+  verifiedAt?: Prisma.DateTimeNullableFilter<"Document"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Document"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Document"> | Date | string
 }
 
 export type DocumentCreateManyVendorInput = {
@@ -510,7 +716,15 @@ export type DocumentCreateManyVendorInput = {
   fileUrl: string
   documentHash?: string | null
   tamperScore?: number
+  verificationStatus?: $Enums.DocumentVerificationStatus
+  duplicateDetected?: boolean
+  duplicateVendorCount?: number
+  extractedFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  verificationReasons?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  reviewNotes?: string | null
+  verifiedAt?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type DocumentUpdateWithoutVendorInput = {
@@ -519,7 +733,15 @@ export type DocumentUpdateWithoutVendorInput = {
   fileUrl?: Prisma.StringFieldUpdateOperationsInput | string
   documentHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tamperScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  verificationStatus?: Prisma.EnumDocumentVerificationStatusFieldUpdateOperationsInput | $Enums.DocumentVerificationStatus
+  duplicateDetected?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateVendorCount?: Prisma.IntFieldUpdateOperationsInput | number
+  extractedFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  verificationReasons?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  reviewNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type DocumentUncheckedUpdateWithoutVendorInput = {
@@ -528,7 +750,15 @@ export type DocumentUncheckedUpdateWithoutVendorInput = {
   fileUrl?: Prisma.StringFieldUpdateOperationsInput | string
   documentHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tamperScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  verificationStatus?: Prisma.EnumDocumentVerificationStatusFieldUpdateOperationsInput | $Enums.DocumentVerificationStatus
+  duplicateDetected?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateVendorCount?: Prisma.IntFieldUpdateOperationsInput | number
+  extractedFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  verificationReasons?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  reviewNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type DocumentUncheckedUpdateManyWithoutVendorInput = {
@@ -537,7 +767,15 @@ export type DocumentUncheckedUpdateManyWithoutVendorInput = {
   fileUrl?: Prisma.StringFieldUpdateOperationsInput | string
   documentHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tamperScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  verificationStatus?: Prisma.EnumDocumentVerificationStatusFieldUpdateOperationsInput | $Enums.DocumentVerificationStatus
+  duplicateDetected?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateVendorCount?: Prisma.IntFieldUpdateOperationsInput | number
+  extractedFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  verificationReasons?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  reviewNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -549,7 +787,15 @@ export type DocumentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   fileUrl?: boolean
   documentHash?: boolean
   tamperScore?: boolean
+  verificationStatus?: boolean
+  duplicateDetected?: boolean
+  duplicateVendorCount?: boolean
+  extractedFields?: boolean
+  verificationReasons?: boolean
+  reviewNotes?: boolean
+  verifiedAt?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   vendor?: boolean | Prisma.VendorDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["document"]>
 
@@ -560,7 +806,15 @@ export type DocumentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   fileUrl?: boolean
   documentHash?: boolean
   tamperScore?: boolean
+  verificationStatus?: boolean
+  duplicateDetected?: boolean
+  duplicateVendorCount?: boolean
+  extractedFields?: boolean
+  verificationReasons?: boolean
+  reviewNotes?: boolean
+  verifiedAt?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   vendor?: boolean | Prisma.VendorDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["document"]>
 
@@ -571,7 +825,15 @@ export type DocumentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   fileUrl?: boolean
   documentHash?: boolean
   tamperScore?: boolean
+  verificationStatus?: boolean
+  duplicateDetected?: boolean
+  duplicateVendorCount?: boolean
+  extractedFields?: boolean
+  verificationReasons?: boolean
+  reviewNotes?: boolean
+  verifiedAt?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   vendor?: boolean | Prisma.VendorDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["document"]>
 
@@ -582,10 +844,18 @@ export type DocumentSelectScalar = {
   fileUrl?: boolean
   documentHash?: boolean
   tamperScore?: boolean
+  verificationStatus?: boolean
+  duplicateDetected?: boolean
+  duplicateVendorCount?: boolean
+  extractedFields?: boolean
+  verificationReasons?: boolean
+  reviewNotes?: boolean
+  verifiedAt?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
 }
 
-export type DocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "vendorId" | "documentType" | "fileUrl" | "documentHash" | "tamperScore" | "createdAt", ExtArgs["result"]["document"]>
+export type DocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "vendorId" | "documentType" | "fileUrl" | "documentHash" | "tamperScore" | "verificationStatus" | "duplicateDetected" | "duplicateVendorCount" | "extractedFields" | "verificationReasons" | "reviewNotes" | "verifiedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["document"]>
 export type DocumentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   vendor?: boolean | Prisma.VendorDefaultArgs<ExtArgs>
 }
@@ -608,7 +878,15 @@ export type $DocumentPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     fileUrl: string
     documentHash: string | null
     tamperScore: number
+    verificationStatus: $Enums.DocumentVerificationStatus
+    duplicateDetected: boolean
+    duplicateVendorCount: number
+    extractedFields: runtime.JsonValue | null
+    verificationReasons: runtime.JsonValue | null
+    reviewNotes: string | null
+    verifiedAt: Date | null
     createdAt: Date
+    updatedAt: Date
   }, ExtArgs["result"]["document"]>
   composites: {}
 }
@@ -1039,7 +1317,15 @@ export interface DocumentFieldRefs {
   readonly fileUrl: Prisma.FieldRef<"Document", 'String'>
   readonly documentHash: Prisma.FieldRef<"Document", 'String'>
   readonly tamperScore: Prisma.FieldRef<"Document", 'Float'>
+  readonly verificationStatus: Prisma.FieldRef<"Document", 'DocumentVerificationStatus'>
+  readonly duplicateDetected: Prisma.FieldRef<"Document", 'Boolean'>
+  readonly duplicateVendorCount: Prisma.FieldRef<"Document", 'Int'>
+  readonly extractedFields: Prisma.FieldRef<"Document", 'Json'>
+  readonly verificationReasons: Prisma.FieldRef<"Document", 'Json'>
+  readonly reviewNotes: Prisma.FieldRef<"Document", 'String'>
+  readonly verifiedAt: Prisma.FieldRef<"Document", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Document", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"Document", 'DateTime'>
 }
     
 

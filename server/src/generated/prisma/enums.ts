@@ -37,3 +37,13 @@ export const AlertType = {
 } as const
 
 export type AlertType = (typeof AlertType)[keyof typeof AlertType]
+
+
+export const DocumentVerificationStatus = {
+  PENDING: 'PENDING',
+  NEEDS_REVIEW: 'NEEDS_REVIEW',
+  VERIFIED: 'VERIFIED',
+  REJECTED: 'REJECTED'
+} as const
+
+export type DocumentVerificationStatus = (typeof DocumentVerificationStatus)[keyof typeof DocumentVerificationStatus]

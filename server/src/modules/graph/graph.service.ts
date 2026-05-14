@@ -226,7 +226,11 @@ export class GraphService {
           fileUrl: document.fileUrl,
           documentHash: document.documentHash,
           tamperScore: document.tamperScore,
+          verificationStatus: document.verificationStatus,
+          duplicateDetected: document.duplicateDetected,
+          duplicateVendorCount: document.duplicateVendorCount,
           createdAt: document.createdAt,
+          updatedAt: document.updatedAt,
         }),
       },
     );

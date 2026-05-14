@@ -130,6 +130,15 @@ export const DocumentScalarFieldEnum = {
   verificationReasons: 'verificationReasons',
   reviewNotes: 'reviewNotes',
   verifiedAt: 'verifiedAt',
+  ocrProvider: 'ocrProvider',
+  ocrStatus: 'ocrStatus',
+  ocrText: 'ocrText',
+  ocrConfidence: 'ocrConfidence',
+  aiGeneratedScore: 'aiGeneratedScore',
+  aiGeneratedDetected: 'aiGeneratedDetected',
+  forensicSignals: 'forensicSignals',
+  processedAt: 'processedAt',
+  processingError: 'processingError',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

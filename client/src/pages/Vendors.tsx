@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Search, Filter, Download, ArrowRight, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { VendorEntityFromVendorsList } from "../typesAndInterfaces";
+import { VendorsSkeleton } from "../Skeletons";
 
 export default function Vendors() {
   // const vendors = [
@@ -86,6 +87,10 @@ export default function Vendors() {
     const date = new Date(string);
     return date.toDateString();
   };
+
+  if (isLoading) {
+    return <VendorsSkeleton />;
+  }
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
@@ -189,7 +194,6 @@ export default function Vendors() {
                     </td>
                   </tr>
                 ))}
-              {isLoading && <p>Loading Vendors...</p>}
             </tbody>
           </table>
         </div>

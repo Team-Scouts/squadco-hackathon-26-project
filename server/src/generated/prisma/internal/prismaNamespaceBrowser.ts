@@ -123,7 +123,15 @@ export const DocumentScalarFieldEnum = {
   fileUrl: 'fileUrl',
   documentHash: 'documentHash',
   tamperScore: 'tamperScore',
-  createdAt: 'createdAt'
+  verificationStatus: 'verificationStatus',
+  duplicateDetected: 'duplicateDetected',
+  duplicateVendorCount: 'duplicateVendorCount',
+  extractedFields: 'extractedFields',
+  verificationReasons: 'verificationReasons',
+  reviewNotes: 'reviewNotes',
+  verifiedAt: 'verifiedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]

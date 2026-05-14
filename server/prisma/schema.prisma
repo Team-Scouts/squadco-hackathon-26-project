@@ -34,6 +34,13 @@ enum AlertType {
   FRAUD_RING
 }
 
+enum DocumentVerificationStatus {
+  PENDING
+  NEEDS_REVIEW
+  VERIFIED
+  REJECTED
+}
+
 model User {
   id       String  @id @default(uuid())
   email    String  @unique
@@ -89,7 +96,20 @@ model Document {
   documentHash String?
   tamperScore  Float   @default(0)
 
+  verificationStatus   DocumentVerificationStatus @default(PENDING)
+  duplicateDetected    Boolean                    @default(false)
+  duplicateVendorCount Int                        @default(0)
+  extractedFields      Json?
+  verificationReasons  Json?
+  reviewNotes          String?
+  verifiedAt           DateTime?
+
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([vendorId])
+  @@index([documentHash])
+  @@index([verificationStatus])
 }
 
 model Device {

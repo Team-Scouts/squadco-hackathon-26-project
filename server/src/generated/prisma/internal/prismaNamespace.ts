@@ -1532,7 +1532,15 @@ export const DocumentScalarFieldEnum = {
   fileUrl: 'fileUrl',
   documentHash: 'documentHash',
   tamperScore: 'tamperScore',
-  createdAt: 'createdAt'
+  verificationStatus: 'verificationStatus',
+  duplicateDetected: 'duplicateDetected',
+  duplicateVendorCount: 'duplicateVendorCount',
+  extractedFields: 'extractedFields',
+  verificationReasons: 'verificationReasons',
+  reviewNotes: 'reviewNotes',
+  verifiedAt: 'verifiedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]
@@ -1842,16 +1850,16 @@ export type ListEnumRiskLevelFieldRefInput<$PrismaModel> = FieldRefInputType<$Pr
 
 
 /**
- * Reference to a field of type 'Json'
+ * Reference to a field of type 'DocumentVerificationStatus'
  */
-export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+export type EnumDocumentVerificationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentVerificationStatus'>
     
 
 
 /**
- * Reference to a field of type 'QueryMode'
+ * Reference to a field of type 'DocumentVerificationStatus[]'
  */
-export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+export type ListEnumDocumentVerificationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentVerificationStatus[]'>
     
 
 
@@ -1866,6 +1874,20 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'In
  * Reference to a field of type 'Int[]'
  */
 export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 

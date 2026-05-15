@@ -1,34 +1,29 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+
 import { AlertsService } from './alerts.service';
 import { CreateAlertDto } from './dto/create-alert.dto';
-import { UpdateAlertDto } from './dto/update-alert.dto';
 
 @Controller('alerts')
 export class AlertsController {
   constructor(private readonly alertsService: AlertsService) {}
 
   @Post()
-  create(@Body() createAlertDto: CreateAlertDto) {
-    return this.alertsService.create(createAlertDto);
+  createAlert(@Body() dto: CreateAlertDto) {
+    return this.alertsService.createAlert(dto);
   }
 
   @Get()
-  findAll() {
-    return this.alertsService.findAll();
+  getAlerts() {
+    return this.alertsService.getAlerts();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.alertsService.findOne(+id);
+  @Get('active')
+  getActiveAlerts() {
+    return this.alertsService.getActiveAlerts();
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAlertDto: UpdateAlertDto) {
-    return this.alertsService.update(+id, updateAlertDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.alertsService.remove(+id);
+  @Patch(':id/resolve')
+  resolveAlert(@Param('id') id: string) {
+    return this.alertsService.resolveAlert(id);
   }
 }

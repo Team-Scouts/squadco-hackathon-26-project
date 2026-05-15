@@ -57,3 +57,13 @@ export const OcrStatus = {
 } as const
 
 export type OcrStatus = (typeof OcrStatus)[keyof typeof OcrStatus]
+
+
+export const AlertSeverity = {
+  INFO: 'INFO',
+  REVIEW: 'REVIEW',
+  HIGH: 'HIGH',
+  CRITICAL: 'CRITICAL'
+} as const
+
+export type AlertSeverity = (typeof AlertSeverity)[keyof typeof AlertSeverity]

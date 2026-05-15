@@ -73,10 +73,11 @@ async function main() {
         vendorId: vendor.id,
         type: alert.type as AlertType,
         message: alert.message,
-      },
+      } as any,
     });
 
-    const accountHash = i === 0 ? 'acct_hash_clean_001' : 'acct_hash_shared_001';
+    const accountHash =
+      i === 0 ? 'acct_hash_clean_001' : 'acct_hash_shared_001';
     const bankAccount = await prisma.bankAccount.create({
       data: {
         vendorId: vendor.id,

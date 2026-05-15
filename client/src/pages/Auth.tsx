@@ -97,7 +97,7 @@ export default function Auth() {
         <form className="space-y-4" onSubmit={handleSubmit} method="POST">
           {!isLogin && (
             <div className="grid grid-cols-2 gap-4">
-              <label className="space-y-1.5">
+              <label className="block space-y-1.5">
                 <span className="pl-1 text-xs font-bold uppercase tracking-wider text-zinc-500">
                   First name
                 </span>
@@ -106,12 +106,12 @@ export default function Auth() {
                   <input
                     type="text"
                     onChange={(event) => updateFirstName(event.target.value)}
-                    className="field-control py-2.5 pl-10"
+                    className="field-control py-2.5 !pl-10"
                     placeholder="Jane"
                   />
                 </span>
               </label>
-              <label className="space-y-1.5">
+              <label className="block space-y-1.5">
                 <span className="pl-1 text-xs font-bold uppercase tracking-wider text-zinc-500">
                   Last name
                 </span>
@@ -120,7 +120,7 @@ export default function Auth() {
                   <input
                     type="text"
                     onChange={(event) => updateLastName(event.target.value)}
-                    className="field-control py-2.5 pl-10"
+                    className="field-control py-2.5 !pl-10"
                     placeholder="Doe"
                   />
                 </span>
@@ -129,7 +129,7 @@ export default function Auth() {
           )}
 
           {!isLogin && (
-            <label className="space-y-1.5">
+            <label className="block space-y-1.5">
               <span className="pl-1 text-xs font-bold uppercase tracking-wider text-zinc-500">
                 Company
               </span>
@@ -137,14 +137,14 @@ export default function Auth() {
                 <Building className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600" />
                 <input
                   type="text"
-                  className="field-control py-2.5 pl-10"
+                  className="field-control py-2.5 !pl-10"
                   placeholder="Acme Corp"
                 />
               </span>
             </label>
           )}
 
-          <label className="space-y-1.5">
+          <label className="block space-y-1.5">
             <span className="pl-1 text-xs font-bold uppercase tracking-wider text-zinc-500">
               Email address
             </span>
@@ -153,13 +153,13 @@ export default function Auth() {
               <input
                 type="email"
                 onChange={(event) => updateEmail(event.target.value)}
-                className="field-control py-2.5 pl-10"
+                className="field-control py-2.5 !pl-10"
                 placeholder="name@company.com"
               />
             </span>
           </label>
 
-          <label className="space-y-1.5">
+          <label className="block space-y-1.5">
             <span className="flex items-center justify-between pl-1">
               <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">
                 Password
@@ -175,7 +175,7 @@ export default function Auth() {
               <input
                 type={showPassword ? "text" : "password"}
                 onChange={(event) => updatePassword(event.target.value)}
-                className="field-control py-2.5 pl-10 pr-10"
+                className="field-control py-2.5 !pl-10 !pr-10"
                 placeholder="Password"
               />
               <button

@@ -5,19 +5,45 @@ import { CreateVendorDto } from './dto/create-vendor.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UpdateVendorDto } from './dto/update-vendor.dto';
 import { GraphService } from '../graph/graph.service';
+import { SquadService } from '../squad/squad.service';
+
+const testVirtualAccountObject = {
+  address: '22 Kota street, UK',
+  beneficiary_account: '4920299492',
+  bvn: '22343211654',
+  customer_identifier: '',
+  dob: '07/19/1990',
+  email: 'ayo@squad.com',
+  first_name: 'Jimmy',
+  gender: '1',
+  last_name: 'Neutron',
+  mobile_num: '08123446789',
+};
 
 @Injectable()
 export class VendorsService {
   constructor(
     private prisma: PrismaService,
     private graphService: GraphService,
+    private squad: SquadService,
   ) {}
 
   // CREATE VENDOR
   async createVendor(createVendorDto: CreateVendorDto) {
+    // const userVirtualAccount = await this.squad.virtualAccount({
+    //   ...testVirtualAccountObject,
+    //   email: createVendorDto.email,
+    //   mobile_num: createVendorDto.phone,
+    //   first_name: createVendorDto.firstName,
+    //   last_name: createVendorDto.lastName,
+    //   customer_identifier: createVendorDto.email,
+    //   bvn: `22${createVendorDto.phone.slice(2, 11)}`,
+    // });
     const vendor = await this.prisma.vendor.create({
       data: {
-        ...createVendorDto,
+        businessName: createVendorDto.businessName,
+        email: createVendorDto.email,
+        phone: createVendorDto.phone,
       },
     });
     const graphSynced = await this.graphService.safeSyncVendorById(vendor.id);

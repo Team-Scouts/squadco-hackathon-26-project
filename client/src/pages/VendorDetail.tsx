@@ -92,7 +92,9 @@ function asSignalList(value: unknown) {
 }
 
 function asRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  return value && typeof value === "object"
+    ? (value as Record<string, unknown>)
+    : {};
 }
 
 function displayValue(value: unknown) {
@@ -291,7 +293,9 @@ function ReviewerDecisionPanel({
     <section className="panel-compact min-w-0 p-4">
       <div className="flex items-center justify-between gap-3">
         <p className={panelTitle}>Reviewer decision</p>
-        <span className={`rounded-lg border px-2 py-1 text-[10px] font-black uppercase tracking-wider ${riskBadgeClass(vendor.riskLevel)}`}>
+        <span
+          className={`rounded-lg border px-2 py-1 text-[10px] font-black uppercase tracking-wider ${riskBadgeClass(vendor.riskLevel)}`}
+        >
           {displayValue(vendor.riskLevel)}
         </span>
       </div>
@@ -402,7 +406,8 @@ function DocumentModification({ vendorId }: { vendorId: string }) {
   };
 
   const runChecksMutation = useMutation({
-    mutationFn: (documentId: string) => documentApi.runDocumentChecks(documentId),
+    mutationFn: (documentId: string) =>
+      documentApi.runDocumentChecks(documentId),
     onSuccess: (response) => invalidateDocumentState(response.data),
   });
 
@@ -461,7 +466,9 @@ function DocumentModification({ vendorId }: { vendorId: string }) {
         <div className="flex flex-wrap items-center gap-2">
           <button
             disabled={!activeDocument || runChecksMutation.isPending}
-            onClick={() => activeDocument && runChecksMutation.mutate(activeDocument.id)}
+            onClick={() =>
+              activeDocument && runChecksMutation.mutate(activeDocument.id)
+            }
             className="button-secondary min-h-0 rounded-xl px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-60"
           >
             <History className="h-4 w-4" />
@@ -531,181 +538,193 @@ function DocumentModification({ vendorId }: { vendorId: string }) {
 
         {activeDocument && (
           <div className="grid min-w-0 grid-cols-1 gap-5 2xl:grid-cols-2">
-          <div className="min-w-0 rounded-2xl border border-white/10 bg-black/50 p-4">
-            <div className="flex items-center justify-between">
-              <p className={panelTitle}>Document preview</p>
-              <div className="flex items-center gap-2">
-                <a
-                  href={activeDocument.fileUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded-lg border border-white/10 bg-white/5 p-2 text-gray-400 transition-colors hover:text-white"
-                >
-                  <Eye className="h-4 w-4" />
-                </a>
-                <a
-                  href={activeDocument.fileUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded-lg border border-white/10 bg-white/5 p-2 text-gray-400 transition-colors hover:text-white"
-                >
-                  <Download className="h-4 w-4" />
-                </a>
-              </div>
-            </div>
-            <div className="mt-4 rounded-2xl border border-white/10 bg-[#020203] p-4">
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between gap-3">
-                  <span className="text-gray-500">OCR provider</span>
-                  <span className="break-words text-right font-semibold text-white">
-                    {activeDocument.ocrProvider ?? "Not run"}
-                  </span>
-                </div>
-                <div className="flex justify-between gap-3">
-                  <span className="text-gray-500">OCR confidence</span>
-                  <span className="text-right font-semibold text-white">
-                    {activeDocument.ocrConfidence ?? 0}%
-                  </span>
-                </div>
-                <div className="flex justify-between gap-3">
-                  <span className="text-gray-500">Duplicate vendors</span>
-                  <span className="text-right font-semibold text-white">
-                    {activeDocument.duplicateVendorCount}
-                  </span>
-                </div>
-                <div className="flex justify-between gap-3">
-                  <span className="text-gray-500">Processed</span>
-                  <span className="text-right font-semibold text-white">
-                    {formatDate(activeDocument.processedAt)}
-                  </span>
+            <div className="min-w-0 rounded-2xl border border-white/10 bg-black/50 p-4">
+              <div className="flex items-center justify-between">
+                <p className={panelTitle}>Document preview</p>
+                <div className="flex items-center gap-2">
+                  <a
+                    href={activeDocument.fileUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-lg border border-white/10 bg-white/5 p-2 text-gray-400 transition-colors hover:text-white"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </a>
+                  <a
+                    href={activeDocument.fileUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-lg border border-white/10 bg-white/5 p-2 text-gray-400 transition-colors hover:text-white"
+                  >
+                    <Download className="h-4 w-4" />
+                  </a>
                 </div>
               </div>
-              <div className="mt-4 rounded-lg border border-white/10 bg-black/30 p-3">
-                <p className="text-xs font-bold uppercase tracking-wider text-gray-500">
-                  OCR text
-                </p>
-                <p className="mt-2 max-h-56 overflow-auto whitespace-pre-wrap break-words text-xs leading-relaxed text-zinc-200">
-                  {activeDocument.ocrText || "Run checks to populate OCR text."}
-                </p>
+              <div className="mt-4 rounded-2xl border border-white/10 bg-[#020203] p-4">
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between gap-3">
+                    <span className="text-gray-500">OCR provider</span>
+                    <span className="break-words text-right font-semibold text-white">
+                      {activeDocument.ocrProvider ?? "Not run"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between gap-3">
+                    <span className="text-gray-500">OCR confidence</span>
+                    <span className="text-right font-semibold text-white">
+                      {activeDocument.ocrConfidence ?? 0}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between gap-3">
+                    <span className="text-gray-500">Duplicate vendors</span>
+                    <span className="text-right font-semibold text-white">
+                      {activeDocument.duplicateVendorCount}
+                    </span>
+                  </div>
+                  <div className="flex justify-between gap-3">
+                    <span className="text-gray-500">Processed</span>
+                    <span className="text-right font-semibold text-white">
+                      {formatDate(activeDocument.processedAt)}
+                    </span>
+                  </div>
+                </div>
+                <div className="mt-4 rounded-lg border border-white/10 bg-black/30 p-3">
+                  <p className="text-xs font-bold uppercase tracking-wider text-gray-500">
+                    OCR text
+                  </p>
+                  <p className="mt-2 max-h-56 overflow-auto whitespace-pre-wrap break-words text-xs leading-relaxed text-zinc-200">
+                    {activeDocument.ocrText ||
+                      "Run checks to populate OCR text."}
+                  </p>
+                </div>
               </div>
-            </div>
-          </div>
-
-          <div className="min-w-0 rounded-2xl border border-white/10 bg-black/50 p-4">
-            <div className="flex items-center justify-between gap-3">
-              <p className={panelTitle}>Extracted fields</p>
-              <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-300">
-                {pendingFieldCount} review field{pendingFieldCount === 1 ? "" : "s"}
-              </span>
             </div>
 
-            <div className="mt-4 space-y-4">
-              {fields.length === 0 && (
-                <div className="rounded-xl border border-white/10 bg-black/30 p-4 text-sm text-gray-400">
-                  Run document checks to extract fields.
-                </div>
-              )}
-              {fields.map((field) => (
-                <div
-                  key={field.label}
-                  className="min-w-0 rounded-2xl border border-white/10 bg-black/40 p-4"
-                >
-                  <div className="mb-3 flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-bold text-white">
-                        {field.label}
-                      </p>
-                      <p className="mt-1 text-xs text-gray-500">
-                        OCR confidence {field.confidence}%
-                      </p>
+            <div className="min-w-0 rounded-2xl border border-white/10 bg-black/50 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <p className={panelTitle}>Extracted fields</p>
+                <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-300">
+                  {pendingFieldCount} review field
+                  {pendingFieldCount === 1 ? "" : "s"}
+                </span>
+              </div>
+
+              <div className="mt-4 space-y-4">
+                {fields.length === 0 && (
+                  <div className="rounded-xl border border-white/10 bg-black/30 p-4 text-sm text-gray-400">
+                    Run document checks to extract fields.
+                  </div>
+                )}
+                {fields.map((field) => (
+                  <div
+                    key={field.label}
+                    className="min-w-0 rounded-2xl border border-white/10 bg-black/40 p-4"
+                  >
+                    <div className="mb-3 flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-bold text-white">
+                          {field.label}
+                        </p>
+                        <p className="mt-1 text-xs text-gray-500">
+                          OCR confidence {field.confidence}%
+                        </p>
+                      </div>
+                      {field.status === "match" && (
+                        <CheckCircle2 className="h-5 w-5 text-green-300" />
+                      )}
+                      {field.status === "edited" && (
+                        <Edit3 className="h-5 w-5 text-cyan-300" />
+                      )}
+                      {field.status === "flagged" && (
+                        <AlertTriangle className="h-5 w-5 text-amber-400" />
+                      )}
                     </div>
-                    {field.status === "match" && (
-                      <CheckCircle2 className="h-5 w-5 text-green-300" />
-                    )}
-                    {field.status === "edited" && (
-                      <Edit3 className="h-5 w-5 text-cyan-300" />
-                    )}
-                    {field.status === "flagged" && (
-                      <AlertTriangle className="h-5 w-5 text-amber-400" />
-                    )}
+                    <div className="grid min-w-0 grid-cols-1 gap-3 xl:grid-cols-2">
+                      <label>
+                        <span className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                          Extracted
+                        </span>
+                        <input
+                          readOnly
+                          value={field.extracted}
+                          className={`${fieldInput} break-all text-zinc-400`}
+                        />
+                      </label>
+                      <label>
+                        <span className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                          Verified
+                        </span>
+                        <input
+                          value={field.verified}
+                          onChange={(event) =>
+                            updateField(field.label, event.target.value)
+                          }
+                          className={fieldInput}
+                        />
+                      </label>
+                    </div>
                   </div>
-                  <div className="grid min-w-0 grid-cols-1 gap-3 xl:grid-cols-2">
-                    <label>
-                      <span className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-gray-500">
-                        Extracted
-                      </span>
-                      <input
-                        readOnly
-                        value={field.extracted}
-                        className={`${fieldInput} break-all text-zinc-400`}
-                      />
-                    </label>
-                    <label>
-                      <span className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-gray-500">
-                        Verified
-                      </span>
-                      <input
-                        value={field.verified}
-                        onChange={(event) =>
-                          updateField(field.label, event.target.value)
-                        }
-                        className={fieldInput}
-                      />
-                    </label>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <label className="mt-4 block">
-              <span className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-gray-500">
-                Review notes
-              </span>
-              <textarea
-                value={reviewNotes}
-                onChange={(event) => setReviewNotes(event.target.value)}
-                rows={3}
-                className={`${fieldInput} resize-none`}
-                placeholder="Add reviewer notes..."
-              />
-            </label>
-
-            <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
-              <div className="min-w-0 rounded-2xl border border-white/10 bg-black/40 p-3">
-                <p className={panelTitle}>Verification reasons</p>
-                <div className="mt-3 space-y-2">
-                  {reasons.length === 0 && (
-                    <p className="text-xs text-gray-500">No reasons recorded.</p>
-                  )}
-                  {reasons.map((reason, index) => (
-                    <p key={`${reason.code}-${index}`} className="break-words text-xs leading-5 text-zinc-300">
-                      <span className="font-bold text-amber-300">
-                        {reason.code ?? "REASON"}
-                      </span>{" "}
-                      {reason.message ?? ""}
-                    </p>
-                  ))}
-                </div>
+                ))}
               </div>
-              <div className="min-w-0 rounded-2xl border border-white/10 bg-black/40 p-3">
-                <p className={panelTitle}>Forensic signals</p>
-                <div className="mt-3 space-y-2">
-                  {signals.length === 0 && (
-                    <p className="text-xs text-gray-500">No signals recorded.</p>
-                  )}
-                  {signals.map((signal, index) => (
-                    <p key={`${signal.code}-${index}`} className="break-words text-xs leading-5 text-zinc-300">
-                      <span className="font-bold text-cyan-300">
-                        {signal.code ?? "SIGNAL"}
-                      </span>{" "}
-                      {signal.message ?? ""}
-                    </p>
-                  ))}
+
+              <label className="mt-4 block">
+                <span className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                  Review notes
+                </span>
+                <textarea
+                  value={reviewNotes}
+                  onChange={(event) => setReviewNotes(event.target.value)}
+                  rows={3}
+                  className={`${fieldInput} resize-none`}
+                  placeholder="Add reviewer notes..."
+                />
+              </label>
+
+              <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+                <div className="min-w-0 rounded-2xl border border-white/10 bg-black/40 p-3">
+                  <p className={panelTitle}>Verification reasons</p>
+                  <div className="mt-3 space-y-2">
+                    {reasons.length === 0 && (
+                      <p className="text-xs text-gray-500">
+                        No reasons recorded.
+                      </p>
+                    )}
+                    {reasons.map((reason, index) => (
+                      <p
+                        key={`${reason.code}-${index}`}
+                        className="break-words text-xs leading-5 text-zinc-300"
+                      >
+                        <span className="font-bold text-amber-300">
+                          {reason.code ?? "REASON"}
+                        </span>{" "}
+                        {reason.message ?? ""}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+                <div className="min-w-0 rounded-2xl border border-white/10 bg-black/40 p-3">
+                  <p className={panelTitle}>Forensic signals</p>
+                  <div className="mt-3 space-y-2">
+                    {signals.length === 0 && (
+                      <p className="text-xs text-gray-500">
+                        No signals recorded.
+                      </p>
+                    )}
+                    {signals.map((signal, index) => (
+                      <p
+                        key={`${signal.code}-${index}`}
+                        className="break-words text-xs leading-5 text-zinc-300"
+                      >
+                        <span className="font-bold text-cyan-300">
+                          {signal.code ?? "SIGNAL"}
+                        </span>{" "}
+                        {signal.message ?? ""}
+                      </p>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
         )}
       </div>
     </section>
@@ -732,7 +751,9 @@ function DeviceIntelligencePanel({ vendorId }: { vendorId: string }) {
             <span className="icon-box border border-cyan-300/20 bg-cyan-300/10">
               <Fingerprint className="h-4 w-4 text-cyan-200" />
             </span>
-            <h2 className="text-xl font-bold text-white">Device intelligence</h2>
+            <h2 className="text-xl font-bold text-white">
+              Device intelligence
+            </h2>
           </div>
           <p className="mt-2 text-sm leading-6 text-zinc-300">
             Captured FingerprintJS devices linked to this vendor.
@@ -770,7 +791,9 @@ function DeviceIntelligencePanel({ vendorId }: { vendorId: string }) {
                 return (
                   <tr key={device.id}>
                     <td className="max-w-64 py-3 pr-4 font-mono text-xs text-zinc-200">
-                      <span className="block truncate">{device.deviceHash}</span>
+                      <span className="block truncate">
+                        {device.deviceHash}
+                      </span>
                       <span className="mt-1 block truncate text-gray-600">
                         {device.browser}
                       </span>
@@ -786,7 +809,9 @@ function DeviceIntelligencePanel({ vendorId }: { vendorId: string }) {
                         {device.riskScore}%
                       </span>
                     </td>
-                    <td className="py-3 pr-4 text-gray-300">{device.timezone}</td>
+                    <td className="py-3 pr-4 text-gray-300">
+                      {device.timezone}
+                    </td>
                     <td className="py-3 pr-4 font-mono text-xs text-gray-400">
                       {device.ipAddress || "Unknown"}
                     </td>
@@ -872,13 +897,13 @@ export default function VendorDetail() {
         <section className="panel-card p-5 md:p-6">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
-            <Link
-              to="/dashboard/vendors"
-              className="mb-4 inline-flex items-center gap-2 text-xs font-bold text-gray-500 transition-colors hover:text-white"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to vendors
-            </Link>
+              <Link
+                to="/dashboard/vendors"
+                className="mb-4 inline-flex items-center gap-2 text-xs font-bold text-gray-500 transition-colors hover:text-white"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to vendors
+              </Link>
               <div className="flex min-w-0 flex-wrap items-center gap-3">
                 <h1 className="min-w-0 break-words text-3xl font-black tracking-tight text-white">
                   {displayValue(vendorDetails.data.businessName)}
@@ -890,8 +915,8 @@ export default function VendorDetail() {
                 </span>
               </div>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-300">
-                Review identity, document evidence, device intelligence, and trust
-                graph relationships before making a vendor decision.
+                Review identity, document evidence, device intelligence, and
+                trust graph relationships before making a vendor decision.
               </p>
               <p className="mt-2 break-all font-mono text-[11px] text-zinc-500">
                 {vendorId ?? "Unknown vendor"}
@@ -921,18 +946,18 @@ export default function VendorDetail() {
         <EvidenceSummaryStrip vendor={vendorDetails.data} graph={userGraph} />
 
         <section className="min-w-0">
-            {graphLoaded && userGraph && (
-              <GraphCanvas
-                graph={userGraph}
-                title="Vendor trust graph"
-                subtitle="Relationship evidence for this vendor. Node labels stay compact; select an entity to inspect full details."
-                height="vendor"
-                onRefresh={() => synchronise()}
-                isRefreshing={isSyncing}
-                showLegend
-              />
-            )}
-            {loadingGraph && <SkeletonGraphPanel />}
+          {graphLoaded && userGraph && (
+            <GraphCanvas
+              graph={userGraph}
+              title="Vendor trust graph"
+              subtitle="Relationship evidence for this vendor. Node labels stay compact; select an entity to inspect full details."
+              height="vendor"
+              onRefresh={() => synchronise()}
+              isRefreshing={isSyncing}
+              showLegend
+            />
+          )}
+          {loadingGraph && <SkeletonGraphPanel />}
         </section>
 
         <div className="grid grid-cols-1 gap-6 2xl:grid-cols-[minmax(0,1fr)_21rem]">

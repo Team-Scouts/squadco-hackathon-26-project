@@ -87,60 +87,60 @@ export class SquadService {
       throw new UnauthorizedException('Invalid Squad webhook signature');
     }
 
-    const eventType =
-      this.resolveFirstString(payload, ['event', 'type', 'event_type']) ??
-      'squad.webhook';
+    // const eventType =
+    //   this.resolveFirstString(payload, ['event', 'type', 'event_type']) ??
+    //   'squad.webhook';
     const data = this.resolveEventData(payload);
-    const transactionReference = this.resolveFirstString(data, [
-      'transaction_ref',
-      'transactionRef',
-      'transaction_reference',
-      'reference',
-    ]);
-    const transferReference = this.resolveFirstString(data, [
-      'transfer_reference',
-      'transferReference',
-      'transfer_ref',
-    ]);
-    const vendorId = this.resolveVendorId(payload);
+    // const transactionReference = this.resolveFirstString(data, [
+    //   'transaction_ref',
+    //   'transactionRef',
+    //   'transaction_reference',
+    //   'reference',
+    // ]);
+    // const transferReference = this.resolveFirstString(data, [
+    //   'transfer_reference',
+    //   'transferReference',
+    //   'transfer_ref',
+    // ]);
+    // const vendorId = this.resolveVendorId(payload);
 
-    const webhookEvent = await this.prisma.webhookEvent.create({
-      data: {
-        provider: 'SQUAD',
-        eventType,
-        transactionReference,
-        transferReference,
-        rawPayload: payload,
-        signature,
-      },
-    });
+    // const webhookEvent = await this.prisma.webhookEvent.create({
+    //   data: {
+    //     provider: 'SQUAD',
+    //     eventType,
+    //     transactionReference,
+    //     transferReference,
+    //     rawPayload: payload,
+    //     signature,
+    //   },
+    // });
 
-    if (vendorId && transactionReference) {
-      await this.prisma.transaction.upsert({
-        where: { transactionRef: transactionReference },
-        create: {
-          vendorId,
-          transactionRef: transactionReference,
-          amount: this.resolveAmount(data),
-          channel: this.resolveFirstString(data, ['channel']) ?? 'SQUAD',
-          status:
-            this.resolveFirstString(data, ['status', 'transaction_status']) ??
-            'UNKNOWN',
-          financialRiskScore: 0,
-        },
-        update: {
-          amount: this.resolveAmount(data),
-          channel: this.resolveFirstString(data, ['channel']) ?? 'SQUAD',
-          status:
-            this.resolveFirstString(data, ['status', 'transaction_status']) ??
-            'UNKNOWN',
-        },
-      });
-    }
+    // if (vendorId && transactionReference) {
+    //   await this.prisma.transaction.upsert({
+    //     where: { transactionRef: transactionReference },
+    //     create: {
+    //       vendorId,
+    //       transactionRef: transactionReference,
+    //       amount: this.resolveAmount(data),
+    //       channel: this.resolveFirstString(data, ['channel']) ?? 'SQUAD',
+    //       status:
+    //         this.resolveFirstString(data, ['status', 'transaction_status']) ??
+    //         'UNKNOWN',
+    //       financialRiskScore: 0,
+    //     },
+    //     update: {
+    //       amount: this.resolveAmount(data),
+    //       channel: this.resolveFirstString(data, ['channel']) ?? 'SQUAD',
+    //       status:
+    //         this.resolveFirstString(data, ['status', 'transaction_status']) ??
+    //         'UNKNOWN',
+    //     },
+    //   });
+    // }
 
-    if (vendorId && transferReference) {
-      await this.persistTransferFromWebhook(vendorId, transferReference, data);
-    }
+    // if (vendorId && transferReference) {
+    //   await this.persistTransferFromWebhook(vendorId, transferReference, data);
+    // }
 
     const financialRisk = vendorId
       ? await this.transactionsService.evaluateVendorFinancialRisk(vendorId, {
@@ -150,25 +150,25 @@ export class SquadService {
         })
       : null;
 
-    let graphSynced = false;
-    if (vendorId) {
-      graphSynced = await this.graphService.safeSyncVendorById(vendorId);
-    }
+    // let graphSynced = false;
+    // if (vendorId) {
+    //   graphSynced = await this.graphService.safeSyncVendorById(vendorId);
+    // }
 
-    await this.prisma.webhookEvent.update({
-      where: { id: webhookEvent.id },
-      data: {
-        processed: true,
-        processedAt: new Date(),
-        graphSynced,
-        graphSyncAttempts: { increment: 1 },
-        graphSyncError: graphSynced
-          ? null
-          : 'Graph sync failed; queued for retry',
-      },
-    });
+    // await this.prisma.webhookEvent.update({
+    //   where: { id: webhookEvent.id },
+    //   data: {
+    //     processed: true,
+    //     processedAt: new Date(),
+    //     graphSynced,
+    //     graphSyncAttempts: { increment: 1 },
+    //     graphSyncError: graphSynced
+    //       ? null
+    //       : 'Graph sync failed; queued for retry',
+    //   },
+    // });
 
-    await this.graphService.safeSyncWebhookEventById(webhookEvent.id);
+    // await this.graphService.safeSyncWebhookEventById(webhookEvent.id);
 
     return {
       received: true,
@@ -221,7 +221,7 @@ export class SquadService {
     payload: Record<string, any>,
     signature?: string,
   ) {
-    const webhookSecret = process.env.SQUAD_WEBHOOK_SECRET;
+    const webhookSecret = process.env.SQUAD_SECRET_KEY;
 
     if (!webhookSecret) {
       this.logger.warn(

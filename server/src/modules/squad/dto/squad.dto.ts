@@ -243,11 +243,11 @@ export class VirtualAccountDto {
   email: string;
 
   @IsNotEmpty()
-  'bvn': 22343211654;
+  bvn: string;
   dob: string;
 
   @IsNotEmpty()
   address: string;
-  gender: 1 | 2;
+  gender: string;
   beneficiary_account: string;
 }

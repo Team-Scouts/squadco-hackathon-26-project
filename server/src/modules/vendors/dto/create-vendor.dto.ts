@@ -9,4 +9,10 @@ export class CreateVendorDto {
   email: string;
   @IsString()
   phone: string;
+
+  @IsString()
+  firstName: string;
+
+  @IsString()
+  lastName: string;
 }

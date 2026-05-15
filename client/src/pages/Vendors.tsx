@@ -4,6 +4,24 @@ import { Link } from "react-router-dom";
 import type { VendorEntityFromVendorsList } from "../typesAndInterfaces";
 import { VendorsSkeleton } from "../Skeletons";
 
+function riskBadgeClass(riskLevel?: string | null) {
+  const normalized = riskLevel?.toLowerCase() ?? "";
+
+  if (normalized.includes("critical")) {
+    return "badge-critical";
+  }
+
+  if (normalized.includes("high")) {
+    return "badge-high";
+  }
+
+  if (normalized.includes("medium") || normalized.includes("review")) {
+    return "badge-review";
+  }
+
+  return "badge-low";
+}
+
 export default function Vendors() {
   // const vendors = [
   //   {
@@ -93,57 +111,59 @@ export default function Vendors() {
   }
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      <div className="flex justify-between items-center">
+    <div className="mx-auto max-w-7xl space-y-6">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="text-3xl font-black text-white tracking-tight">
+          <p className="text-xs font-bold uppercase tracking-[0.24em] text-zinc-500">
+            Review inventory
+          </p>
+          <h1 className="mt-3 text-3xl font-black tracking-tight text-white">
             Vendors Directory
           </h1>
-          <p className="text-sm text-gray-400 mt-1">
-            Manage and review all vendor applications.
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
+            Manage vendor applications, review risk posture, and open the
+            investigation workspace for document, device, and graph evidence.
           </p>
         </div>
         <div className="flex items-center gap-3">
           <Link
             to="/dashboard/vendors/new"
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-gray-950 rounded-lg text-sm font-black shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:bg-emerald-400 transition-all hover:-translate-y-0.5"
+            className="button-primary"
           >
             <Plus className="h-4 w-4" />
             New Vendor
           </Link>
-          <button className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm font-bold text-white transition-colors">
-            <Download className="h-4 w-4 text-emerald-400" />
+          <button className="button-secondary">
+            <Download className="h-4 w-4 text-zinc-400" />
             Export CSV
           </button>
         </div>
       </div>
 
-      <div className="glass-panel rounded-2xl overflow-hidden">
-        {/* Toolbar */}
-        <div className="p-4 border-b border-white/5 flex gap-4 bg-black/20">
+      <div className="panel-card overflow-hidden">
+        <div className="flex flex-col gap-3 border-b border-vs-border-soft bg-black/20 p-5 lg:flex-row">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600" />
             <input
               type="text"
               placeholder="Search by vendor name, ID, or email..."
-              className="w-full bg-white/5 border border-white/10 rounded-lg py-2 pl-10 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 transition-all"
+              className="field-control py-2.5 pl-10"
             />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-semibold text-gray-300 hover:text-white transition-colors">
+          <button className="button-secondary py-2.5">
             <Filter className="h-4 w-4" />
-            Filter by Risk Level
+            Risk level
           </button>
 
-          <button className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-semibold text-gray-300 hover:text-white transition-colors">
+          <button className="button-secondary py-2.5">
             <Filter className="h-4 w-4" />
-            Filter by Application Status
+            Status
           </button>
         </div>
 
-        {/* Data Table */}
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-black/40 text-gray-500 text-xs uppercase tracking-wider font-semibold">
+            <thead className="border-b border-vs-border-soft bg-black/40 text-xs font-semibold uppercase tracking-wider text-zinc-500">
               <tr>
                 <th className="px-6 py-4">Vendor Details</th>
                 <th className="px-6 py-4">Registration Date</th>
@@ -153,41 +173,43 @@ export default function Vendors() {
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-vs-border-soft">
               {isSuccess &&
                 allVendors?.data.map((vendor, i) => (
                   <tr
                     key={i}
-                    className="hover:bg-white/5 transition-colors group"
+                    className="group transition-colors hover:bg-white/[0.03]"
                   >
                     <td className="px-6 py-4">
                       <div className="font-bold text-white">
                         {vendor.businessName}
                       </div>
-                      {/* <div className="text-xs text-gray-500">{vendor.}</div> */}
+                      <div className="mt-1 font-mono text-xs text-zinc-600">
+                        {vendor.id}
+                      </div>
                     </td>
-                    <td className="px-6 py-4 text-gray-400">
+                    <td className="px-6 py-4 text-zinc-400">
                       {makeDate(String(vendor.createdAt))}
                     </td>
-                    <td className="px-6 py-4 font-black text-white text-lg">
+                    <td className="px-6 py-4 text-lg font-black text-white">
                       {vendor.overallRiskScore}
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold border `}
+                        className={`risk-badge ${riskBadgeClass(vendor.riskLevel)}`}
                       >
                         {vendor.riskLevel}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-gray-300 font-semibold">
+                      <span className="status-badge border-white/10 bg-white/5 text-zinc-300">
                         {vendor.status}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <Link
                         to={`/dashboard/vendors/${vendor.id}`}
-                        className="inline-flex items-center gap-1 text-emerald-400 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="inline-flex items-center gap-1 text-xs font-bold text-cyan-200 opacity-0 transition-opacity group-hover:opacity-100"
                       >
                         Review <ArrowRight className="h-3 w-3" />
                       </Link>
@@ -197,8 +219,8 @@ export default function Vendors() {
             </tbody>
           </table>
         </div>
-        <div className="p-4 border-t border-white/5 bg-black/20 text-center text-xs text-gray-500">
-          Showing 6 of 12,840 vendors
+        <div className="border-t border-vs-border-soft bg-black/20 p-4 text-center text-xs text-zinc-600">
+          Showing {allVendors?.data.length ?? 0} vendors from the current workspace
         </div>
       </div>
     </div>

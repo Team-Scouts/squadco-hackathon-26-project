@@ -36,6 +36,7 @@
     "@nestjs/swagger": "^11.4.2",
     "@prisma/adapter-pg": "^7.0.1",
     "@prisma/client": "^7.8.0",
+    "@realitydefender/realitydefender": "^0.1.17",
     "@thallesp/nestjs-better-auth": "^2.6.0",
     "axios": "^1.16.0",
     "bcrypt": "^6.0.0",

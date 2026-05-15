@@ -102,11 +102,10 @@ const nodeGlowBase = "absolute inset-0 rounded-full animate-ping-slow";
 
 export default function Landing() {
   return (
-    <div className="min-h-svh bg-gray-950 text-gray-200 font-sans selection:bg-emerald-500/30">
-      {/* Dynamic Background */}
+    <div className="min-h-svh bg-vs-background text-zinc-200 font-sans selection:bg-cyan-300/20">
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-900/20 blur-[120px] animate-float-slow"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-cyan-900/10 blur-[150px] animate-float-slower"></div>
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-white/[0.035] blur-[120px]"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-white/[0.025] blur-[150px]"></div>
       </div>
 
       {/* Header */}
@@ -116,7 +115,7 @@ export default function Landing() {
           href="#top"
           aria-label="VeriSphere home"
         >
-          <div className="relative grid h-9 w-9 place-items-center rounded-xl bg-linear-to-br from-emerald-400 to-cyan-500 text-gray-950 shadow-[0_0_15px_rgba(16,185,129,0.4)]">
+          <div className="relative grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white text-black">
             V
             <div className="absolute inset-0 rounded-xl bg-white/20 opacity-0 transition-opacity hover:opacity-100"></div>
           </div>
@@ -146,7 +145,7 @@ export default function Landing() {
           </a>
         </nav>
         <Link
-          className="hidden min-h-10 items-center justify-center rounded-full bg-emerald-500 px-5 text-sm font-bold text-gray-950 no-underline shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all hover:bg-emerald-400 hover:shadow-[0_0_25px_rgba(16,185,129,0.5)] hover:scale-105 sm:inline-flex"
+          className="button-primary hidden min-h-10 px-5 py-0 no-underline sm:inline-flex"
           to="/auth"
         >
           Open Console
@@ -165,17 +164,14 @@ export default function Landing() {
           </div>
 
           <div className="w-full max-w-180 self-center pt-10">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-emerald-400 backdrop-blur-sm">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-300/30 bg-cyan-300/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-cyan-100 backdrop-blur-sm">
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-300"></span>
               </span>
               AI Trust Graph for Verified Actors
             </div>
             <h1 className="m-0 text-5xl font-black leading-[1.1] tracking-tight text-white sm:text-7xl lg:text-[88px]">
-              <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-400 via-cyan-300 to-emerald-200 animate-pulse-glow">
-                VeriSphere
-              </span>
+              <span className="text-white">VeriSphere</span>
             </h1>
             <p className="mt-8 max-w-160 text-lg leading-relaxed text-gray-400 lg:text-xl">
               A fraud intelligence platform for screening vendors, documents,
@@ -184,7 +180,7 @@ export default function Landing() {
             </p>
             <div className="mt-10 flex flex-wrap items-center gap-4">
               <Link
-                className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-emerald-500 px-8 text-base font-bold text-gray-950 no-underline shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all hover:bg-emerald-400 hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] hover:-translate-y-1 sm:w-auto"
+                className="button-primary min-h-12 w-full px-8 text-base no-underline sm:w-auto"
                 to="/auth"
               >
                 Explore Platform
@@ -201,7 +197,7 @@ export default function Landing() {
           <div className="mt-20 grid gap-4 self-end sm:grid-cols-3 w-full max-w-225 animate-float">
             {metrics.map((metric) => (
               <div
-                className="glass-panel rounded-2xl p-6 transition-all duration-300 hover:border-emerald-500/30 hover:bg-white/10"
+                className="panel-card p-6 transition-all duration-300 hover:border-white/20"
                 key={metric.label}
               >
                 <dt className="text-sm font-semibold text-gray-400">
@@ -236,7 +232,7 @@ export default function Landing() {
               className="glass-panel relative overflow-hidden rounded-3xl p-6 md:p-8"
               aria-label="Risk console preview"
             >
-              <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-emerald-500 to-cyan-500"></div>
+              <div className="absolute top-0 left-0 h-px w-full bg-white/20"></div>
 
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-5 border-b border-white/10 pb-6">
                 <div>
@@ -329,7 +325,7 @@ export default function Landing() {
                 className="relative mt-8 hidden h-75 w-full overflow-hidden rounded-2xl border border-white/5 bg-gray-950/50 sm:block"
                 aria-label="Trust graph preview"
               >
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.1)_0,transparent_100%)]"></div>
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.06)_0,transparent_100%)]"></div>
 
                 {/* Connecting Lines */}
                 <svg
@@ -404,7 +400,7 @@ export default function Landing() {
             <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
               {intelligenceModules.map((module) => (
                 <article
-                  className="glass-panel group relative flex flex-col justify-between overflow-hidden rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500/30 hover:shadow-[0_8px_30px_rgba(16,185,129,0.1)]"
+                  className="panel-card group relative flex flex-col justify-between overflow-hidden p-6 transition-all duration-300 hover:-translate-y-1 hover:border-white/20"
                   key={module.title}
                 >
                   <div className="absolute inset-0 bg-linear-to-br from-white/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>

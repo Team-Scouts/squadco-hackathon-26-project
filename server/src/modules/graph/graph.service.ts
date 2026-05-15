@@ -468,7 +468,7 @@ export class GraphService {
       WHERE vendorCount >= $threshold
       RETURN d {.*} AS device, vendorCount, [vendor IN vendors | vendor {.*}] AS vendors
       `,
-      { threshold: 3 },
+      { threshold: 2 },
     );
 
     const graph = this.emptyGraph();

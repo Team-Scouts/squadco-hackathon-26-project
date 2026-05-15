@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
 import { DeviceIntelligenceService } from './device-intelligence.service';
 import { DeviceIntelligenceController } from './device-intelligence.controller';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaModule } from '../../prisma/prisma.module';
+import { GraphModule } from '../graph/graph.module';
 
 @Module({
+  imports: [PrismaModule, GraphModule],
   controllers: [DeviceIntelligenceController],
-  providers: [DeviceIntelligenceService, PrismaService],
+  providers: [DeviceIntelligenceService],
 })
 export class DeviceIntelligenceModule {}

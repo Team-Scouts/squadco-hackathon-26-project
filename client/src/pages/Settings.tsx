@@ -246,7 +246,7 @@ export default function Settings() {
                     </label>
                     <input
                       type="text"
-                      defaultValue={data?.user.name.split(" ")[0]}
+                      defaultValue={data?.user?.name?.split(" ")[0] ?? ""}
                       className="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-all"
                     />
                   </div>
@@ -256,7 +256,7 @@ export default function Settings() {
                     </label>
                     <input
                       type="text"
-                      defaultValue={data?.user.name.split(" ")[1]}
+                      defaultValue={data?.user?.name?.split(" ")[1] ?? ""}
                       className="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-all"
                     />
                   </div>

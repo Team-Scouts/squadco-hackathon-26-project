@@ -1,531 +1,402 @@
-import heroImage from "../assets/verisphere-hero.png";
 import { Link } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 
+/* ── data ── */
 const metrics = [
-  { label: "Vendor profiles screened", value: "12,840" },
-  { label: "Risk signals connected", value: "48k+" },
-  { label: "Review cases resolved", value: "91%" },
+  { label: "Profiles Scanned", value: "12,840", icon: "⬡" },
+  { label: "Risk Signals", value: "48k+", icon: "◈" },
+  { label: "Cases Resolved", value: "91%", icon: "◉" },
 ];
 
-const toneClasses = {
-  safe: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
-  info: "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20",
-  watch: "bg-amber-500/10 text-amber-400 border border-amber-500/20",
-  danger: "bg-red-500/10 text-red-400 border border-red-500/20",
-} as const;
-
-type ModuleTone = keyof typeof toneClasses;
-
-const intelligenceModules: Array<{
-  title: string;
-  detail: string;
-  score: string;
-  tone: ModuleTone;
-}> = [
-  {
-    title: "Document Integrity",
-    detail:
-      "OCR extraction, duplicate checks, and tamper-risk indicators for CAC and business documents.",
-    score: "82",
-    tone: "safe",
-  },
-  {
-    title: "Squad Payment Signals",
-    detail:
-      "Verification fees, payment metadata, transaction status, and webhook events become risk inputs.",
-    score: "76",
-    tone: "info",
-  },
-  {
-    title: "Device Intelligence",
-    detail:
-      "Browser fingerprint, timezone, IP history, and session velocity reveal suspicious reuse patterns.",
-    score: "64",
-    tone: "watch",
-  },
-  {
-    title: "Trust Graph",
-    detail:
-      "Vendors, accounts, devices, documents, and transactions are linked to expose hidden clusters.",
-    score: "38",
-    tone: "danger",
-  },
+const modules = [
+  { title: "Document Integrity", detail: "OCR extraction, duplicate checks, and tamper-risk indicators for CAC and business documents.", score: "82", color: "#00ff41" },
+  { title: "Squad Payment Signals", detail: "Verification fees, payment metadata, transaction status, and webhook events become risk inputs.", score: "76", color: "#00d4ff" },
+  { title: "Device Intelligence", detail: "Browser fingerprint, timezone, IP history, and session velocity reveal suspicious reuse patterns.", score: "64", color: "#f59e0b" },
+  { title: "Trust Graph", detail: "Vendors, accounts, devices, documents, and transactions are linked to expose hidden clusters.", score: "38", color: "#ff006e" },
 ];
 
-const workflowSteps = [
-  "Capture vendor identity, business details, device consent, and uploaded documents.",
-  "Initiate a Squad verification payment with vendor and risk-session metadata attached.",
-  "Ingest webhook events, write relationships, and refresh document, device, network, and payment scores.",
-  "Route each case to approve, review, or reject with evidence an operator can defend.",
+const steps = [
+  { title: "INTAKE", text: "Capture vendor identity, business details, device consent, and uploaded documents." },
+  { title: "VERIFY", text: "Initiate a Squad verification payment with vendor and risk-session metadata attached." },
+  { title: "ANALYZE", text: "Ingest webhook events, write relationships, and refresh document, device, network, and payment scores." },
+  { title: "DECIDE", text: "Route each case to approve, review, or reject with evidence an operator can defend." },
 ];
 
-const statusClasses = {
-  "Low risk": "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
-  Review: "bg-amber-500/10 text-amber-400 border border-amber-500/20",
-  "High risk": "bg-red-500/10 text-red-400 border border-red-500/20",
-} as const;
-
-type VendorStatus = keyof typeof statusClasses;
-
-const vendorCases: Array<{
-  name: string;
-  status: VendorStatus;
-  score: string;
-  signal: string;
-}> = [
-  {
-    name: "Adenike Supplies Ltd",
-    status: "Low risk",
-    score: "84",
-    signal:
-      "Clean document hash, verified payment, and no shared account history.",
-  },
-  {
-    name: "Koro Market Services",
-    status: "Review",
-    score: "59",
-    signal: "Shared device appears across three pending vendor applications.",
-  },
-  {
-    name: "Northline Exports",
-    status: "High risk",
-    score: "24",
-    signal:
-      "Reused bank account and duplicate CAC image detected in the graph.",
-  },
+const cases = [
+  { name: "Adenike Supplies Ltd", status: "CLEAR", score: "84", signal: "Clean document hash, verified payment, no shared account history.", color: "#00ff41" },
+  { name: "Koro Market Services", status: "REVIEW", score: "59", signal: "Shared device appears across three pending vendor applications.", color: "#f59e0b" },
+  { name: "Northline Exports", status: "THREAT", score: "24", signal: "Reused bank account and duplicate CAC image detected in the graph.", color: "#ff006e" },
 ];
 
-const graphNodeBase =
-  "absolute z-10 grid h-[74px] w-[74px] place-items-center rounded-full border border-white/20 bg-gray-900/80 backdrop-blur-md text-xs font-black shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-transform duration-500 hover:scale-110";
+/* ── matrix rain canvas ── */
+function MatrixRain() {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const c = ref.current!;
+    const ctx = c.getContext("2d")!;
+    let w = (c.width = window.innerWidth);
+    let h = (c.height = window.innerHeight);
+    const cols = Math.floor(w / 20);
+    const drops = Array(cols).fill(1);
+    const chars = "01アイウエオカキクケコサシスセソVERISPHERE";
+    const draw = () => {
+      ctx.fillStyle = "rgba(10,10,15,0.05)";
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = "rgba(0,255,65,0.15)";
+      ctx.font = "14px monospace";
+      for (let i = 0; i < drops.length; i++) {
+        const t = chars[Math.floor(Math.random() * chars.length)];
+        ctx.fillText(t, i * 20, drops[i] * 20);
+        if (drops[i] * 20 > h && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+      }
+    };
+    const id = setInterval(draw, 50);
+    const resize = () => { w = c.width = window.innerWidth; h = c.height = window.innerHeight; };
+    window.addEventListener("resize", resize);
+    return () => { clearInterval(id); window.removeEventListener("resize", resize); };
+  }, []);
+  return <canvas ref={ref} className="fixed inset-0 z-0 pointer-events-none opacity-60" />;
+}
 
-const nodeGlowBase = "absolute inset-0 rounded-full animate-ping-slow";
+/* ── cycling typing text ── */
+const heroLines = [
+  "Screening vendors, documents, devices, and bank accounts in real-time.",
+  "AI-powered trust graphs exposing hidden fraud rings before payouts.",
+  "Squad payment telemetry transformed into actionable risk signals.",
+  "Document forgery detection with OCR extraction and tamper analysis.",
+  "Device fingerprinting that traces suspicious session reuse patterns.",
+  "Explainable clearance decisions operators can audit and defend.",
+];
 
-export default function Landing() {
+function TypingText({ lines, delay = 0 }: { lines: string[]; delay?: number }) {
+  const [lineIdx, setLineIdx] = useState(0);
+  const [charIdx, setCharIdx] = useState(0);
+  const [deleting, setDeleting] = useState(false);
+  const [started, setStarted] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setStarted(true), delay);
+    return () => clearTimeout(t);
+  }, [delay]);
+
+  useEffect(() => {
+    if (!started) return;
+    const current = lines[lineIdx];
+
+    if (!deleting && charIdx <= current.length) {
+      // typing
+      const t = setTimeout(() => {
+        if (charIdx === current.length) {
+          // pause at end before deleting
+          setTimeout(() => setDeleting(true), 2000);
+        } else {
+          setCharIdx((c) => c + 1);
+        }
+      }, 40);
+      return () => clearTimeout(t);
+    }
+
+    if (deleting && charIdx >= 0) {
+      // erasing
+      const t = setTimeout(() => {
+        if (charIdx === 0) {
+          setDeleting(false);
+          setLineIdx((l) => (l + 1) % lines.length);
+        } else {
+          setCharIdx((c) => c - 1);
+        }
+      }, 20);
+      return () => clearTimeout(t);
+    }
+  }, [charIdx, deleting, lineIdx, lines, started]);
+
+  const current = lines[lineIdx];
   return (
-    <div className="min-h-svh bg-gray-950 text-gray-200 font-sans selection:bg-emerald-500/30">
-      {/* Dynamic Background */}
+    <>
+      {started ? current.slice(0, charIdx) : ""}
+      <span className="animate-cursor-blink text-cyber-green">█</span>
+    </>
+  );
+}
+
+/* ── hex ring svg ── */
+function HexRing({ size = 300, className = "" }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 200 200" className={className}>
+      <defs>
+        <linearGradient id="hex-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#00ff41" stopOpacity="0.6" />
+          <stop offset="100%" stopColor="#00d4ff" stopOpacity="0.2" />
+        </linearGradient>
+      </defs>
+      <polygon points="100,10 178,55 178,145 100,190 22,145 22,55" fill="none" stroke="url(#hex-grad)" strokeWidth="1" />
+      <polygon points="100,30 160,65 160,135 100,170 40,135 40,65" fill="none" stroke="rgba(0,255,65,0.15)" strokeWidth="0.5" />
+    </svg>
+  );
+}
+
+/* ── main ── */
+export default function Landing() {
+  const [scrollY, setScrollY] = useState(0);
+  useEffect(() => {
+    const h = () => setScrollY(window.scrollY);
+    window.addEventListener("scroll", h, { passive: true });
+    return () => window.removeEventListener("scroll", h);
+  }, []);
+
+  return (
+    <div className="min-h-svh bg-[#0a0a0f] text-gray-200 font-sans scanlines cyber-grid overflow-x-hidden">
+      <MatrixRain />
+
+      {/* Ambient glows */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-900/20 blur-[120px] animate-float-slow"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-cyan-900/10 blur-[150px] animate-float-slower"></div>
+        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-[#00ff41]/5 blur-[150px] animate-float-slow" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] rounded-full bg-[#00d4ff]/5 blur-[180px] animate-float-slower" />
+        <div className="absolute top-[40%] left-[50%] w-[30%] h-[30%] rounded-full bg-[#a855f7]/5 blur-[120px] animate-float" />
       </div>
 
-      {/* Header */}
-      <header className="fixed inset-x-0 top-0 z-50 flex min-h-18 items-center justify-between gap-6 border-b border-white/5 bg-gray-950/50 px-6 backdrop-blur-xl md:px-12">
-        <a
-          className="flex items-center gap-3 font-extrabold text-white no-underline transition-opacity hover:opacity-80"
-          href="#top"
-          aria-label="VeriSphere home"
-        >
-          <div className="relative grid h-9 w-9 place-items-center rounded-xl bg-linear-to-br from-emerald-400 to-cyan-500 text-gray-950 shadow-[0_0_15px_rgba(16,185,129,0.4)]">
+      {/* ━━ HEADER ━━ */}
+      <header className={`fixed inset-x-0 top-0 z-50 flex min-h-16 items-center justify-between gap-6 px-6 md:px-12 transition-all duration-500 ${scrollY > 50 ? "bg-[#0a0a0f]/90 backdrop-blur-xl border-b border-[#00ff41]/10" : "bg-transparent"}`}>
+        <a className="flex items-center gap-3 font-extrabold text-white no-underline group" href="#top">
+          <div className="relative grid h-9 w-9 place-items-center rounded-lg bg-[#0a0a0f] border border-[#00ff41]/40 text-[#00ff41] font-mono text-sm animate-neon-pulse group-hover:border-[#00ff41]/80 transition-all">
             V
-            <div className="absolute inset-0 rounded-xl bg-white/20 opacity-0 transition-opacity hover:opacity-100"></div>
           </div>
-          <span className="text-lg tracking-tight">VeriSphere</span>
+          <span className="text-lg tracking-tight font-mono">
+            <span className="text-[#00ff41]">Veri</span>
+            <span className="text-[#00d4ff]">Sphere</span>
+          </span>
         </a>
-        <nav
-          className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/5 p-1.5 md:flex backdrop-blur-md"
-          aria-label="Primary navigation"
-        >
-          <a
-            className="inline-flex min-h-9 items-center rounded-full px-4 text-sm font-semibold text-gray-300 no-underline transition-all hover:bg-white/10 hover:text-white"
-            href="#intelligence"
-          >
-            Intelligence
-          </a>
-          <a
-            className="inline-flex min-h-9 items-center rounded-full px-4 text-sm font-semibold text-gray-300 no-underline transition-all hover:bg-white/10 hover:text-white"
-            href="#workflow"
-          >
-            Workflow
-          </a>
-          <a
-            className="inline-flex min-h-9 items-center rounded-full px-4 text-sm font-semibold text-gray-300 no-underline transition-all hover:bg-white/10 hover:text-white"
-            href="#cases"
-          >
-            Cases
-          </a>
+        <nav className="hidden items-center gap-1 md:flex" aria-label="Primary navigation">
+          {["Intelligence", "Workflow", "Cases"].map((item) => (
+            <a key={item} className="inline-flex min-h-9 items-center rounded px-4 text-xs font-bold uppercase tracking-[0.2em] text-gray-500 no-underline transition-all hover:text-[#00ff41] hover:bg-[#00ff41]/5 font-mono" href={`#${item.toLowerCase()}`}>
+              [{item}]
+            </a>
+          ))}
         </nav>
-        <Link
-          className="hidden min-h-10 items-center justify-center rounded-full bg-emerald-500 px-5 text-sm font-bold text-gray-950 no-underline shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all hover:bg-emerald-400 hover:shadow-[0_0_25px_rgba(16,185,129,0.5)] hover:scale-105 sm:inline-flex"
-          to="/auth"
-        >
-          Open Console
+        <Link className="hidden min-h-10 items-center justify-center rounded border border-[#00ff41]/40 bg-[#00ff41]/10 px-6 text-xs font-bold uppercase tracking-[0.2em] text-[#00ff41] no-underline transition-all hover:bg-[#00ff41]/20 hover:border-[#00ff41]/80 hover:shadow-[0_0_20px_rgba(0,255,65,0.2)] font-mono sm:inline-flex" to="/auth">
+          &gt; Access Console
         </Link>
       </header>
 
       <main id="top" className="relative z-10">
-        {/* Hero Section */}
-        <section className="relative isolate grid min-h-[90svh] overflow-hidden px-6 pb-12 pt-32 md:px-12 md:pt-40">
-          <div className="absolute inset-0 -z-30 opacity-20 mix-blend-screen">
-            <img
-              className="h-full w-full object-cover object-center [mask-linear-gradient(to_bottom,black_40%,transparent_100%)]"
-              src={heroImage}
-              alt=""
-            />
+        {/* ━━ HERO ━━ */}
+        <section className="relative isolate min-h-[100svh] flex flex-col justify-center px-6 pt-24 pb-16 md:px-12">
+          {/* Rotating hex rings */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-20">
+            <HexRing size={600} className="animate-rotate-slow" />
+          </div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-10">
+            <HexRing size={800} className="animate-rotate-reverse" />
           </div>
 
-          <div className="w-full max-w-180 self-center pt-10">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-emerald-400 backdrop-blur-sm">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
-              </span>
-              AI Trust Graph for Verified Actors
+          <div className="w-full max-w-4xl mx-auto relative">
+            {/* Terminal-style badge */}
+            <div className="mb-8 inline-flex items-center gap-3 rounded border border-[#00ff41]/20 bg-[#00ff41]/5 px-4 py-2 font-mono text-xs text-[#00ff41] animate-fade-in-up backdrop-blur-sm">
+              <span className="flex h-2 w-2"><span className="absolute inline-flex h-2 w-2 animate-ping rounded-full bg-[#00ff41] opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-[#00ff41]" /></span>
+              <span className="opacity-60">[SYS]</span> AI Trust Graph for Verified Actors
             </div>
-            <h1 className="m-0 text-5xl font-black leading-[1.1] tracking-tight text-white sm:text-7xl lg:text-[88px]">
-              <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-400 via-cyan-300 to-emerald-200 animate-pulse-glow">
-                VeriSphere
+
+            {/* Main heading with glitch */}
+            <h1 className="m-0 text-5xl font-black leading-[1.05] tracking-tight sm:text-7xl lg:text-8xl animate-fade-in-up" style={{ animationDelay: "200ms", animationFillMode: "both" }}>
+              <span className="block text-white/90 animate-glitch-subtle">VERI</span>
+              <span className="block text-transparent bg-clip-text" style={{ backgroundImage: "linear-gradient(90deg, #00ff41, #00d4ff, #a855f7)" }}>
+                SPHERE
               </span>
             </h1>
-            <p className="mt-8 max-w-160 text-lg leading-relaxed text-gray-400 lg:text-xl">
-              A fraud intelligence platform for screening vendors, documents,
-              devices, bank accounts, and Squad payment activity before
-              procurement or grant payouts move forward.
-            </p>
-            <div className="mt-10 flex flex-wrap items-center gap-4">
-              <Link
-                className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-emerald-500 px-8 text-base font-bold text-gray-950 no-underline shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all hover:bg-emerald-400 hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] hover:-translate-y-1 sm:w-auto"
-                to="/auth"
-              >
-                Explore Platform
+
+            {/* Subtitle with typing */}
+            <div className="mt-8 max-w-2xl font-mono text-sm md:text-base leading-relaxed text-gray-500 animate-fade-in-up h-14" style={{ animationDelay: "600ms", animationFillMode: "both" }}>
+              <span className="text-cyber-green/60">&gt; </span>
+              <TypingText lines={heroLines} delay={1200} />
+            </div>
+
+            {/* CTA buttons */}
+            <div className="mt-10 flex flex-wrap items-center gap-4 animate-fade-in-up" style={{ animationDelay: "800ms", animationFillMode: "both" }}>
+              <Link className="group relative inline-flex min-h-12 items-center justify-center rounded border border-[#00ff41]/50 bg-[#00ff41]/10 px-8 text-sm font-bold uppercase tracking-[0.15em] text-[#00ff41] no-underline font-mono transition-all hover:bg-[#00ff41]/20 hover:shadow-[0_0_30px_rgba(0,255,65,0.2)] hover:-translate-y-0.5" to="/auth">
+                <span className="mr-2 opacity-60">&gt;</span> Explore_Platform
+                <div className="absolute inset-0 rounded border border-[#00ff41]/0 group-hover:border-[#00ff41]/30 transition-all" />
               </Link>
-              <a
-                className="glass-button inline-flex min-h-12 w-full items-center justify-center rounded-full px-8 text-base font-bold sm:w-auto hover:-translate-y-1"
-                href="#workflow"
-              >
-                See Workflow
+              <a className="inline-flex min-h-12 items-center justify-center rounded border border-white/10 bg-white/5 px-8 text-sm font-bold uppercase tracking-[0.15em] text-gray-400 no-underline font-mono transition-all hover:border-[#00d4ff]/30 hover:text-[#00d4ff] hover:bg-[#00d4ff]/5 hover:-translate-y-0.5 backdrop-blur-sm" href="#workflow">
+                See_Workflow
               </a>
             </div>
           </div>
 
-          <div className="mt-20 grid gap-4 self-end sm:grid-cols-3 w-full max-w-225 animate-float">
-            {metrics.map((metric) => (
-              <div
-                className="glass-panel rounded-2xl p-6 transition-all duration-300 hover:border-emerald-500/30 hover:bg-white/10"
-                key={metric.label}
-              >
-                <dt className="text-sm font-semibold text-gray-400">
-                  {metric.label}
-                </dt>
-                <dd className="mt-2 text-4xl font-black text-white tracking-tight">
-                  {metric.value}
-                </dd>
-              </div>
-            ))}
+          {/* Metrics bar */}
+          <div className="mt-auto pt-16 w-full max-w-4xl mx-auto">
+            <div className="grid gap-4 sm:grid-cols-3 animate-fade-in-up" style={{ animationDelay: "1000ms", animationFillMode: "both" }}>
+              {metrics.map((m, i) => (
+                <div key={m.label} className="group rounded border border-white/5 bg-white/[0.02] p-5 backdrop-blur-sm transition-all duration-500 hover:border-[#00ff41]/20 hover:bg-[#00ff41]/[0.03]" style={{ animationDelay: `${1000 + i * 150}ms` }}>
+                  <div className="flex items-center gap-2 text-xs font-mono text-gray-600 uppercase tracking-wider">
+                    <span className="text-[#00ff41]/40">{m.icon}</span> {m.label}
+                  </div>
+                  <div className="mt-2 text-3xl font-black text-white font-mono tracking-tight group-hover:text-[#00ff41] transition-colors">
+                    {m.value}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
+
+          {/* Scan line decoration */}
+          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00ff41]/20 to-transparent" />
         </section>
 
-        {/* Intelligence Section */}
-        <section
-          className="relative px-6 py-24 md:px-12 md:py-32"
-          id="intelligence"
-        >
-          <div className="mx-auto mb-16 w-full max-w-245">
-            <p className="mb-4 text-sm font-bold uppercase tracking-widest text-cyan-400">
-              Live Verification Console
+        {/* ━━ INTELLIGENCE ━━ */}
+        <section className="relative px-6 py-24 md:px-12 md:py-32" id="intelligence">
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00d4ff]/20 to-transparent" />
+          </div>
+
+          <div className="mx-auto mb-16 w-full max-w-4xl">
+            <p className="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-[#00d4ff] font-mono">
+              <span className="opacity-50">[</span>Live Verification Console<span className="opacity-50">]</span>
             </p>
             <h2 className="m-0 text-3xl font-black leading-tight tracking-tight text-white lg:text-5xl">
-              One decision layer for onboarding, payment telemetry, and
-              fraud-ring evidence.
+              One decision layer for onboarding, payment telemetry, and fraud-ring evidence.
             </h2>
           </div>
 
-          <div className="mx-auto grid w-full max-w-300 gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
-            {/* Console Preview Card */}
-            <div
-              className="glass-panel relative overflow-hidden rounded-3xl p-6 md:p-8"
-              aria-label="Risk console preview"
-            >
-              <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-emerald-500 to-cyan-500"></div>
+          {/* Console card */}
+          <div className="mx-auto w-full max-w-5xl rounded border border-white/10 bg-[#0d0d14]/80 backdrop-blur-xl overflow-hidden animate-neon-pulse-blue">
+            {/* Terminal header */}
+            <div className="flex items-center gap-2 px-5 py-3 bg-black/40 border-b border-white/5">
+              <div className="flex gap-1.5">
+                <div className="h-3 w-3 rounded-full bg-[#ff006e]/60" />
+                <div className="h-3 w-3 rounded-full bg-[#f59e0b]/60" />
+                <div className="h-3 w-3 rounded-full bg-[#00ff41]/60" />
+              </div>
+              <span className="ml-3 text-[10px] font-mono text-gray-600 uppercase tracking-wider">verisphere://risk-console</span>
+            </div>
 
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-5 border-b border-white/10 pb-6">
+            <div className="p-6 md:p-8">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-5 border-b border-white/5 pb-6">
                 <div>
-                  <span className="text-sm font-semibold text-gray-400">
-                    Current Case
-                  </span>
-                  <h3 className="mt-2 text-2xl font-black text-white">
-                    State SME Procurement Batch
-                  </h3>
+                  <span className="text-xs font-mono text-gray-600 uppercase tracking-wider">&gt; active_case</span>
+                  <h3 className="mt-2 text-xl font-black text-white font-mono">State SME Procurement Batch</h3>
                 </div>
-                <span className="inline-flex items-center gap-2 rounded-full bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 text-sm font-bold text-amber-400 backdrop-blur-sm">
-                  <div className="h-2 w-2 rounded-full bg-amber-400 animate-pulse"></div>
-                  Review Required
+                <span className="inline-flex items-center gap-2 rounded border border-[#f59e0b]/20 bg-[#f59e0b]/5 px-3 py-1.5 text-xs font-bold text-[#f59e0b] font-mono uppercase tracking-wider">
+                  <div className="h-2 w-2 rounded-full bg-[#f59e0b] animate-pulse" />
+                  Review_Required
                 </span>
               </div>
 
-              <div className="mt-8 grid gap-8 sm:flex sm:items-center">
-                <div className="relative grid h-40 w-40 shrink-0 place-items-center rounded-full border-12 border-gray-800 md:h-45 md:w-45">
-                  {/* Faux progress rings */}
-                  <svg
-                    className="absolute inset-0 h-full w-full -rotate-90 transform"
-                    viewBox="0 0 100 100"
-                  >
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="44"
-                      stroke="currentColor"
-                      strokeWidth="8"
-                      fill="transparent"
-                      className="text-gray-800"
-                    />
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="44"
-                      stroke="url(#score-gradient)"
-                      strokeWidth="8"
-                      fill="transparent"
-                      strokeDasharray="276"
-                      strokeDashoffset="113"
-                      strokeLinecap="round"
-                      className="transition-all duration-1000 ease-out"
-                    />
-                    <defs>
-                      <linearGradient
-                        id="score-gradient"
-                        x1="0%"
-                        y1="0%"
-                        x2="100%"
-                        y2="0%"
-                      >
-                        <stop offset="0%" stopColor="#f59e0b" />
-                        <stop offset="100%" stopColor="#10b981" />
-                      </linearGradient>
-                    </defs>
+              <div className="mt-6 grid gap-6 sm:grid-cols-[auto_1fr]">
+                {/* Score ring */}
+                <div className="relative grid h-36 w-36 shrink-0 place-items-center mx-auto sm:mx-0">
+                  <svg className="absolute inset-0 h-full w-full -rotate-90 animate-rotate-slow" style={{ animationDuration: "30s" }} viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="44" stroke="rgba(255,255,255,0.05)" strokeWidth="6" fill="transparent" />
+                    <circle cx="50" cy="50" r="44" stroke="url(#sg)" strokeWidth="6" fill="transparent" strokeDasharray="276" strokeDashoffset="113" strokeLinecap="round" />
+                    <defs><linearGradient id="sg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor="#f59e0b" /><stop offset="100%" stopColor="#00ff41" /></linearGradient></defs>
                   </svg>
                   <div className="text-center relative z-10">
-                    <span className="block text-5xl font-black leading-none text-white text-glow">
-                      59
-                    </span>
-                    <small className="mt-2 block text-xs font-bold uppercase tracking-wider text-gray-400">
-                      Trust Score
-                    </small>
+                    <span className="block text-4xl font-black leading-none text-white font-mono text-glow">59</span>
+                    <small className="mt-1 block text-[10px] font-bold uppercase tracking-wider text-gray-500 font-mono">Trust Score</small>
                   </div>
                 </div>
-                <div className="grid flex-1 gap-3">
-                  {[
-                    ["Shared device cluster", "High", "text-red-400"],
-                    ["Payment authenticity", "Medium", "text-amber-400"],
-                    ["Document integrity", "Low risk", "text-emerald-400"],
-                  ].map(([label, value, colorClass]) => (
-                    <div
-                      className="flex justify-between items-center gap-4 rounded-xl bg-white/5 border border-white/5 p-4 transition-colors hover:bg-white/10"
-                      key={label}
-                    >
-                      <span className="text-sm font-medium text-gray-300">
-                        {label}
-                      </span>
-                      <strong className={`text-sm font-bold ${colorClass}`}>
-                        {value}
-                      </strong>
+
+                <div className="grid gap-2">
+                  {[["Shared device cluster", "HIGH", "#ff006e"], ["Payment authenticity", "MED", "#f59e0b"], ["Document integrity", "LOW", "#00ff41"]].map(([label, value, color]) => (
+                    <div className="flex justify-between items-center gap-4 rounded border border-white/5 bg-white/[0.02] p-3 transition-colors hover:bg-white/[0.05] group" key={label}>
+                      <span className="text-sm font-mono text-gray-400 group-hover:text-gray-200 transition-colors">{label}</span>
+                      <strong className="text-xs font-bold font-mono px-2 py-0.5 rounded" style={{ color, backgroundColor: `${color}15`, border: `1px solid ${color}30` }}>{value}</strong>
                     </div>
                   ))}
                 </div>
               </div>
-
-              {/* Trust Graph Preview */}
-              <div
-                className="relative mt-8 hidden h-75 w-full overflow-hidden rounded-2xl border border-white/5 bg-gray-950/50 sm:block"
-                aria-label="Trust graph preview"
-              >
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.1)_0,transparent_100%)]"></div>
-
-                {/* Connecting Lines */}
-                <svg
-                  className="absolute inset-0 h-full w-full opacity-30"
-                  preserveAspectRatio="none"
-                >
-                  <path
-                    d="M 80 80 Q 150 50 200 130 T 320 180"
-                    stroke="url(#line-gradient)"
-                    strokeWidth="2"
-                    fill="none"
-                    strokeDasharray="4 4"
-                    className="animate-pulse-glow"
-                  />
-                  <path
-                    d="M 200 130 L 120 220"
-                    stroke="#f59e0b"
-                    strokeWidth="2"
-                    fill="none"
-                    strokeDasharray="4 4"
-                  />
-                  <path
-                    d="M 200 130 L 280 240"
-                    stroke="#ef4444"
-                    strokeWidth="2"
-                    fill="none"
-                    strokeDasharray="4 4"
-                  />
-                  <defs>
-                    <linearGradient
-                      id="line-gradient"
-                      x1="0%"
-                      y1="0%"
-                      x2="100%"
-                      y2="100%"
-                    >
-                      <stop offset="0%" stopColor="#10b981" />
-                      <stop offset="100%" stopColor="#06b6d4" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-
-                {/* Nodes */}
-                <div className={`${graphNodeBase} left-[10 top-10`}>
-                  <div className={`${nodeGlowBase} bg-emerald-500/20`}></div>
-                  <span className="text-emerald-400">Vendor</span>
-                </div>
-                <div
-                  className={`${graphNodeBase} left-40 top-22.5 shadow-[0_0_20px_rgba(245,158,11,0.3)] border-amber-500/30`}
-                >
-                  <div className={`${nodeGlowBase} bg-amber-500/20`}></div>
-                  <span className="text-amber-400">Device</span>
-                </div>
-                <div className={`${graphNodeBase} left-20 top-45`}>
-                  <div className={`${nodeGlowBase} bg-cyan-500/20`}></div>
-                  <span className="text-cyan-400">Account</span>
-                </div>
-                <div
-                  className={`${graphNodeBase} left-60 top-[50 shadow-[0_0_20px_rgba(239,68,68,0.3)] border-red-500/30`}
-                >
-                  <div className={`${nodeGlowBase} bg-red-500/20`}></div>
-                  <span className="text-red-400">Doc</span>
-                </div>
-                <div className={`${graphNodeBase} left-70 top-35`}>
-                  <div className={`${nodeGlowBase} bg-emerald-500/20`}></div>
-                  <span className="text-emerald-400">Vendor</span>
-                </div>
-              </div>
             </div>
+          </div>
 
-            {/* Modules List */}
-            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-              {intelligenceModules.map((module) => (
-                <article
-                  className="glass-panel group relative flex flex-col justify-between overflow-hidden rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500/30 hover:shadow-[0_8px_30px_rgba(16,185,129,0.1)]"
-                  key={module.title}
-                >
-                  <div className="absolute inset-0 bg-linear-to-br from-white/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
-                  <div className="relative z-10">
-                    <div className="flex items-start justify-between gap-4">
-                      <h3 className="text-lg font-bold text-white leading-tight">
-                        {module.title}
-                      </h3>
-                      <span
-                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl font-black text-sm ${toneClasses[module.tone]}`}
-                      >
-                        {module.score}
-                      </span>
-                    </div>
-                    <p className="mt-4 text-sm leading-relaxed text-gray-400">
-                      {module.detail}
-                    </p>
-                  </div>
-                </article>
-              ))}
-            </div>
+          {/* Module cards */}
+          <div className="mx-auto mt-8 w-full max-w-5xl grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {modules.map((mod, i) => (
+              <article key={mod.title} className="group rounded border border-white/5 bg-white/[0.02] backdrop-blur-sm p-5 transition-all duration-500 hover:-translate-y-1 hover:bg-white/[0.04]" style={{ animationDelay: `${i * 100}ms`, borderColor: `${mod.color}00`, transition: "all 0.5s" }} onMouseEnter={e => (e.currentTarget.style.borderColor = `${mod.color}30`)} onMouseLeave={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.05)")}>
+                <div className="flex items-start justify-between gap-3">
+                  <h3 className="text-sm font-bold text-white font-mono leading-tight">{mod.title}</h3>
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded font-mono font-black text-xs" style={{ color: mod.color, backgroundColor: `${mod.color}10`, border: `1px solid ${mod.color}20` }}>
+                    {mod.score}
+                  </span>
+                </div>
+                <p className="mt-3 text-xs leading-relaxed text-gray-500">{mod.detail}</p>
+              </article>
+            ))}
           </div>
         </section>
 
-        {/* Workflow Section */}
-        <section
-          className="relative px-6 py-24 md:px-12 md:py-32"
-          id="workflow"
-        >
-          <div className="absolute inset-0 -z-10 bg-gray-900/50 skew-y-3 transform origin-bottom-left"></div>
+        {/* ━━ WORKFLOW ━━ */}
+        <section className="relative px-6 py-24 md:px-12 md:py-32" id="workflow">
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00ff41]/20 to-transparent" />
+          </div>
 
-          <div className="mx-auto mb-16 w-full max-w-245">
-            <p className="mb-4 text-sm font-bold uppercase tracking-widest text-emerald-400">
-              MVP Flow
+          <div className="mx-auto mb-16 w-full max-w-4xl">
+            <p className="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-[#00ff41] font-mono">
+              <span className="opacity-50">[</span>Protocol Sequence<span className="opacity-50">]</span>
             </p>
             <h2 className="m-0 text-3xl font-black leading-tight tracking-tight text-white lg:text-5xl">
               From vendor intake to explainable clearance.
             </h2>
           </div>
 
-          <div className="mx-auto grid w-full max-w-300 gap-6 lg:grid-cols-4">
-            {workflowSteps.map((step, index) => (
-              <article
-                className="glass-panel group relative rounded-3xl p-8 transition-all duration-500 hover:-translate-y-2 hover:bg-white/10"
-                key={step}
-              >
-                <div className="mb-8 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-xl font-black text-emerald-400 group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-gray-950 transition-all duration-300">
-                  {String(index + 1).padStart(2, "0")}
+          <div className="mx-auto grid w-full max-w-5xl gap-4 lg:grid-cols-4">
+            {steps.map((step, i) => (
+              <article key={step.title} className="group relative rounded border border-white/5 bg-white/[0.02] backdrop-blur-sm p-6 transition-all duration-500 hover:-translate-y-2 hover:border-[#00ff41]/20 hover:bg-[#00ff41]/[0.02] overflow-hidden">
+                {/* Step number */}
+                <div className="mb-6 inline-flex h-10 w-10 items-center justify-center rounded border border-[#00ff41]/20 bg-[#00ff41]/5 text-sm font-black text-[#00ff41] font-mono group-hover:bg-[#00ff41] group-hover:text-[#0a0a0f] group-hover:border-[#00ff41] transition-all duration-300">
+                  {String(i + 1).padStart(2, "0")}
                 </div>
-                <p className="text-base leading-relaxed text-gray-300 group-hover:text-white transition-colors">
-                  {step}
-                </p>
+                <h3 className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-[#00ff41]/60 font-mono group-hover:text-[#00ff41] transition-colors">{step.title}</h3>
+                <p className="text-sm leading-relaxed text-gray-500 group-hover:text-gray-300 transition-colors">{step.text}</p>
+                {/* Connection line */}
+                {i < 3 && <div className="hidden lg:block absolute top-1/2 -right-2 w-4 h-px bg-gradient-to-r from-[#00ff41]/20 to-transparent" />}
               </article>
             ))}
           </div>
         </section>
 
-        {/* Cases Section */}
+        {/* ━━ CASES ━━ */}
         <section className="relative px-6 py-24 md:px-12 md:py-32" id="cases">
-          <div className="mx-auto mb-16 w-full max-w-245">
-            <p className="mb-4 text-sm font-bold uppercase tracking-widest text-cyan-400">
-              Operator View
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00d4ff]/20 to-transparent" />
+          </div>
+
+          <div className="mx-auto mb-16 w-full max-w-4xl">
+            <p className="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-[#00d4ff] font-mono">
+              <span className="opacity-50">[</span>Operator View<span className="opacity-50">]</span>
             </p>
             <h2 className="m-0 text-3xl font-black leading-tight tracking-tight text-white lg:text-5xl">
               Clean vendors and suspicious clusters separate quickly.
             </h2>
           </div>
 
-          <div
-            className="mx-auto w-full max-w-300 overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl"
-            role="table"
-            aria-label="Vendor risk cases"
-          >
-            <div
-              className="hidden grid-cols-[1.2fr_0.8fr_0.6fr_2fr] items-center gap-6 border-b border-white/10 bg-black/40 px-8 py-5 text-xs font-black uppercase tracking-wider text-gray-400 md:grid"
-              role="row"
-            >
-              <span role="columnheader">Vendor</span>
-              <span role="columnheader">Decision</span>
-              <span role="columnheader">Score</span>
-              <span role="columnheader">Primary Signal</span>
+          <div className="mx-auto w-full max-w-5xl rounded border border-white/10 bg-[#0d0d14]/80 backdrop-blur-xl overflow-hidden">
+            {/* Table header */}
+            <div className="hidden md:grid grid-cols-[1.2fr_0.8fr_0.6fr_2fr] items-center gap-6 border-b border-white/5 bg-black/40 px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-gray-600 font-mono">
+              <span>Vendor</span><span>Status</span><span>Score</span><span>Primary Signal</span>
             </div>
-            {vendorCases.map((vendor) => (
-              <div
-                className="grid gap-4 border-b border-white/5 px-8 py-6 last:border-0 md:grid-cols-[1.2fr_0.8fr_0.6fr_2fr] md:items-center md:gap-6 hover:bg-white/5 transition-colors"
-                role="row"
-                key={vendor.name}
-              >
-                <span
-                  className="min-w-0 font-bold text-white text-base"
-                  role="cell"
-                >
-                  {vendor.name}
-                </span>
-                <span role="cell" className="flex items-center">
-                  <span
-                    className={`inline-flex min-h-8 items-center rounded-full px-4 text-xs font-bold uppercase tracking-wider ${statusClasses[vendor.status]}`}
-                  >
-                    {vendor.status}
+
+            {cases.map((c) => (
+              <div key={c.name} className="grid gap-3 border-b border-white/5 last:border-0 px-6 py-5 md:grid-cols-[1.2fr_0.8fr_0.6fr_2fr] md:items-center md:gap-6 hover:bg-white/[0.02] transition-colors group">
+                <span className="font-bold text-white text-sm font-mono group-hover:text-[#00d4ff] transition-colors">{c.name}</span>
+                <span className="flex items-center">
+                  <span className="inline-flex items-center rounded px-3 py-1 text-[10px] font-bold uppercase tracking-[0.15em] font-mono" style={{ color: c.color, backgroundColor: `${c.color}10`, border: `1px solid ${c.color}20` }}>
+                    {c.status}
                   </span>
                 </span>
-                <span
-                  className="min-w-0 text-xl font-black text-white"
-                  role="cell"
-                >
-                  {vendor.score}
-                </span>
-                <span
-                  className="min-w-0 text-sm text-gray-400 leading-relaxed"
-                  role="cell"
-                >
-                  {vendor.signal}
-                </span>
+                <span className="text-lg font-black text-white font-mono">{c.score}</span>
+                <span className="text-xs text-gray-500 leading-relaxed">{c.signal}</span>
               </div>
             ))}
           </div>
         </section>
 
-        {/* Footer */}
-        <footer className="border-t border-white/10 bg-black/50 px-6 py-12 md:px-12 text-center text-sm text-gray-500">
-          <p>© 2026 VeriSphere Platform. All rights reserved.</p>
+        {/* ━━ FOOTER ━━ */}
+        <footer className="relative border-t border-white/5 bg-black/30 px-6 py-12 md:px-12 text-center">
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00ff41]/10 to-transparent" />
+          <p className="text-xs text-gray-600 font-mono">
+            <span className="text-[#00ff41]/30">&gt;</span> © 2026 VeriSphere Platform. All rights reserved.
+          </p>
         </footer>
       </main>
     </div>

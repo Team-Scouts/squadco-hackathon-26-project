@@ -11,7 +11,7 @@ export class HealthService {
   getHealth(): HealthResponse {
     return {
       status: 'ok',
-      service: 'verisphere-backend',
+      service: 'Fraudlens-backend',
       timestamp: new Date().toISOString(),
     };
   }

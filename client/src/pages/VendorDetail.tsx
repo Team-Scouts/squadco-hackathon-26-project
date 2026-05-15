@@ -24,7 +24,10 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { IndividualVendorDetails } from "../typesAndInterfaces";
+import type {
+  IndividualVendorDetails,
+  VirtualAccountRequest,
+} from "../typesAndInterfaces";
 import { VendorDetailSkeleton, SkeletonGraphPanel } from "../Skeletons";
 import GraphCanvas from "../components/GraphCanvas";
 import { graphApi } from "../lib/graphApi";
@@ -833,6 +836,7 @@ export default function VendorDetail() {
   const { vendorId } = useParams();
   const queryClient = useQueryClient();
   const { data: session } = useSession();
+  const [virtual_account, updateVA] = useState("");
   const {
     data: vendorDetails,
     isLoading,
@@ -868,6 +872,87 @@ export default function VendorDetail() {
     queryFn: () => graphApi.getVendorGraph(String(vendorId)),
     staleTime: 30 * 60 * 1000,
   });
+
+  const starterObjVirtual = {
+    customer_identifier: "SQUAD_101",
+    first_name: "Joesph",
+    last_name: "Ayodele",
+    mobile_num: "08123456789",
+    email: "ayo@squadco.com",
+    bvn: "22343211654",
+    dob: "07/19/1990",
+    address: "22 Kota street, UK",
+    gender: "1",
+    beneficiary_account: "4920299492",
+  };
+
+  //User VA generation mutation
+  const {
+    isPending: isGenerating,
+    isSuccess: isGenerated,
+    mutateAsync: getVirtual,
+  } = useMutation({
+    mutationFn: async (body: VirtualAccountRequest) => {
+      const request = await fetch(
+        `${import.meta.env.VITE_SERVER_BASE_URL}/squad/virtual`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+          credentials: "include",
+        },
+      );
+      const response = await request.json();
+      updateVA(response.data.virtual_account_number);
+      return response;
+    },
+  });
+
+  const {
+    data: events,
+    isSuccess: eventsLoaded,
+    isLoading: loadingEvents,
+  } = useQuery({
+    queryKey: ["events"],
+    queryFn: async () => {
+      const request = await fetch(
+        `${import.meta.env.VITE_SERVER_BASE_URL}/squad/events`,
+        {
+          credentials: "include",
+        },
+      );
+      const response = await request.json();
+      return response;
+    },
+  });
+
+  const {
+    isSuccess: isSimulated,
+    isPending: isSimulating,
+    mutateAsync: simulate,
+  } = useMutation({
+    mutationFn: async (body: any) => {
+      const request = await fetch(
+        `${import.meta.env.VITE_SERVER_BASE_URL}/squad/simulate/payment`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+          credentials: "include",
+        },
+      );
+      const response = await request.json();
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["events"] });
+    },
+  });
+
+  const handleDate = (string: string) => {
+    const newDate = new Date(string);
+    return newDate.toDateString();
+  };
 
   const { isPending: isSyncing, mutateAsync: synchronise } = useMutation({
     mutationFn: async () => {
@@ -944,6 +1029,53 @@ export default function VendorDetail() {
         </section>
 
         <EvidenceSummaryStrip vendor={vendorDetails.data} graph={userGraph} />
+        <section>
+          <p className="text-3xl">Your Account Details</p>
+          <p>Your Virtual Account</p>
+          {isGenerated && <p>Account Number: {virtual_account} </p>}
+          <div className="flex gap-x-4 p-2">
+            <button
+              onClick={() => {
+                if (vendorDetails.data) {
+                  getVirtual({
+                    ...starterObjVirtual,
+                    customer_identifier: String(vendorDetails.data.id),
+                    mobile_num: String(vendorDetails.data.phone),
+                    bvn: `22${String(vendorDetails.data.phone).slice(2, 11)}`,
+                    first_name: String(
+                      vendorDetails.data.businessName?.split(" ")[0],
+                    ),
+                  });
+                }
+              }}
+            >
+              Click to Generate Virtual Account
+            </button>
+            <button
+              onClick={() => {
+                if (virtual_account.length > 1) {
+                  simulate({
+                    virtual_account_number: virtual_account,
+                    amount: String(Math.floor(Math.random() * 10000)),
+                  });
+                }
+              }}
+            >
+              Simulate Transaction into Account
+            </button>
+          </div>
+          <div>
+            <p>Your Transactions</p>
+            {events.map((event: any) => (
+              <div className="flex gap-x-4 p-2">
+                <p>Successful Transaction</p>
+                <p>{event.payload.currency}</p>
+                <p>{event.payload.settled_amount}</p>
+                <p className="text-right">{handleDate(event.receivedAt)}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
         <section className="min-w-0">
           {graphLoaded && userGraph && (

@@ -11,6 +11,8 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { GraphService } from '../graph/graph.service';
 import { TransactionsService } from '../transactions/transactions.service';
+import * as fs from 'fs';
+import * as path from 'path';
 
 import {
   SQUAD_MODULE_OPTIONS,
@@ -87,99 +89,36 @@ export class SquadService {
       throw new UnauthorizedException('Invalid Squad webhook signature');
     }
 
-    // const eventType =
-    //   this.resolveFirstString(payload, ['event', 'type', 'event_type']) ??
-    //   'squad.webhook';
     const data = this.resolveEventData(payload);
-    // const transactionReference = this.resolveFirstString(data, [
-    //   'transaction_ref',
-    //   'transactionRef',
-    //   'transaction_reference',
-    //   'reference',
-    // ]);
-    // const transferReference = this.resolveFirstString(data, [
-    //   'transfer_reference',
-    //   'transferReference',
-    //   'transfer_ref',
-    // ]);
-    // const vendorId = this.resolveVendorId(payload);
 
-    // const webhookEvent = await this.prisma.webhookEvent.create({
-    //   data: {
-    //     provider: 'SQUAD',
-    //     eventType,
-    //     transactionReference,
-    //     transferReference,
-    //     rawPayload: payload,
-    //     signature,
-    //   },
-    // });
+    const storagePath = path.join(
+      process.cwd(),
+      'src',
+      'modules',
+      'squad',
+      'webhook_data.json',
+    );
 
-    // if (vendorId && transactionReference) {
-    //   await this.prisma.transaction.upsert({
-    //     where: { transactionRef: transactionReference },
-    //     create: {
-    //       vendorId,
-    //       transactionRef: transactionReference,
-    //       amount: this.resolveAmount(data),
-    //       channel: this.resolveFirstString(data, ['channel']) ?? 'SQUAD',
-    //       status:
-    //         this.resolveFirstString(data, ['status', 'transaction_status']) ??
-    //         'UNKNOWN',
-    //       financialRiskScore: 0,
-    //     },
-    //     update: {
-    //       amount: this.resolveAmount(data),
-    //       channel: this.resolveFirstString(data, ['channel']) ?? 'SQUAD',
-    //       status:
-    //         this.resolveFirstString(data, ['status', 'transaction_status']) ??
-    //         'UNKNOWN',
-    //     },
-    //   });
-    // }
+    let existingData: any[] = [];
 
-    // if (vendorId && transferReference) {
-    //   await this.persistTransferFromWebhook(vendorId, transferReference, data);
-    // }
+    if (fs.existsSync(storagePath)) {
+      const fileContent = fs.readFileSync(storagePath, 'utf8');
 
-    const financialRisk = vendorId
-      ? await this.transactionsService.evaluateVendorFinancialRisk(vendorId, {
-          transactionRef: transactionReference,
-          transferReference,
-          webhookEventId: webhookEvent.id,
-        })
-      : null;
+      existingData = fileContent.trim() ? JSON.parse(fileContent) : [];
+    }
 
-    // let graphSynced = false;
-    // if (vendorId) {
-    //   graphSynced = await this.graphService.safeSyncVendorById(vendorId);
-    // }
+    existingData.push({
+      payload,
+      receivedAt: new Date().toISOString(),
+    });
 
-    // await this.prisma.webhookEvent.update({
-    //   where: { id: webhookEvent.id },
-    //   data: {
-    //     processed: true,
-    //     processedAt: new Date(),
-    //     graphSynced,
-    //     graphSyncAttempts: { increment: 1 },
-    //     graphSyncError: graphSynced
-    //       ? null
-    //       : 'Graph sync failed; queued for retry',
-    //   },
-    // });
-
-    // await this.graphService.safeSyncWebhookEventById(webhookEvent.id);
+    fs.writeFileSync(storagePath, JSON.stringify(existingData, null, 2));
 
     return {
+      ...data,
       received: true,
-      eventId: webhookEvent.id,
-      transactionReference,
-      transferReference,
-      financialRisk,
-      graphSynced,
     };
   }
-
   private async persistTransferFromWebhook(
     vendorId: string,
     transferReference: string,

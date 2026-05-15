@@ -21,6 +21,7 @@ import {
   DocumentIntelligenceService,
   VerificationReason,
 } from './document-intelligence.service';
+import { AlertsService } from '../alerts/alerts.service';
 
 @Injectable()
 export class DocumentsService {
@@ -29,6 +30,7 @@ export class DocumentsService {
     private cloudinaryService: CloudinaryService,
     private graphService: GraphService,
     private documentIntelligenceService: DocumentIntelligenceService,
+    private alertservice: AlertsService,
   ) {}
 
   async uploadDocument(
@@ -212,10 +214,11 @@ export class DocumentsService {
         vendor: documentWithVendor.vendor,
       });
 
-      const verificationStatus = this.resolveVerificationStatusAfterIntelligence(
-        document.verificationStatus,
-        intelligence,
-      );
+      const verificationStatus =
+        this.resolveVerificationStatusAfterIntelligence(
+          document.verificationStatus,
+          intelligence,
+        );
 
       processedDocument = await this.prisma.document.update({
         where: { id: document.id },

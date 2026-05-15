@@ -264,8 +264,11 @@ export const AlertScalarFieldEnum = {
   id: 'id',
   vendorId: 'vendorId',
   type: 'type',
+  severity: 'severity',
+  title: 'title',
   message: 'message',
   resolved: 'resolved',
+  resolvedAt: 'resolvedAt',
   createdAt: 'createdAt'
 } as const
 

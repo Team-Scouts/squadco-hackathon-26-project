@@ -279,16 +279,28 @@ model GraphSyncFailure {
   @@index([resolved])
 }
 
+enum AlertSeverity {
+  INFO
+  REVIEW
+  HIGH
+  CRITICAL
+}
+
 model Alert {
   id String @id @default(uuid())
 
   vendorId String
   vendor   Vendor @relation(fields: [vendorId], references: [id])
 
-  type    AlertType
+  type AlertType
+
+  severity AlertSeverity @default(INFO)
+
+  title   String
   message String
 
-  resolved Boolean @default(false)
+  resolved   Boolean @default(false)
+  resolvedAt DateTime?
 
   createdAt DateTime @default(now())
 }

@@ -126,10 +126,7 @@ export default function Vendors() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Link
-            to="/dashboard/vendors/new"
-            className="button-primary"
-          >
+          <Link to="/dashboard/vendors/new" className="button-primary">
             <Plus className="h-4 w-4" />
             New Vendor
           </Link>
@@ -220,7 +217,8 @@ export default function Vendors() {
           </table>
         </div>
         <div className="border-t border-vs-border-soft bg-black/20 p-4 text-center text-xs text-zinc-600">
-          Showing {allVendors?.data.length ?? 0} vendors from the current workspace
+          Showing {allVendors?.data.length ?? 0} vendors from the current
+          workspace
         </div>
       </div>
     </div>

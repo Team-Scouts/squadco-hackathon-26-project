@@ -17,6 +17,19 @@ export type VendorEntityFromVendorsList = {
   updatedAt: Date | null;
 };
 
+export interface VirtualAccountRequest {
+  customer_identifier: string;
+  first_name: string;
+  last_name: string;
+  mobile_num: string;
+  email: string;
+  bvn: string;
+  dob: string;
+  address: string;
+  gender: string;
+  beneficiary_account: string;
+}
+
 export type Doc = {
   id: string;
   documentType: string;

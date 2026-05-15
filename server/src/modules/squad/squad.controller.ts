@@ -25,6 +25,8 @@ import {
   VirtualAccountDto,
 } from './dto/squad.dto';
 import { AllowAnonymous, OptionalAuth } from '@thallesp/nestjs-better-auth';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @OptionalAuth()
 @Controller('squad')
@@ -85,6 +87,25 @@ export class SquadController {
   @Patch('transaction/cancel/recurring')
   cancelRecurringCharge(@Body() dto: CancelRecurringChargeDto) {
     return this.squadService.cancelRecurringCharge(dto);
+  }
+
+  @Get('/events')
+  async getWebhookData() {
+    try {
+      const filePath = path.join(
+        process.cwd(),
+        'src',
+        'modules',
+        'squad',
+        'webhook_data.json',
+      );
+
+      const fileContents = await fs.readFileSync(filePath, 'utf-8');
+
+      return JSON.parse(fileContents);
+    } catch (error) {
+      throw new Error('Failed to read webhook_data.json');
+    }
   }
 
   /**

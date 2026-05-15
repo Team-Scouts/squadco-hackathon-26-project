@@ -11,6 +11,7 @@ import VendorDetail from "./pages/VendorDetail";
 import Transactions from "./pages/Transactions";
 import Alerts from "./pages/Alerts";
 import Settings from "./pages/Settings";
+import FraudGraph from "./pages/FraudGraph";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ function App() {
             <Route path="vendors" element={<Vendors />} />
             <Route path="vendors/new" element={<CreateVendor />} />
             <Route path="vendors/:vendorId" element={<VendorDetail />} />
+            <Route path="fraud-graph" element={<FraudGraph />} />
             <Route path="transactions" element={<Transactions />} />
             <Route path="alerts" element={<Alerts />} />
             <Route path="settings" element={<Settings />} />

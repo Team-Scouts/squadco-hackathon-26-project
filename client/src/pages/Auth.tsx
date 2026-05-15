@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  Mail,
-  Lock,
-  User,
-  Building,
   ArrowRight,
+  Building,
   Eye,
   EyeOff,
+  Lock,
+  Mail,
+  User,
 } from "lucide-react";
 import { signIn, signUp, useSession } from "../lib/authClient";
 
@@ -20,192 +20,168 @@ export default function Auth() {
   const [lastName, updateLastName] = useState("");
   const navigate = useNavigate();
   const { data } = useSession();
-  if (data && data.user) {
+
+  if (data?.user) {
     navigate("/dashboard");
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    // Simulated auth delay
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
     if (isLogin) {
-      try {
-        await signIn.email(
-          {
-            email: email,
-            password: password,
-          },
-          {
-            onSuccess: () => navigate("/dashboard"),
-          },
-        );
-      } catch (error) {
-        console.log(error);
-      }
-    } else {
-      try {
-        await signUp.email(
-          {
-            email: email,
-            password: password,
-            name: `${firstName} ${lastName}`,
-          },
-          {
-            onSuccess: () => navigate("/dashboard"),
-          },
-        );
-      } catch (error) {
-        console.log(error);
-      }
+      await signIn.email(
+        { email, password },
+        { onSuccess: () => navigate("/dashboard") },
+      );
+      return;
     }
+
+    await signUp.email(
+      {
+        email,
+        password,
+        name: `${firstName} ${lastName}`,
+      },
+      { onSuccess: () => navigate("/dashboard") },
+    );
   };
 
   return (
-    <div className="min-h-svh bg-gray-950 text-gray-200 font-sans selection:bg-emerald-500/30 flex items-center justify-center p-6 relative overflow-hidden">
-      {/* Dynamic Background */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-emerald-900/20 blur-[150px] animate-float-slow"></div>
-        <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] rounded-full bg-cyan-900/10 blur-[180px] animate-float-slower"></div>
+    <div className="relative flex min-h-svh items-center justify-center overflow-hidden bg-vs-background p-6 text-zinc-200 selection:bg-cyan-300/20">
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+        <div className="absolute left-[-10%] top-[-20%] h-[50%] w-[50%] rounded-full bg-white/[0.035] blur-[150px]" />
+        <div className="absolute bottom-[-20%] right-[-10%] h-[60%] w-[60%] rounded-full bg-white/[0.025] blur-[180px]" />
       </div>
 
-      <div className="glass-panel w-full max-w-md relative z-10 rounded-3xl p-8 shadow-2xl border border-white/10 backdrop-blur-xl">
-        <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-emerald-500 to-cyan-500 rounded-t-3xl"></div>
-
-        {/* Header */}
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-block mb-6 group">
-            <div className="relative grid h-12 w-12 mx-auto place-items-center rounded-2xl bg-linear-to-br from-emerald-400 to-cyan-500 text-gray-950 shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-transform group-hover:scale-105">
+      <div className="panel-card relative z-10 w-full max-w-md p-8">
+        <div className="mb-8 text-center">
+          <Link to="/" className="mb-6 inline-block group">
+            <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl border border-white/10 bg-white text-black transition-transform group-hover:scale-105">
               <span className="text-xl font-black">V</span>
-              <div className="absolute inset-0 rounded-2xl bg-white/20 opacity-0 transition-opacity group-hover:opacity-100"></div>
             </div>
           </Link>
-          <h1 className="text-3xl font-black text-white tracking-tight mb-2">
+          <p className="text-xs font-bold uppercase tracking-[0.24em] text-zinc-500">
+            VeriSphere console
+          </p>
+          <h1 className="mt-3 text-3xl font-black tracking-tight text-white">
             {isLogin ? "Welcome back" : "Create an account"}
           </h1>
-          <p className="text-sm text-gray-400">
+          <p className="mt-2 text-sm text-zinc-400">
             {isLogin
-              ? "Enter your details to access the console."
-              : "Join VeriSphere to start screening."}
+              ? "Access vendor intelligence, graph evidence, and review queues."
+              : "Create a workspace user for the review console."}
           </p>
         </div>
 
-        {/* Toggle */}
-        <div className="flex p-1 bg-black/40 rounded-xl mb-8 border border-white/5">
+        <div className="mb-8 flex rounded-2xl border border-white/5 bg-black/40 p-1">
           <button
+            type="button"
             onClick={() => setIsLogin(true)}
-            className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all duration-300 ${isLogin ? "bg-white/10 text-white shadow-md" : "text-gray-400 hover:text-white"}`}
+            className={`flex-1 rounded-xl py-2 text-sm font-bold transition-all ${
+              isLogin ? "bg-white/10 text-white" : "text-zinc-500 hover:text-white"
+            }`}
           >
             Sign In
           </button>
           <button
+            type="button"
             onClick={() => setIsLogin(false)}
-            className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all duration-300 ${!isLogin ? "bg-white/10 text-white shadow-md" : "text-gray-400 hover:text-white"}`}
+            className={`flex-1 rounded-xl py-2 text-sm font-bold transition-all ${
+              !isLogin ? "bg-white/10 text-white" : "text-zinc-500 hover:text-white"
+            }`}
           >
             Sign Up
           </button>
         </div>
 
-        {/* Form */}
         <form className="space-y-4" onSubmit={handleSubmit} method="POST">
           {!isLogin && (
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider pl-1">
-                  First Name
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User className="h-4 w-4 text-emerald-500/50" />
-                  </div>
+              <label className="space-y-1.5">
+                <span className="pl-1 text-xs font-bold uppercase tracking-wider text-zinc-500">
+                  First name
+                </span>
+                <span className="relative block">
+                  <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600" />
                   <input
                     type="text"
-                    onChange={(e) => updateFirstName(e.target.value)}
-                    className="w-full bg-black/40 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all"
+                    onChange={(event) => updateFirstName(event.target.value)}
+                    className="field-control py-2.5 pl-10"
                     placeholder="Jane"
                   />
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider pl-1">
-                  Last Name
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User className="h-4 w-4 text-emerald-500/50" />
-                  </div>
+                </span>
+              </label>
+              <label className="space-y-1.5">
+                <span className="pl-1 text-xs font-bold uppercase tracking-wider text-zinc-500">
+                  Last name
+                </span>
+                <span className="relative block">
+                  <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600" />
                   <input
                     type="text"
-                    onChange={(e) => updateLastName(e.target.value)}
-                    className="w-full bg-black/40 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all"
+                    onChange={(event) => updateLastName(event.target.value)}
+                    className="field-control py-2.5 pl-10"
                     placeholder="Doe"
                   />
-                </div>
-              </div>
+                </span>
+              </label>
             </div>
           )}
 
           {!isLogin && (
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-400 uppercase tracking-wider pl-1">
+            <label className="space-y-1.5">
+              <span className="pl-1 text-xs font-bold uppercase tracking-wider text-zinc-500">
                 Company
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Building className="h-4 w-4 text-emerald-500/50" />
-                </div>
+              </span>
+              <span className="relative block">
+                <Building className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600" />
                 <input
                   type="text"
-                  className="w-full bg-black/40 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all"
+                  className="field-control py-2.5 pl-10"
                   placeholder="Acme Corp"
                 />
-              </div>
-            </div>
+              </span>
+            </label>
           )}
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider pl-1">
-              Email Address
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Mail className="h-4 w-4 text-emerald-500/50" />
-              </div>
+          <label className="space-y-1.5">
+            <span className="pl-1 text-xs font-bold uppercase tracking-wider text-zinc-500">
+              Email address
+            </span>
+            <span className="relative block">
+              <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600" />
               <input
                 type="email"
-                onChange={(e) => updateEmail(e.target.value)}
-                className="w-full bg-black/40 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all"
+                onChange={(event) => updateEmail(event.target.value)}
+                className="field-control py-2.5 pl-10"
                 placeholder="name@company.com"
               />
-            </div>
-          </div>
+            </span>
+          </label>
 
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between pl-1">
-              <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+          <label className="space-y-1.5">
+            <span className="flex items-center justify-between pl-1">
+              <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">
                 Password
-              </label>
+              </span>
               {isLogin && (
-                <a
-                  href="#"
-                  className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors"
-                >
+                <a href="#" className="text-xs text-zinc-400 hover:text-white">
                   Forgot?
                 </a>
               )}
-            </div>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Lock className="h-4 w-4 text-emerald-500/50" />
-              </div>
+            </span>
+            <span className="relative block">
+              <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600" />
               <input
                 type={showPassword ? "text" : "password"}
-                onChange={(e) => updatePassword(e.target.value)}
-                className="w-full bg-black/40 border border-white/10 rounded-xl py-2.5 pl-10 pr-10 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all"
-                placeholder="••••••••"
+                onChange={(event) => updatePassword(event.target.value)}
+                className="field-control py-2.5 pl-10 pr-10"
+                placeholder="Password"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-300 transition-colors focus:outline-none"
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-zinc-500 transition-colors hover:text-zinc-300"
               >
                 {showPassword ? (
                   <EyeOff className="h-4 w-4" />
@@ -213,29 +189,22 @@ export default function Auth() {
                   <Eye className="h-4 w-4" />
                 )}
               </button>
-            </div>
-          </div>
+            </span>
+          </label>
 
-          <button className="w-full mt-6 group relative flex items-center justify-center gap-2 rounded-xl bg-emerald-500 py-3 px-4 text-sm font-bold text-gray-950 shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all hover:bg-emerald-400 hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] hover:-translate-y-0.5">
+          <button className="button-primary mt-6 w-full rounded-xl">
             {isLogin ? "Sign In to Console" : "Create Account"}
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            <ArrowRight className="h-4 w-4" />
           </button>
         </form>
 
-        {/* Footer */}
-        <p className="mt-8 text-center text-xs text-gray-500">
+        <p className="mt-8 text-center text-xs text-zinc-500">
           By continuing, you agree to our{" "}
-          <Link
-            to="/terms"
-            className="text-gray-400 underline hover:text-white"
-          >
+          <Link to="/terms" className="text-zinc-300 underline hover:text-white">
             Terms of Service
           </Link>{" "}
           and{" "}
-          <Link
-            to="/privacy"
-            className="text-gray-400 underline hover:text-white"
-          >
+          <Link to="/privacy" className="text-zinc-300 underline hover:text-white">
             Privacy Policy
           </Link>
           .

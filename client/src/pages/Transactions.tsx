@@ -1,74 +1,123 @@
-import { Search, Filter, Activity, CreditCard, CheckCircle, XCircle, Clock } from 'lucide-react'
+import {
+  Activity,
+  CheckCircle,
+  Clock,
+  CreditCard,
+  Filter,
+  Search,
+  XCircle,
+} from "lucide-react";
+
+const transactions = [
+  {
+    id: "sq_txn_9x2b4...",
+    vendor: "Northline Exports",
+    amount: "NGN 15,000",
+    type: "Verification Fee",
+    status: "Success",
+    date: "Oct 24, 2026 14:32",
+    icon: CheckCircle,
+    tone: "text-green-300",
+  },
+  {
+    id: "sq_txn_2m4n5...",
+    vendor: "Koro Market Services",
+    amount: "NGN 15,000",
+    type: "Verification Fee",
+    status: "Pending",
+    date: "Oct 24, 2026 12:15",
+    icon: Clock,
+    tone: "text-yellow-200",
+  },
+  {
+    id: "sq_txn_7v8c2...",
+    vendor: "Adenike Supplies Ltd",
+    amount: "NGN 500,000",
+    type: "Payout",
+    status: "Success",
+    date: "Oct 23, 2026 09:41",
+    icon: CheckCircle,
+    tone: "text-green-300",
+  },
+  {
+    id: "sq_txn_4b5n6...",
+    vendor: "Global Tech Ventures",
+    amount: "NGN 15,000",
+    type: "Verification Fee",
+    status: "Failed",
+    date: "Oct 23, 2026 16:20",
+    icon: XCircle,
+    tone: "text-red-300",
+  },
+  {
+    id: "sq_txn_1z2x3...",
+    vendor: "Apex Build Group",
+    amount: "NGN 2,500,000",
+    type: "Payout",
+    status: "Success",
+    date: "Oct 22, 2026 11:05",
+    icon: CheckCircle,
+    tone: "text-green-300",
+  },
+];
+
+const metrics = [
+  { label: "Total volume", value: "NGN 42.5M", icon: CreditCard, tone: "text-cyan-200" },
+  { label: "Success rate", value: "98.2%", icon: Activity, tone: "text-green-300" },
+  { label: "Pending verification", value: "112", icon: Clock, tone: "text-yellow-200" },
+];
 
 export default function Transactions() {
-  const transactions = [
-    { id: 'sq_txn_9x2b4...', vendor: 'Northline Exports', amount: '₦15,000', type: 'Verification Fee', status: 'Success', date: 'Oct 24, 2026 14:32', icon: CheckCircle, color: 'text-emerald-400' },
-    { id: 'sq_txn_2m4n5...', vendor: 'Koro Market Services', amount: '₦15,000', type: 'Verification Fee', status: 'Pending', date: 'Oct 24, 2026 12:15', icon: Clock, color: 'text-amber-400' },
-    { id: 'sq_txn_7v8c2...', vendor: 'Adenike Supplies Ltd', amount: '₦500,000', type: 'Payout', status: 'Success', date: 'Oct 23, 2026 09:41', icon: CheckCircle, color: 'text-emerald-400' },
-    { id: 'sq_txn_4b5n6...', vendor: 'Global Tech Ventures', amount: '₦15,000', type: 'Verification Fee', status: 'Failed', date: 'Oct 23, 2026 16:20', icon: XCircle, color: 'text-red-400' },
-    { id: 'sq_txn_1z2x3...', vendor: 'Apex Build Group', amount: '₦2,500,000', type: 'Payout', status: 'Success', date: 'Oct 22, 2026 11:05', icon: CheckCircle, color: 'text-emerald-400' },
-  ]
-
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">Squad Transactions</h1>
-          <p className="text-sm text-gray-400 mt-1">Payment telemetry and webhook events.</p>
-        </div>
+    <div className="mx-auto max-w-6xl space-y-6">
+      <div>
+        <p className="text-xs font-bold uppercase tracking-[0.24em] text-zinc-500">
+          Payment intelligence
+        </p>
+        <h1 className="mt-3 text-3xl font-black tracking-tight text-white">
+          Squad Transactions
+        </h1>
+        <p className="mt-2 text-sm leading-6 text-zinc-400">
+          Payment telemetry and webhook events. This route remains visually
+          prepared while full transaction wiring is deferred.
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="glass-panel rounded-xl p-5 flex items-center gap-4">
-          <div className="h-12 w-12 rounded-full bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
-            <CreditCard className="h-6 w-6 text-cyan-400" />
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        {metrics.map((metric) => (
+          <div key={metric.label} className="panel-card flex items-center gap-4 p-5">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-black/40">
+              <metric.icon className={`h-6 w-6 ${metric.tone}`} />
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+                {metric.label}
+              </p>
+              <p className="mt-1 text-2xl font-black text-white">{metric.value}</p>
+            </div>
           </div>
-          <div>
-            <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Total Volume</p>
-            <p className="text-2xl font-black text-white">₦42.5M</p>
-          </div>
-        </div>
-        <div className="glass-panel rounded-xl p-5 flex items-center gap-4">
-          <div className="h-12 w-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-            <Activity className="h-6 w-6 text-emerald-400" />
-          </div>
-          <div>
-            <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Success Rate</p>
-            <p className="text-2xl font-black text-white">98.2%</p>
-          </div>
-        </div>
-        <div className="glass-panel rounded-xl p-5 flex items-center gap-4">
-          <div className="h-12 w-12 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-            <Clock className="h-6 w-6 text-amber-400" />
-          </div>
-          <div>
-            <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Pending Verifications</p>
-            <p className="text-2xl font-black text-white">112</p>
-          </div>
-        </div>
+        ))}
       </div>
 
-      <div className="glass-panel rounded-2xl overflow-hidden">
-        {/* Toolbar */}
-        <div className="p-4 border-b border-white/5 flex flex-col sm:flex-row gap-4 bg-black/20">
-          <div className="relative flex-1 w-full sm:max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-            <input 
-              type="text" 
-              placeholder="Search by Transaction ID or Vendor..." 
-              className="w-full bg-white/5 border border-white/10 rounded-lg py-2 pl-10 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 transition-all"
+      <div className="panel-card overflow-hidden">
+        <div className="flex flex-col gap-3 border-b border-vs-border-soft bg-black/20 p-5 lg:flex-row">
+          <div className="relative max-w-md flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600" />
+            <input
+              type="text"
+              placeholder="Search by transaction ID or vendor..."
+              className="field-control py-2.5 pl-10"
             />
           </div>
-          <button className="flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-semibold text-gray-300 hover:text-white transition-colors">
+          <button className="button-secondary py-2.5">
             <Filter className="h-4 w-4" />
             Status
           </button>
         </div>
 
-        {/* Data Table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-black/40 text-gray-500 text-xs uppercase tracking-wider font-semibold">
+          <table className="w-full whitespace-nowrap text-left text-sm">
+            <thead className="border-b border-vs-border-soft bg-black/40 text-xs font-semibold uppercase tracking-wider text-zinc-500">
               <tr>
                 <th className="px-6 py-4">Transaction ID</th>
                 <th className="px-6 py-4">Vendor</th>
@@ -78,20 +127,22 @@ export default function Transactions() {
                 <th className="px-6 py-4">Date</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
-              {transactions.map((txn, i) => (
-                <tr key={i} className="hover:bg-white/5 transition-colors">
-                  <td className="px-6 py-4 font-mono text-xs text-gray-400">{txn.id}</td>
+            <tbody className="divide-y divide-vs-border-soft">
+              {transactions.map((txn) => (
+                <tr key={txn.id} className="transition-colors hover:bg-white/[0.03]">
+                  <td className="px-6 py-4 font-mono text-xs text-zinc-400">
+                    {txn.id}
+                  </td>
                   <td className="px-6 py-4 font-bold text-white">{txn.vendor}</td>
                   <td className="px-6 py-4 font-black text-white">{txn.amount}</td>
-                  <td className="px-6 py-4 text-gray-300">{txn.type}</td>
+                  <td className="px-6 py-4 text-zinc-300">{txn.type}</td>
                   <td className="px-6 py-4">
-                    <span className={`inline-flex items-center gap-1.5 font-bold ${txn.color}`}>
+                    <span className={`inline-flex items-center gap-1.5 font-bold ${txn.tone}`}>
                       <txn.icon className="h-4 w-4" />
                       {txn.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-gray-400 text-xs">{txn.date}</td>
+                  <td className="px-6 py-4 text-xs text-zinc-500">{txn.date}</td>
                 </tr>
               ))}
             </tbody>
@@ -99,5 +150,5 @@ export default function Transactions() {
         </div>
       </div>
     </div>
-  )
+  );
 }

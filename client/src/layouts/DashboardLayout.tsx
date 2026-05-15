@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -7,13 +9,31 @@ import {
   Settings,
   Search,
   Bell,
+  GitBranch,
   LogOut,
+  Activity,
 } from "lucide-react";
 import { authClient } from "../lib/authClient";
+import { useSession } from "../lib/authClient";
+import { graphApi } from "../lib/graphApi";
 
 export default function DashboardLayout() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { data: session, isPending } = useSession();
+  const neo4jHealthQuery = useQuery({
+    queryKey: ["neo4j_health_header"],
+    queryFn: graphApi.getNeo4jHealth,
+    enabled: !!session?.user,
+    retry: false,
+    staleTime: 60 * 1000,
+  });
+
+  useEffect(() => {
+    if (!isPending && !session?.user) {
+      navigate("/auth", { replace: true });
+    }
+  }, [isPending, navigate, session?.user]);
 
   const signOut = async () =>
     await authClient.signOut({
@@ -25,6 +45,7 @@ export default function DashboardLayout() {
   const navItems = [
     { name: "Risk Console", path: "/dashboard", icon: LayoutDashboard },
     { name: "Vendors", path: "/dashboard/vendors", icon: Users },
+    { name: "Fraud Graph", path: "/dashboard/fraud-graph", icon: GitBranch },
     {
       name: "Squad Transactions",
       path: "/dashboard/transactions",
@@ -34,33 +55,57 @@ export default function DashboardLayout() {
     { name: "Settings", path: "/dashboard/settings", icon: Settings },
   ];
 
+  if (isPending || !session?.user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-vs-background text-sm font-semibold text-zinc-400">
+        Checking session...
+      </div>
+    );
+  }
+
+  const healthStatus = neo4jHealthQuery.data?.status ?? "checking";
+  const healthTone =
+    healthStatus === "connected"
+      ? "bg-green-500"
+      : healthStatus === "checking"
+        ? "bg-yellow-400"
+        : "bg-red-500";
+
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-200 font-sans flex selection:bg-emerald-500/30">
-      {/* Sidebar */}
-      <aside className="w-64 border-r border-white/5 bg-gray-900/50 backdrop-blur-xl flex flex-col fixed inset-y-0 left-0 z-20">
-        <div className="h-20 flex items-center px-6 border-b border-white/5">
+    <div className="flex min-h-screen bg-vs-background text-zinc-200 selection:bg-cyan-300/20">
+      <aside className="fixed inset-y-0 left-0 z-20 flex w-70 flex-col border-r border-vs-border-soft bg-vs-surface/90 backdrop-blur-xl">
+        <div className="flex h-20 items-center border-b border-vs-border-soft px-6">
           <Link
             to="/"
             className="flex items-center gap-3 font-extrabold text-white no-underline transition-opacity hover:opacity-80"
           >
-            <div className="relative grid h-8 w-8 place-items-center rounded-lg bg-linear-to-br from-emerald-400 to-cyan-500 text-gray-950 shadow-[0_0_15px_rgba(16,185,129,0.4)]">
+            <div className="relative grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white text-black shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]">
               V
             </div>
-            <span className="text-lg tracking-tight">VeriSphere</span>
+            <div>
+              <span className="block text-lg tracking-tight">VeriSphere</span>
+              <span className="block text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-500">
+                Fraud intelligence
+              </span>
+            </div>
           </Link>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1">
+        <nav className="flex-1 space-y-1 p-4">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
               <Link
                 key={item.name}
                 to={item.path}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all ${isActive ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.1)]" : "text-gray-400 hover:text-white hover:bg-white/5 border border-transparent"}`}
+                className={`flex items-center gap-3 rounded-xl border px-3.5 py-3 text-sm font-semibold transition-all ${
+                  isActive
+                    ? "border-vs-border bg-vs-raised text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
+                    : "border-transparent text-zinc-500 hover:border-white/5 hover:bg-white/5 hover:text-zinc-100"
+                }`}
               >
                 <item.icon
-                  className={`h-5 w-5 ${isActive ? "text-emerald-400" : "text-gray-500"}`}
+                  className={`h-5 w-5 ${isActive ? "text-cyan-300" : "text-zinc-600"}`}
                 />
                 {item.name}
               </Link>
@@ -68,49 +113,65 @@ export default function DashboardLayout() {
           })}
         </nav>
 
-        <div className="p-4 border-t border-white/5">
+        <div className="border-t border-vs-border-soft p-4">
+          <div className="mb-4 rounded-2xl border border-white/5 bg-black/30 p-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+                Environment
+              </span>
+              <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-bold text-zinc-300">
+                Local
+              </span>
+            </div>
+            <div className="mt-3 flex items-center gap-2 text-xs font-semibold text-zinc-400">
+              <span className={`h-2 w-2 rounded-full ${healthTone}`} />
+              Neo4j {healthStatus}
+            </div>
+          </div>
           <button
             onClick={signOut}
-            className="flex  gap-x-2 items-center font-semibold text-sm"
+            className="flex w-full items-center gap-x-2 rounded-xl px-3 py-2 text-sm font-semibold text-zinc-400 transition-colors hover:bg-white/5 hover:text-white"
           >
-            <LogOut className="h-5 w-5 text-gray-400" />
+            <LogOut className="h-5 w-5 text-zinc-500" />
             Sign Out
           </button>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <div className="flex-1 ml-64 flex flex-col min-h-svh">
-        {/* Top Header */}
-        <header className="h-20 border-b border-white/5 bg-gray-950/80 backdrop-blur-xl flex items-center justify-between px-8 sticky top-0 z-20">
-          <div className="relative w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+      <div className="ml-70 flex min-h-svh flex-1 flex-col">
+        <header className="sticky top-0 z-20 flex h-20 items-center justify-between border-b border-vs-border-soft bg-vs-background/80 px-8 backdrop-blur-xl">
+          <div className="relative w-full max-w-md">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600" />
             <input
               type="text"
               placeholder="Search vendors, documents, or Squad IDs..."
-              className="w-full bg-white/5 border border-white/10 rounded-full py-2 pl-10 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all"
+              className="field-control rounded-full py-2.5 pl-10"
             />
           </div>
 
           <div className="flex items-center gap-4">
-            <button className="relative p-2 rounded-full text-gray-400 hover:text-white hover:bg-white/5 transition-colors">
+            <div className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold text-zinc-300 lg:flex">
+              <Activity className="h-4 w-4 text-cyan-300" />
+              Review workspace
+            </div>
+            <button className="relative rounded-full p-2 text-zinc-500 transition-colors hover:bg-white/5 hover:text-white">
               <Bell className="h-5 w-5" />
-              <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 animate-ping"></span>
-              <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500"></span>
+              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500"></span>
             </button>
             <Link
               to="/dashboard/settings?tab=profile"
-              className="h-9 w-9 rounded-full bg-linear-to-tr from-emerald-500 to-cyan-500 border-2 border-gray-900 shadow-[0_0_10px_rgba(16,185,129,0.3)] ml-2 cursor-pointer transition-transform hover:scale-105"
-            ></Link>
+              className="ml-2 grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-vs-raised text-sm font-black text-white transition-transform hover:scale-105"
+            >
+              {session.user.name?.slice(0, 1).toUpperCase() ?? "U"}
+            </Link>
           </div>
         </header>
 
-        {/* Dashboard Content */}
-        <main className="flex-1 p-8 relative">
-          <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-            <div className="absolute top-0 right-0 md:w-125 md:h-125 rounded-full bg-emerald-900/10 blur-[150px]"></div>
+        <main className="relative flex-1 p-8">
+          <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+            <div className="absolute right-0 top-0 h-125 w-125 rounded-full bg-white/[0.025] blur-[150px]" />
           </div>
-          <div className="relative z-10 max-w-350 mx-auto">
+          <div className="relative z-10 mx-auto max-w-350">
             <Outlet />
           </div>
         </main>

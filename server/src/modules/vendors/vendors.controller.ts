@@ -5,7 +5,9 @@ import { VendorsService } from './vendors.service';
 import { CreateVendorDto } from './dto/create-vendor.dto';
 
 import { UpdateVendorDto } from './dto/update-vendor.dto';
+import { OptionalAuth } from '@thallesp/nestjs-better-auth';
 
+@OptionalAuth()
 @Controller('vendors')
 export class VendorsController {
   constructor(private readonly vendorsService: VendorsService) {}

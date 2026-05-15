@@ -1,34 +1,24 @@
-// import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-// import { DeviceIntelligenceService } from './device-intelligence.service';
-// import { CreateDeviceIntelligenceDto } from './dto/create-device-intelligence.dto';
-// import { UpdateDeviceIntelligenceDto } from './dto/update-device-intelligence.dto';
+import { Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
+import { AllowAnonymous, Roles } from '@thallesp/nestjs-better-auth';
+import { CreateDeviceDto } from './dto/create-device-dto';
+import { DeviceIntelligenceService } from './device-intelligence.service';
 
-// @Controller('device-intelligence')
-// export class DeviceIntelligenceController {
-//   constructor(private readonly deviceIntelligenceService: DeviceIntelligenceService) {}
+@Controller('devices')
+export class DeviceIntelligenceController {
+  constructor(private readonly devicesService: DeviceIntelligenceService) {}
 
-//   @Post()
-//   create(@Body() createDeviceIntelligenceDto: CreateDeviceIntelligenceDto) {
-//     return this.deviceIntelligenceService.create(createDeviceIntelligenceDto);
-//   }
+  @Post()
+  @AllowAnonymous()
+  createDevice(@Body() createDeviceDto: CreateDeviceDto, @Req() req) {
+    const ipAddress =
+      req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
-//   @Get()
-//   findAll() {
-//     return this.deviceIntelligenceService.findAll();
-//   }
+    return this.devicesService.createDevice(createDeviceDto, ipAddress);
+  }
 
-//   @Get(':id')
-//   findOne(@Param('id') id: string) {
-//     return this.deviceIntelligenceService.findOne(+id);
-//   }
-
-//   @Patch(':id')
-//   update(@Param('id') id: string, @Body() updateDeviceIntelligenceDto: UpdateDeviceIntelligenceDto) {
-//     return this.deviceIntelligenceService.update(+id, updateDeviceIntelligenceDto);
-//   }
-
-//   @Delete(':id')
-//   remove(@Param('id') id: string) {
-//     return this.deviceIntelligenceService.remove(+id);
-//   }
-// }
+  @Roles(['admin', 'reviewer'])
+  @Get('vendor/:vendorId')
+  getVendorDevices(@Param('vendorId') vendorId: string) {
+    return this.devicesService.getVendorDevices(vendorId);
+  }
+}

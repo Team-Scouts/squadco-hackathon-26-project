@@ -229,6 +229,15 @@ export class GraphService {
           verificationStatus: document.verificationStatus,
           duplicateDetected: document.duplicateDetected,
           duplicateVendorCount: document.duplicateVendorCount,
+          verificationReasons: this.stringifyJson(document.verificationReasons),
+          forensicSignals: this.stringifyJson(document.forensicSignals),
+          ocrProvider: document.ocrProvider,
+          ocrStatus: document.ocrStatus,
+          ocrConfidence: document.ocrConfidence,
+          aiGeneratedScore: document.aiGeneratedScore,
+          aiGeneratedDetected: document.aiGeneratedDetected,
+          processedAt: document.processedAt,
+          processingError: document.processingError,
           createdAt: document.createdAt,
           updatedAt: document.updatedAt,
         }),
@@ -459,7 +468,7 @@ export class GraphService {
       WHERE vendorCount >= $threshold
       RETURN d {.*} AS device, vendorCount, [vendor IN vendors | vendor {.*}] AS vendors
       `,
-      { threshold: 3 },
+      { threshold: 2 },
     );
 
     const graph = this.emptyGraph();

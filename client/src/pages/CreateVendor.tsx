@@ -1,25 +1,19 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
-  AlertTriangle,
   ArrowLeft,
-  Banknote,
   Building2,
   CheckCircle2,
-  CreditCard,
-  FileCheck2,
   FileUp,
   Fingerprint,
-  Info,
   Mail,
-  MapPin,
   Phone,
-  Save,
   Send,
-  ShieldCheck,
   User,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { UploadingDocumentSkeleton } from "../Skeletons";
+import FingerprintJS from "@fingerprintjs/fingerprintjs";
 
 type FormState = {
   businessName: string;
@@ -44,7 +38,7 @@ type FormState = {
 };
 
 const inputClass =
-  "w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all";
+  "field-control";
 
 const selectClass = `${inputClass} appearance-none`;
 
@@ -70,38 +64,16 @@ const initialForm: FormState = {
   notes: "",
 };
 
-const documentRequirements = [
-  "CAC certificate or equivalent registration document",
-  "Tax identification document",
-  "Director or owner government ID",
-  "Proof of business address",
-];
-
 export default function CreateVendor() {
   const [form, setForm] = useState<FormState>(initialForm);
   const [submitted, setSubmitted] = useState(false);
   const [vendorID, updateVendorID] = useState("");
   const [formStage, updateFormStage] = useState(1);
   const [file, updateFile] = useState<File | null>();
+  const [deviceCaptureWarning, setDeviceCaptureWarning] = useState("");
   const navigate = useNavigate();
-
-  const completion = useMemo(() => {
-    const requiredFields = [
-      form.businessName,
-      form.registrationNumber,
-      form.sector,
-      form.contactName,
-      form.contactEmail,
-      form.contactPhone,
-      form.address,
-      // form.bankName,
-      // form.accountNumber,
-      // form.accountName,
-    ];
-
-    const completed = requiredFields.filter(Boolean).length;
-    return Math.round((completed / requiredFields.length) * 100);
-  }, [form]);
+  const browser = navigator.userAgent;
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const updateField = <K extends keyof FormState>(
     field: K,
@@ -117,7 +89,7 @@ export default function CreateVendor() {
     queryFn: async () => {
       if (vendorID.length > 1) {
         const request = await fetch(
-          `${import.meta.env.VITE_SERVER_BASE_URL}/vendors/${vendorID} `,
+          `${import.meta.env.VITE_SERVER_BASE_URL}/vendors/${vendorID}`,
           {
             credentials: "include",
           },
@@ -134,7 +106,6 @@ export default function CreateVendor() {
       email: string;
       phone: string;
     }) => {
-      console.log(JSON.stringify(body));
       const request = await fetch(
         `${import.meta.env.VITE_SERVER_BASE_URL}/vendors`,
         {
@@ -148,13 +119,49 @@ export default function CreateVendor() {
       updateVendorID(response.data.id);
       return response;
     },
-    onSuccess: () => {
+    onSuccess: async (response) => {
       updateFormStage(2);
+
+      const vendorId = response.data.id || vendorID;
+
+      if (!form.deviceConsent) {
+        return;
+      }
+
+      try {
+        const fp = await FingerprintJS.load();
+        const result = await fp.get();
+        const response = await fetch(
+          `${import.meta.env.VITE_SERVER_BASE_URL}/devices`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+              vendorId,
+              deviceHash: result.visitorId,
+              browser,
+              timezone,
+            }),
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error(`Device capture failed with status ${response.status}`);
+        }
+      } catch (error) {
+        console.warn("Device fingerprint capture failed", error);
+        setDeviceCaptureWarning(
+          "Vendor was created, but device fingerprint capture failed.",
+        );
+      }
     },
   });
 
   const uploadDocumentsMutation = useMutation({
-    mutationFn: async (body: any) => {
+    mutationFn: async (body: FormData) => {
       const postRequest = await fetch(
         `${import.meta.env.VITE_SERVER_BASE_URL}/documents/upload`,
         {
@@ -171,12 +178,14 @@ export default function CreateVendor() {
     },
   });
 
-  const handleDocumentSubmit = async (e: any) => {
+  const handleDocumentSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData();
     formData.append("vendorId", vendorID);
-    file && formData.append("file", file);
-    formData.append("documentType", "CAC");
+    if (file) {
+      formData.append("file", file);
+    }
+    formData.append("documentType", "CAC_REGISTRATION");
     await uploadDocumentsMutation.mutateAsync(formData);
   };
 
@@ -186,7 +195,7 @@ export default function CreateVendor() {
     }
   };
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     vendorCreateMutation.mutateAsync({
       businessName: form.businessName,
@@ -196,20 +205,23 @@ export default function CreateVendor() {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="mx-auto max-w-6xl space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <Link
             to="/dashboard/vendors"
-            className="inline-flex items-center gap-2 text-xs font-bold text-gray-500 hover:text-white transition-colors mb-4"
+            className="mb-4 inline-flex items-center gap-2 text-xs font-bold text-zinc-500 transition-colors hover:text-white"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to vendors
           </Link>
-          <h1 className="text-3xl font-black text-white tracking-tight">
+          <p className="text-xs font-bold uppercase tracking-[0.24em] text-zinc-500">
+            Vendor intake
+          </p>
+          <h1 className="mt-3 text-3xl font-black tracking-tight text-white">
             Create New Vendor
           </h1>
-          <p className="text-sm text-gray-400 mt-1 max-w-2xl">
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
             Capture the identity, document, bank, and Squad payment signals
             needed to start a VeriSphere risk review.
           </p>
@@ -236,8 +248,8 @@ export default function CreateVendor() {
       </div>
 
       {submitted && (
-        <div className="glass-panel rounded-2xl p-4 border-emerald-500/30 bg-emerald-500/5 flex items-start gap-3">
-          <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0 mt-0.5" />
+        <div className="glass-panel flex items-start gap-3 rounded-2xl border-green-500/30 bg-green-500/5 p-4">
+          <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-green-300" />
           <div>
             <p className="text-sm font-bold text-white">
               Vendor intake staged for review
@@ -254,12 +266,21 @@ export default function CreateVendor() {
       <div className="xl:col-span-2 space-y-6">
         {formStage === 2 && isSuccess && (
           <form onSubmit={handleDocumentSubmit}>
-            <section className="glass-panel rounded-2xl p-6">
-              <p>Your Vendor ID: {data.data.id}</p>
-              <p>Your Vendor Details: {data.data.businessName}</p>
-              <div className="border-b border-white/10 pb-5 mb-6 flex items-start gap-4">
-                <div className="h-11 w-11 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                  <Building2 className="h-5 w-5 text-emerald-400" />
+            <section className="panel-card p-6">
+              <div className="mb-6 rounded-2xl border border-white/5 bg-black/30 p-4">
+                <p className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+                  Vendor created
+                </p>
+                <p className="mt-2 font-mono text-xs text-zinc-400">
+                  {data.data.id}
+                </p>
+                <p className="mt-1 text-sm font-bold text-white">
+                  {data.data.businessName}
+                </p>
+              </div>
+              <div className="mb-6 flex items-start gap-4 border-b border-white/10 pb-5">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-green-500/20 bg-green-500/10">
+                  <Building2 className="h-5 w-5 text-green-300" />
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-white">
@@ -337,8 +358,8 @@ export default function CreateVendor() {
                   />
                 </label>
 
-                <label className="flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-black/30 p-5 text-center hover:border-emerald-500/40 hover:bg-emerald-500/5 transition-colors">
-                  <FileUp className="h-8 w-8 text-emerald-400 mb-3" />
+                <label className="flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-black/30 p-5 text-center transition-colors hover:border-cyan-300/40 hover:bg-cyan-300/5">
+                  <FileUp className="mb-3 h-8 w-8 text-cyan-300" />
                   <span className="text-sm font-bold text-white">
                     Upload vendor documents
                   </span>
@@ -355,7 +376,7 @@ export default function CreateVendor() {
               </div>
               <button
                 type="submit"
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-emerald-500 text-gray-950 rounded-xl text-sm font-black shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:bg-emerald-400 transition-all hover:-translate-y-0.5"
+                className="button-primary mt-5"
               >
                 <Send className="h-4 w-4" />
                 Upload Docs
@@ -365,21 +386,15 @@ export default function CreateVendor() {
         )}
 
         {formStage === 2 && uploadDocumentsMutation.isPending && (
-          <div className="h-full bg-inherit grid place-items-center rounded-xl ">
-            <p>Your document is uploading...</p>
-            <p>
-              You will be redirected to the vendor's profile once this operation
-              is completed!
-            </p>
-          </div>
+          <UploadingDocumentSkeleton />
         )}
 
         {formStage === 1 && (
-          <section className="glass-panel rounded-2xl p-6">
+          <section className="panel-card p-6">
             <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6">
               <div className="border-b border-white/10 pb-5 mb-6 items-start gap-4">
-                <div className="h-11 w-11 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
-                  <User className="h-5 w-5 text-cyan-400" />
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-cyan-300/20 bg-cyan-300/10">
+                  <User className="h-5 w-5 text-cyan-300" />
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-white">
@@ -484,6 +499,32 @@ export default function CreateVendor() {
                   />
                 </label>
 
+                <label className="flex items-start gap-3 rounded-xl border border-white/10 bg-black/30 p-4 md:col-span-2">
+                  <input
+                    type="checkbox"
+                    checked={form.deviceConsent}
+                    onChange={(event) =>
+                      updateField("deviceConsent", event.target.checked)
+                    }
+                    className="mt-1 h-4 w-4 accent-cyan-300"
+                  />
+                  <span>
+                    <span className="flex items-center gap-2 text-sm font-bold text-white">
+                      <Fingerprint className="h-4 w-4 text-cyan-300" />
+                      Capture device fingerprint
+                    </span>
+                    <span className="block text-xs text-gray-500 mt-1">
+                      Link this vendor to shared-device fraud checks.
+                    </span>
+                  </span>
+                </label>
+
+                {deviceCaptureWarning && (
+                  <p className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-xs text-amber-100 md:col-span-2">
+                    {deviceCaptureWarning}
+                  </p>
+                )}
+
                 {/* <label className="block md:col-span-2">
                 <span className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
                   Business address
@@ -506,7 +547,7 @@ export default function CreateVendor() {
               <div className="flex justify-end p-2">
                 <button
                   type="submit"
-                  className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-emerald-500 text-gray-950 rounded-xl text-sm font-black shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:bg-emerald-400 transition-all hover:-translate-y-0.5"
+                  className="button-primary"
                 >
                   <Send className="h-4 w-4" />
                   Create vendor

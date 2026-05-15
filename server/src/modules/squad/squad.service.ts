@@ -10,6 +10,7 @@ import axios, { AxiosInstance, AxiosError } from 'axios';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { GraphService } from '../graph/graph.service';
+import { TransactionsService } from '../transactions/transactions.service';
 
 import {
   SQUAD_MODULE_OPTIONS,
@@ -29,6 +30,7 @@ import {
   RequeryTransferDto,
   GetAllTransfersDto,
   RefundDto,
+  VirtualAccountDto,
 } from './dto/squad.dto';
 
 import {
@@ -52,6 +54,7 @@ export class SquadService {
     @Inject(SQUAD_MODULE_OPTIONS) private readonly options: SquadModuleOptions,
     private readonly prisma: PrismaService,
     private readonly graphService: GraphService,
+    private readonly transactionsService: TransactionsService,
   ) {
     const baseURL = options.isProduction
       ? SQUAD_PRODUCTION_BASE_URL
@@ -139,6 +142,14 @@ export class SquadService {
       await this.persistTransferFromWebhook(vendorId, transferReference, data);
     }
 
+    const financialRisk = vendorId
+      ? await this.transactionsService.evaluateVendorFinancialRisk(vendorId, {
+          transactionRef: transactionReference,
+          transferReference,
+          webhookEventId: webhookEvent.id,
+        })
+      : null;
+
     let graphSynced = false;
     if (vendorId) {
       graphSynced = await this.graphService.safeSyncVendorById(vendorId);
@@ -151,7 +162,9 @@ export class SquadService {
         processedAt: new Date(),
         graphSynced,
         graphSyncAttempts: { increment: 1 },
-        graphSyncError: graphSynced ? null : 'Graph sync failed; queued for retry',
+        graphSyncError: graphSynced
+          ? null
+          : 'Graph sync failed; queued for retry',
       },
     });
 
@@ -162,6 +175,7 @@ export class SquadService {
       eventId: webhookEvent.id,
       transactionReference,
       transferReference,
+      financialRisk,
       graphSynced,
     };
   }
@@ -367,6 +381,12 @@ export class SquadService {
       '/virtual-account/simulate/payment',
       dto,
     );
+    return data;
+  }
+
+  //Virtual Account Generation for users
+  async virtualAccount(dto: VirtualAccountDto): Promise<SquadApiResponse<any>> {
+    const { data } = await this.http.post('/virtual-account', dto);
     return data;
   }
 

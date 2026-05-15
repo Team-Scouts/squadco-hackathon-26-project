@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -6,8 +6,6 @@ import {
   Building2,
   Check,
   CheckCircle2,
-  Clock3,
-  Copy,
   Download,
   Edit3,
   Eye,
@@ -15,276 +13,413 @@ import {
   FileText,
   Fingerprint,
   GitBranch,
-  Globe2,
   History,
-  Link2,
-  MapPin,
-  MessageSquareText,
-  MoreHorizontal,
-  RefreshCw,
+  LucideClockArrowUp,
+  Mail,
+  Phone,
   Save,
-  Search,
   ShieldAlert,
-  ShieldCheck,
-  UserRound,
   X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import type { VendorFromQuery } from "../typesAndInterfaces";
-
-type DocumentField = {
-  label: string;
-  extracted: string;
-  verified: string;
-  confidence: number;
-  status: "match" | "edited" | "flagged";
-};
-
-type GraphNode = {
-  id: string;
-  label: string;
-  type: string;
-  x: number;
-  y: number;
-  tone: "vendor" | "risk" | "safe" | "warn" | "neutral";
-};
-
-type SnapshotItem = [LucideIcon, string];
-type ChecklistItem = [LucideIcon, string, boolean];
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { IndividualVendorDetails } from "../typesAndInterfaces";
+import { VendorDetailSkeleton, SkeletonGraphPanel } from "../Skeletons";
+import GraphCanvas from "../components/GraphCanvas";
+import { graphApi } from "../lib/graphApi";
+import {
+  documentApi,
+  type DocumentFieldVerification,
+  type DocumentVerificationStatus,
+  type VendorDocument,
+} from "../lib/documentApi";
+import { deviceApi } from "../lib/deviceApi";
+import { useSession } from "../lib/authClient";
+import type { GraphResponse } from "../lib/graphApi";
 
 const panelTitle = "text-xs font-bold text-gray-400 uppercase tracking-wider";
 
 const fieldInput =
-  "w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all";
+  "w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-sm text-white transition-all focus:border-cyan-300/50 focus:outline-none focus:ring-1 focus:ring-cyan-300/50";
 
-const documents = [
-  {
-    name: "CAC certificate",
-    id: "doc_cac_8f2",
-    risk: "Duplicate hash",
-    updated: "12 minutes ago",
-    status: "Needs edit",
-    color: "text-red-400 bg-red-500/10 border-red-500/20",
-  },
-  {
-    name: "Tax identification",
-    id: "doc_tax_19a",
-    risk: "Clean",
-    updated: "38 minutes ago",
-    status: "Verified",
-    color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
-  },
-  {
-    name: "Director ID",
-    id: "doc_id_46c",
-    risk: "Name mismatch",
-    updated: "1 hour ago",
-    status: "Review",
-    color: "text-amber-400 bg-amber-500/10 border-amber-500/20",
-  },
-];
+function statusTone(status?: DocumentVerificationStatus) {
+  if (status === "VERIFIED") {
+    return "text-green-300 bg-green-500/10 border-green-500/20";
+  }
 
-const initialFields: DocumentField[] = [
-  {
-    label: "Legal business name",
-    extracted: "Northline Export Ltd",
-    verified: "Northline Exports Ltd",
-    confidence: 91,
-    status: "edited",
-  },
-  {
-    label: "Registration number",
-    extracted: "RC 8129402",
-    verified: "RC 8129402",
-    confidence: 98,
-    status: "match",
-  },
-  {
-    label: "Director name",
-    extracted: "Emeka Nwosu",
-    verified: "Emeka Nwosu",
-    confidence: 96,
-    status: "match",
-  },
-  {
-    label: "Registered address",
-    extracted: "14 Balogun Street, Lagos",
-    verified: "14 Balogun St, Lagos Island",
-    confidence: 76,
-    status: "flagged",
-  },
-];
+  if (status === "REJECTED") {
+    return "text-red-400 bg-red-500/10 border-red-500/20";
+  }
 
-const graphNodes: GraphNode[] = [
-  {
-    id: "vendor",
-    label: "Northline",
-    type: "Vendor",
-    x: 50,
-    y: 50,
-    tone: "vendor",
-  },
-  {
-    id: "device",
-    label: "iPhone 14",
-    type: "Device",
-    x: 24,
-    y: 30,
-    tone: "risk",
-  },
-  { id: "bank", label: "Acct 0192", type: "Bank", x: 78, y: 36, tone: "warn" },
-  {
-    id: "doc",
-    label: "CAC hash",
-    type: "Document",
-    x: 74,
-    y: 70,
-    tone: "risk",
-  },
-  {
-    id: "ip",
-    label: "IP cluster",
-    type: "Network",
-    x: 30,
-    y: 76,
-    tone: "neutral",
-  },
-  { id: "clean", label: "TIN", type: "Document", x: 50, y: 18, tone: "safe" },
-];
+  if (status === "NEEDS_REVIEW") {
+    return "text-amber-300 bg-amber-500/10 border-amber-500/20";
+  }
 
-const graphLinks = [
-  ["vendor", "device", "critical"],
-  ["vendor", "bank", "warning"],
-  ["vendor", "doc", "critical"],
-  ["vendor", "ip", "neutral"],
-  ["vendor", "clean", "safe"],
-  ["device", "ip", "critical"],
-  ["bank", "doc", "warning"],
-];
-
-function getNodeTone(tone: GraphNode["tone"]) {
-  const tones = {
-    vendor:
-      "bg-cyan-500/20 border-cyan-400/60 text-cyan-300 shadow-[0_0_24px_rgba(34,211,238,0.28)]",
-    risk: "bg-red-500/20 border-red-400/60 text-red-300 shadow-[0_0_24px_rgba(248,113,113,0.28)]",
-    safe: "bg-emerald-500/20 border-emerald-400/60 text-emerald-300 shadow-[0_0_24px_rgba(16,185,129,0.24)]",
-    warn: "bg-amber-500/20 border-amber-400/60 text-amber-200 shadow-[0_0_24px_rgba(251,191,36,0.2)]",
-    neutral: "bg-white/10 border-white/20 text-gray-300",
-  };
-
-  return tones[tone];
+  return "text-cyan-200 bg-cyan-300/10 border-cyan-300/20";
 }
 
-function getLinkColor(kind: string) {
-  if (kind === "critical") return "#f87171";
-  if (kind === "warning") return "#fbbf24";
-  if (kind === "safe") return "#10b981";
-  return "#64748b";
+function formatDate(value?: string | null) {
+  if (!value) {
+    return "Not available";
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value));
 }
 
-function TrustGraph() {
-  const nodeById = useMemo(
-    () => Object.fromEntries(graphNodes.map((node) => [node.id, node])),
-    [],
+function asReasonList(value: unknown) {
+  return Array.isArray(value)
+    ? (value as Array<{
+        code?: string;
+        message?: string;
+        severity?: string;
+        scoreImpact?: number;
+      }>)
+    : [];
+}
+
+function asSignalList(value: unknown) {
+  return Array.isArray(value)
+    ? (value as Array<{
+        code?: string;
+        message?: string;
+        weight?: number;
+      }>)
+    : [];
+}
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+}
+
+function displayValue(value: unknown) {
+  if (value === null || value === undefined || value === "") {
+    return "Not captured";
+  }
+
+  return String(value);
+}
+
+function highestDeviceRisk(devices: unknown[]) {
+  return devices.reduce<number>((highest, device) => {
+    const risk = Number(asRecord(device).riskScore ?? 0);
+    return Number.isFinite(risk) && risk > highest ? risk : highest;
+  }, 0);
+}
+
+function vendorInitials(name?: string | null) {
+  const words = String(name ?? "Vendor")
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2);
+
+  return words.map((word) => word[0]?.toUpperCase()).join("") || "V";
+}
+
+function riskBadgeClass(riskLevel?: string | null) {
+  const risk = riskLevel?.toLowerCase() ?? "";
+
+  if (risk.includes("critical")) {
+    return "border-red-500/30 bg-red-500/10 text-red-300";
+  }
+
+  if (risk.includes("high")) {
+    return "border-orange-500/30 bg-orange-500/10 text-orange-300";
+  }
+
+  if (risk.includes("medium") || risk.includes("review")) {
+    return "border-amber-400/30 bg-amber-400/10 text-amber-200";
+  }
+
+  return "border-green-500/25 bg-green-500/10 text-green-300";
+}
+
+function EvidenceMetric({
+  label,
+  value,
+  icon: Icon,
+  tone = "text-zinc-100",
+}: {
+  label: string;
+  value: unknown;
+  icon: LucideIcon;
+  tone?: string;
+}) {
+  return (
+    <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-white/10 bg-black/45 p-3">
+      <span className="icon-box border border-white/10 bg-white/[0.04]">
+        <Icon className={`h-4 w-4 ${tone}`} />
+      </span>
+      <div className="min-w-0">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+          {label}
+        </p>
+        <p className={`mt-1 truncate text-lg font-black ${tone}`}>
+          {displayValue(value)}
+        </p>
+      </div>
+    </div>
   );
+}
+
+function EvidenceSummaryStrip({
+  vendor,
+  graph,
+}: {
+  vendor: IndividualVendorDetails;
+  graph?: GraphResponse;
+}) {
+  const deviceRisk = highestDeviceRisk(vendor.devices ?? []);
+  const graphLinks = graph?.edges.length ?? 0;
 
   return (
-    <section className="glass-panel rounded-2xl p-6">
-      <div className="flex flex-col gap-4 border-b border-white/10 pb-5 md:flex-row md:items-center md:justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <GitBranch className="h-5 w-5 text-cyan-400" />
-            <h2 className="text-xl font-bold text-white">Trust Graph</h2>
-          </div>
-          <p className="mt-1 text-sm text-gray-400">
-            Entity links explaining the current vendor risk score.
-          </p>
+    <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      <EvidenceMetric
+        label="Risk score"
+        value={Math.round(Number(vendor.overallRiskScore ?? 0))}
+        icon={ShieldAlert}
+        tone="text-red-300"
+      />
+      <EvidenceMetric
+        label="Documents"
+        value={vendor.documents?.length ?? 0}
+        icon={FileText}
+        tone="text-cyan-200"
+      />
+      <EvidenceMetric
+        label="Devices"
+        value={vendor.devices?.length ?? 0}
+        icon={Fingerprint}
+        tone={deviceRisk >= 70 ? "text-red-300" : "text-green-300"}
+      />
+      <EvidenceMetric
+        label="Graph links"
+        value={graphLinks}
+        icon={GitBranch}
+        tone="text-violet-200"
+      />
+      <EvidenceMetric
+        label="Device risk"
+        value={`${deviceRisk}%`}
+        icon={Fingerprint}
+        tone={deviceRisk >= 70 ? "text-red-300" : "text-zinc-100"}
+      />
+    </section>
+  );
+}
+
+function EntityProfilePanel({ vendor }: { vendor: IndividualVendorDetails }) {
+  const deviceRisk = highestDeviceRisk(vendor.devices ?? []);
+  const snapshotItems = [
+    [Building2, "Business name", vendor.businessName],
+    [Mail, "Email", vendor.email],
+    [Phone, "Phone", vendor.phone],
+    [ShieldAlert, "Status", vendor.status],
+    [Banknote, "Risk level", vendor.riskLevel],
+    [Fingerprint, "Highest device risk", `${deviceRisk}%`],
+  ] satisfies Array<[LucideIcon, string, unknown]>;
+
+  return (
+    <section className="panel-compact min-w-0 p-4">
+      <div className="mb-4 flex items-center gap-3">
+        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-cyan-300/20 bg-cyan-300/10 text-base font-black text-cyan-100 shadow-cyber-soft">
+          {vendorInitials(vendor.businessName)}
         </div>
-        <div className="flex items-center gap-2">
-          <button className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold text-gray-300 transition-colors hover:bg-white/10 hover:text-white">
-            <Search className="h-4 w-4" />
-            Trace
-          </button>
-          <button className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-3 py-2 text-xs font-black text-gray-950 transition-all hover:-translate-y-0.5 hover:bg-emerald-400">
-            <RefreshCw className="h-4 w-4" />
-            Re-score
-          </button>
+        <div className="min-w-0">
+          <p className={panelTitle}>Entity profile</p>
+          <p className="mt-1 truncate text-sm font-bold text-white">
+            {displayValue(vendor.businessName)}
+          </p>
         </div>
       </div>
 
-      <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-[1fr_16rem]">
-        <div className="relative min-h-90 overflow-hidden rounded-2xl border border-white/10 bg-black/40">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.08)_0,transparent_60%)]" />
-          <svg className="absolute inset-0 h-full w-full">
-            {graphLinks.map(([from, to, kind]) => {
-              const fromNode = nodeById[from];
-              const toNode = nodeById[to];
-              return (
-                <line
-                  key={`${from}-${to}`}
-                  x1={`${fromNode.x}%`}
-                  y1={`${fromNode.y}%`}
-                  x2={`${toNode.x}%`}
-                  y2={`${toNode.y}%`}
-                  stroke={getLinkColor(kind)}
-                  strokeWidth={kind === "critical" ? 2.5 : 1.5}
-                  strokeDasharray={kind === "neutral" ? "5 6" : undefined}
-                  opacity={kind === "critical" ? 0.72 : 0.45}
-                />
-              );
-            })}
-          </svg>
-
-          {graphNodes.map((node) => (
-            <div
-              key={node.id}
-              className="absolute -translate-x-1/2 -translate-y-1/2 text-center"
-              style={{ left: `${node.x}%`, top: `${node.y}%` }}
-            >
-              <div
-                className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full border ${getNodeTone(node.tone)}`}
-              >
-                {node.type === "Vendor" && <Building2 className="h-6 w-6" />}
-                {node.type === "Device" && <Fingerprint className="h-6 w-6" />}
-                {node.type === "Bank" && <Banknote className="h-6 w-6" />}
-                {node.type === "Document" && <FileText className="h-6 w-6" />}
-                {node.type === "Network" && <Globe2 className="h-6 w-6" />}
-              </div>
-              <span className="mt-2 block rounded-full bg-gray-950/80 px-2 py-1 text-[10px] font-bold text-gray-300">
-                {node.label}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        <div className="space-y-3">
-          {[
-            ["Critical links", "3", "text-red-400"],
-            ["Shared devices", "6", "text-red-400"],
-            ["Document collisions", "2", "text-amber-400"],
-            ["Clean anchors", "1", "text-emerald-400"],
-          ].map(([label, value, color]) => (
-            <div
-              key={label}
-              className="rounded-xl border border-white/10 bg-black/30 p-4"
-            >
-              <p className="text-xs font-bold uppercase tracking-wider text-gray-500">
+      <div className="grid grid-cols-1 gap-2">
+        {snapshotItems.map(([Icon, label, value]) => (
+          <div
+            key={label}
+            className="flex min-w-0 items-start gap-3 rounded-xl border border-white/10 bg-black/45 p-3"
+          >
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[0.04]">
+              <Icon className="h-4 w-4 text-zinc-400" />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500">
                 {label}
-              </p>
-              <p className={`mt-1 text-2xl font-black ${color}`}>{value}</p>
-            </div>
-          ))}
+              </span>
+              <span className="mt-1 block break-words text-sm font-semibold text-zinc-100">
+                {displayValue(value)}
+              </span>
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-3 rounded-xl border border-white/10 bg-white/[0.035] p-3">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+          Vendor ID
+        </p>
+        <p className="mt-1 break-all font-mono text-[11px] text-zinc-300">
+          {displayValue(vendor.id)}
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function ReviewerDecisionPanel({
+  vendor,
+  graph,
+  onSync,
+  isSyncing,
+}: {
+  vendor: IndividualVendorDetails;
+  graph?: GraphResponse;
+  onSync: () => void;
+  isSyncing: boolean;
+}) {
+  const checks = [
+    ["Documents uploaded", (vendor.documents?.length ?? 0) > 0],
+    ["Device captured", (vendor.devices?.length ?? 0) > 0],
+    ["Graph evidence loaded", (graph?.nodes.length ?? 0) > 0],
+    ["Risk score available", vendor.overallRiskScore !== null],
+  ] satisfies Array<[string, boolean]>;
+
+  return (
+    <section className="panel-compact min-w-0 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <p className={panelTitle}>Reviewer decision</p>
+        <span className={`rounded-lg border px-2 py-1 text-[10px] font-black uppercase tracking-wider ${riskBadgeClass(vendor.riskLevel)}`}>
+          {displayValue(vendor.riskLevel)}
+        </span>
+      </div>
+
+      <div className="mt-4 space-y-2">
+        {checks.map(([label, complete]) => (
+          <div
+            key={label}
+            className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-black/45 p-3"
+          >
+            <span className="text-xs font-semibold text-zinc-200">{label}</span>
+            <span
+              className={`grid h-5 w-5 place-items-center rounded-full border ${
+                complete
+                  ? "border-green-500 bg-green-500 text-black"
+                  : "border-white/20 text-transparent"
+              }`}
+            >
+              <Check className="h-3.5 w-3.5" />
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <textarea
+        rows={4}
+        placeholder="Add concise reviewer context..."
+        className="field-control mt-4 min-h-28 resize-none"
+      />
+
+      <div className="mt-3 grid grid-cols-1 gap-2">
+        <button
+          onClick={onSync}
+          className={`button-secondary min-h-0 rounded-xl px-3 py-2 text-xs ${isSyncing ? "opacity-70" : "opacity-100"}`}
+        >
+          <LucideClockArrowUp className="h-4 w-4 text-zinc-400" />
+          {isSyncing ? "Syncing graph..." : "Refresh graph"}
+        </button>
+        <div className="grid grid-cols-2 gap-2">
+          <button className="button-danger min-h-0 rounded-xl px-3 py-2 text-xs">
+            <X className="h-4 w-4" />
+            Reject
+          </button>
+          <button className="button-primary min-h-0 rounded-xl px-3 py-2 text-xs">
+            <Check className="h-4 w-4" />
+            Approve
+          </button>
         </div>
       </div>
     </section>
   );
 }
 
-function DocumentModification() {
-  const [activeDocument, setActiveDocument] = useState(documents[0].id);
-  const [fields, setFields] = useState(initialFields);
+function DocumentModification({ vendorId }: { vendorId: string }) {
+  const queryClient = useQueryClient();
+  const { data: session } = useSession();
+  const [activeDocumentId, setActiveDocumentId] = useState("");
+  const [fields, setFields] = useState<DocumentFieldVerification[]>([]);
+  const [reviewNotes, setReviewNotes] = useState("");
+
+  const documentsQuery = useQuery({
+    queryKey: ["vendor_documents", vendorId],
+    queryFn: () => documentApi.getVendorDocuments(vendorId),
+    enabled: vendorId.length > 0 && !!session?.user,
+    retry: false,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  const documents = useMemo(
+    () => documentsQuery.data?.data ?? [],
+    [documentsQuery.data],
+  );
+
+  const activeDocument = useMemo(
+    () =>
+      documents.find((document) => document.id === activeDocumentId) ??
+      documents[0],
+    [activeDocumentId, documents],
+  );
+
+  useEffect(() => {
+    if (!activeDocumentId && documents[0]) {
+      setActiveDocumentId(documents[0].id);
+    }
+  }, [activeDocumentId, documents]);
+
+  useEffect(() => {
+    setFields(activeDocument?.extractedFields ?? []);
+    setReviewNotes(activeDocument?.reviewNotes ?? "");
+  }, [activeDocument]);
+
+  const invalidateDocumentState = async (document?: VendorDocument) => {
+    await Promise.all([
+      queryClient.invalidateQueries({
+        queryKey: ["vendor_documents", vendorId],
+      }),
+      queryClient.invalidateQueries({
+        queryKey: ["vendor_details", vendorId],
+      }),
+      queryClient.invalidateQueries({
+        queryKey: ["vendorGraph", vendorId],
+      }),
+    ]);
+
+    if (document) {
+      setActiveDocumentId(document.id);
+    }
+  };
+
+  const runChecksMutation = useMutation({
+    mutationFn: (documentId: string) => documentApi.runDocumentChecks(documentId),
+    onSuccess: (response) => invalidateDocumentState(response.data),
+  });
+
+  const updateVerificationMutation = useMutation({
+    mutationFn: (verificationStatus: DocumentVerificationStatus) => {
+      if (!activeDocument) {
+        throw new Error("No active document selected");
+      }
+
+      return documentApi.updateDocumentVerification(activeDocument.id, {
+        verificationStatus,
+        extractedFields: fields,
+        reviewNotes,
+      });
+    },
+    onSuccess: (response) => invalidateDocumentState(response.data),
+  });
 
   const updateField = (label: string, value: string) => {
     setFields((current) =>
@@ -300,111 +435,180 @@ function DocumentModification() {
     );
   };
 
+  const reasons = asReasonList(activeDocument?.verificationReasons);
+  const signals = asSignalList(activeDocument?.forensicSignals);
+  const pendingFieldCount = fields.filter((field) =>
+    ["edited", "flagged", "missing"].includes(field.status),
+  ).length;
+
   return (
-    <section className="glass-panel rounded-2xl p-6">
+    <section className="panel-card min-w-0 p-6">
       <div className="flex flex-col gap-4 border-b border-white/10 pb-5 lg:flex-row lg:items-center lg:justify-between">
-        <div>
+        <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <Edit3 className="h-5 w-5 text-emerald-400" />
+            <span className="icon-box border border-cyan-300/20 bg-cyan-300/10">
+              <Edit3 className="h-4 w-4 text-cyan-200" />
+            </span>
             <h2 className="text-xl font-bold text-white">
-              Document Modification
+              Document intelligence
             </h2>
           </div>
-          <p className="mt-1 text-sm text-gray-400">
-            Correct OCR fields, compare document evidence, and preserve the
-            review history.
+          <p className="mt-2 text-sm leading-6 text-zinc-300">
+            Run document checks, correct OCR fields, and save reviewer
+            decisions.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <button className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold text-gray-300 transition-colors hover:bg-white/10 hover:text-white">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            disabled={!activeDocument || runChecksMutation.isPending}
+            onClick={() => activeDocument && runChecksMutation.mutate(activeDocument.id)}
+            className="button-secondary min-h-0 rounded-xl px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-60"
+          >
             <History className="h-4 w-4" />
-            History
+            {runChecksMutation.isPending ? "Running..." : "Run checks"}
           </button>
-          <button className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-3 py-2 text-xs font-black text-gray-950 transition-all hover:-translate-y-0.5 hover:bg-emerald-400">
+          <button
+            disabled={!activeDocument || updateVerificationMutation.isPending}
+            onClick={() => updateVerificationMutation.mutate("VERIFIED")}
+            className="button-primary min-h-0 rounded-xl px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-60"
+          >
             <Save className="h-4 w-4" />
-            Save edits
+            Verify
+          </button>
+          <button
+            disabled={!activeDocument || updateVerificationMutation.isPending}
+            onClick={() => updateVerificationMutation.mutate("REJECTED")}
+            className="inline-flex min-h-0 items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-bold text-red-300 transition-all hover:bg-red-500/20 hover:shadow-danger-soft disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <X className="h-4 w-4" />
+            Reject
           </button>
         </div>
       </div>
 
-      <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-[17rem_1fr]">
-        <div className="space-y-3">
+      <div className="mt-5 grid min-w-0 grid-cols-1 gap-5 xl:grid-cols-[16rem_minmax(0,1fr)]">
+        <div className="min-w-0 space-y-3">
+          {documentsQuery.isLoading && (
+            <div className="rounded-xl border border-white/10 bg-black/30 p-4 text-sm text-gray-400">
+              Loading documents...
+            </div>
+          )}
+          {!documentsQuery.isLoading && documents.length === 0 && (
+            <div className="rounded-xl border border-white/10 bg-black/30 p-4 text-sm text-gray-400">
+              No documents uploaded for this vendor yet.
+            </div>
+          )}
           {documents.map((document) => (
             <button
               key={document.id}
-              onClick={() => setActiveDocument(document.id)}
-              className={`w-full rounded-xl border p-4 text-left transition-colors ${
-                activeDocument === document.id
-                  ? "border-emerald-500/40 bg-emerald-500/10"
+              onClick={() => setActiveDocumentId(document.id)}
+              className={`w-full min-w-0 rounded-2xl border p-4 text-left transition-all hover:shadow-cyber-soft ${
+                activeDocument?.id === document.id
+                  ? "border-cyan-300/40 bg-cyan-300/10"
                   : "border-white/10 bg-black/30 hover:bg-white/5"
               }`}
             >
               <div className="flex items-start justify-between gap-3">
-                <FileCheck2 className="mt-0.5 h-5 w-5 text-emerald-400" />
+                <FileCheck2 className="mt-0.5 h-5 w-5 shrink-0 text-cyan-300" />
                 <span
-                  className={`rounded border px-2 py-0.5 text-[10px] font-bold ${document.color}`}
+                  className={`rounded border px-2 py-0.5 text-[10px] font-bold ${statusTone(document.verificationStatus)}`}
                 >
-                  {document.status}
+                  {document.verificationStatus.replace("_", " ")}
                 </span>
               </div>
               <p className="mt-3 text-sm font-bold text-white">
-                {document.name}
+                {document.documentType.replace("_", " ")}
               </p>
-              <p className="mt-1 text-xs text-gray-500 font-mono">
+              <p className="mt-1 break-all font-mono text-xs text-zinc-500">
                 {document.id}
               </p>
-              <p className="mt-2 text-xs text-gray-400">{document.risk}</p>
+              <p className="mt-2 text-xs text-gray-400">
+                Tamper {document.tamperScore}% - AI {document.aiGeneratedScore}%
+              </p>
             </button>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 gap-5 2xl:grid-cols-[0.9fr_1.1fr]">
-          <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+        {activeDocument && (
+          <div className="grid min-w-0 grid-cols-1 gap-5 2xl:grid-cols-2">
+          <div className="min-w-0 rounded-2xl border border-white/10 bg-black/50 p-4">
             <div className="flex items-center justify-between">
               <p className={panelTitle}>Document preview</p>
               <div className="flex items-center gap-2">
-                <button className="rounded-lg border border-white/10 bg-white/5 p-2 text-gray-400 transition-colors hover:text-white">
+                <a
+                  href={activeDocument.fileUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-lg border border-white/10 bg-white/5 p-2 text-gray-400 transition-colors hover:text-white"
+                >
                   <Eye className="h-4 w-4" />
-                </button>
-                <button className="rounded-lg border border-white/10 bg-white/5 p-2 text-gray-400 transition-colors hover:text-white">
+                </a>
+                <a
+                  href={activeDocument.fileUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-lg border border-white/10 bg-white/5 p-2 text-gray-400 transition-colors hover:text-white"
+                >
                   <Download className="h-4 w-4" />
-                </button>
+                </a>
               </div>
             </div>
-            <div className="mt-4 aspect-[4/5] rounded-xl border border-white/10 bg-gray-950 p-5">
-              <div className="h-full rounded-lg border border-dashed border-white/15 bg-white/[0.03] p-5">
-                <div className="mb-6 h-8 w-32 rounded bg-white/10" />
-                <div className="space-y-3">
-                  <div className="h-3 w-full rounded bg-white/10" />
-                  <div className="h-3 w-10/12 rounded bg-white/10" />
-                  <div className="h-3 w-11/12 rounded bg-white/10" />
+            <div className="mt-4 rounded-2xl border border-white/10 bg-[#020203] p-4">
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between gap-3">
+                  <span className="text-gray-500">OCR provider</span>
+                  <span className="break-words text-right font-semibold text-white">
+                    {activeDocument.ocrProvider ?? "Not run"}
+                  </span>
                 </div>
-                <div className="mt-8 grid grid-cols-2 gap-3">
-                  <div className="h-20 rounded border border-red-500/30 bg-red-500/10" />
-                  <div className="h-20 rounded border border-white/10 bg-white/5" />
+                <div className="flex justify-between gap-3">
+                  <span className="text-gray-500">OCR confidence</span>
+                  <span className="text-right font-semibold text-white">
+                    {activeDocument.ocrConfidence ?? 0}%
+                  </span>
                 </div>
-                <div className="mt-8 space-y-3">
-                  <div className="h-3 w-8/12 rounded bg-white/10" />
-                  <div className="h-3 w-7/12 rounded bg-white/10" />
-                  <div className="h-3 w-9/12 rounded bg-white/10" />
+                <div className="flex justify-between gap-3">
+                  <span className="text-gray-500">Duplicate vendors</span>
+                  <span className="text-right font-semibold text-white">
+                    {activeDocument.duplicateVendorCount}
+                  </span>
                 </div>
+                <div className="flex justify-between gap-3">
+                  <span className="text-gray-500">Processed</span>
+                  <span className="text-right font-semibold text-white">
+                    {formatDate(activeDocument.processedAt)}
+                  </span>
+                </div>
+              </div>
+              <div className="mt-4 rounded-lg border border-white/10 bg-black/30 p-3">
+                <p className="text-xs font-bold uppercase tracking-wider text-gray-500">
+                  OCR text
+                </p>
+                <p className="mt-2 max-h-56 overflow-auto whitespace-pre-wrap break-words text-xs leading-relaxed text-zinc-200">
+                  {activeDocument.ocrText || "Run checks to populate OCR text."}
+                </p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+          <div className="min-w-0 rounded-2xl border border-white/10 bg-black/50 p-4">
             <div className="flex items-center justify-between gap-3">
               <p className={panelTitle}>Extracted fields</p>
               <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-300">
-                2 edits pending
+                {pendingFieldCount} review field{pendingFieldCount === 1 ? "" : "s"}
               </span>
             </div>
 
             <div className="mt-4 space-y-4">
+              {fields.length === 0 && (
+                <div className="rounded-xl border border-white/10 bg-black/30 p-4 text-sm text-gray-400">
+                  Run document checks to extract fields.
+                </div>
+              )}
               {fields.map((field) => (
                 <div
                   key={field.label}
-                  className="rounded-xl border border-white/10 bg-black/30 p-4"
+                  className="min-w-0 rounded-2xl border border-white/10 bg-black/40 p-4"
                 >
                   <div className="mb-3 flex items-center justify-between gap-3">
                     <div>
@@ -416,16 +620,16 @@ function DocumentModification() {
                       </p>
                     </div>
                     {field.status === "match" && (
-                      <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+                      <CheckCircle2 className="h-5 w-5 text-green-300" />
                     )}
                     {field.status === "edited" && (
-                      <Edit3 className="h-5 w-5 text-cyan-400" />
+                      <Edit3 className="h-5 w-5 text-cyan-300" />
                     )}
                     {field.status === "flagged" && (
                       <AlertTriangle className="h-5 w-5 text-amber-400" />
                     )}
                   </div>
-                  <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                  <div className="grid min-w-0 grid-cols-1 gap-3 xl:grid-cols-2">
                     <label>
                       <span className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-gray-500">
                         Extracted
@@ -433,7 +637,7 @@ function DocumentModification() {
                       <input
                         readOnly
                         value={field.extracted}
-                        className={`${fieldInput} text-gray-400`}
+                        className={`${fieldInput} break-all text-zinc-400`}
                       />
                     </label>
                     <label>
@@ -452,8 +656,149 @@ function DocumentModification() {
                 </div>
               ))}
             </div>
+
+            <label className="mt-4 block">
+              <span className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                Review notes
+              </span>
+              <textarea
+                value={reviewNotes}
+                onChange={(event) => setReviewNotes(event.target.value)}
+                rows={3}
+                className={`${fieldInput} resize-none`}
+                placeholder="Add reviewer notes..."
+              />
+            </label>
+
+            <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+              <div className="min-w-0 rounded-2xl border border-white/10 bg-black/40 p-3">
+                <p className={panelTitle}>Verification reasons</p>
+                <div className="mt-3 space-y-2">
+                  {reasons.length === 0 && (
+                    <p className="text-xs text-gray-500">No reasons recorded.</p>
+                  )}
+                  {reasons.map((reason, index) => (
+                    <p key={`${reason.code}-${index}`} className="break-words text-xs leading-5 text-zinc-300">
+                      <span className="font-bold text-amber-300">
+                        {reason.code ?? "REASON"}
+                      </span>{" "}
+                      {reason.message ?? ""}
+                    </p>
+                  ))}
+                </div>
+              </div>
+              <div className="min-w-0 rounded-2xl border border-white/10 bg-black/40 p-3">
+                <p className={panelTitle}>Forensic signals</p>
+                <div className="mt-3 space-y-2">
+                  {signals.length === 0 && (
+                    <p className="text-xs text-gray-500">No signals recorded.</p>
+                  )}
+                  {signals.map((signal, index) => (
+                    <p key={`${signal.code}-${index}`} className="break-words text-xs leading-5 text-zinc-300">
+                      <span className="font-bold text-cyan-300">
+                        {signal.code ?? "SIGNAL"}
+                      </span>{" "}
+                      {signal.message ?? ""}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function DeviceIntelligencePanel({ vendorId }: { vendorId: string }) {
+  const { data: session } = useSession();
+  const devicesQuery = useQuery({
+    queryKey: ["vendor_devices", vendorId],
+    queryFn: () => deviceApi.getVendorDevices(vendorId),
+    enabled: vendorId.length > 0 && !!session?.user,
+    retry: false,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  const devices = devicesQuery.data?.data ?? [];
+
+  return (
+    <section className="panel-card min-w-0 p-6">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="icon-box border border-cyan-300/20 bg-cyan-300/10">
+              <Fingerprint className="h-4 w-4 text-cyan-200" />
+            </span>
+            <h2 className="text-xl font-bold text-white">Device intelligence</h2>
+          </div>
+          <p className="mt-2 text-sm leading-6 text-zinc-300">
+            Captured FingerprintJS devices linked to this vendor.
+          </p>
+        </div>
+        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold text-gray-300">
+          {devices.length} device{devices.length === 1 ? "" : "s"}
+        </span>
+      </div>
+
+      <div className="mt-5 overflow-x-auto">
+        {devicesQuery.isLoading && (
+          <p className="text-sm text-gray-400">Loading devices...</p>
+        )}
+        {!devicesQuery.isLoading && devices.length === 0 && (
+          <p className="rounded-2xl border border-white/10 bg-black/50 p-4 text-sm text-zinc-400">
+            No device fingerprint has been captured for this vendor yet.
+          </p>
+        )}
+        {devices.length > 0 && (
+          <table className="w-full min-w-[720px] text-left text-sm">
+            <thead className="border-b border-white/10 text-xs uppercase tracking-wider text-gray-500">
+              <tr>
+                <th className="py-3 pr-4">Fingerprint</th>
+                <th className="py-3 pr-4">Risk</th>
+                <th className="py-3 pr-4">Timezone</th>
+                <th className="py-3 pr-4">IP</th>
+                <th className="py-3 pr-4">Captured</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {devices.map((device) => {
+                const highRisk = device.riskScore >= 70;
+
+                return (
+                  <tr key={device.id}>
+                    <td className="max-w-64 py-3 pr-4 font-mono text-xs text-zinc-200">
+                      <span className="block truncate">{device.deviceHash}</span>
+                      <span className="mt-1 block truncate text-gray-600">
+                        {device.browser}
+                      </span>
+                    </td>
+                    <td className="py-3 pr-4">
+                      <span
+                        className={`rounded border px-2 py-1 text-xs font-bold ${
+                          highRisk
+                            ? "border-red-500/20 bg-red-500/10 text-red-300"
+                            : "border-green-500/20 bg-green-500/10 text-green-300"
+                        }`}
+                      >
+                        {device.riskScore}%
+                      </span>
+                    </td>
+                    <td className="py-3 pr-4 text-gray-300">{device.timezone}</td>
+                    <td className="py-3 pr-4 font-mono text-xs text-gray-400">
+                      {device.ipAddress || "Unknown"}
+                    </td>
+                    <td className="py-3 pr-4 text-xs text-gray-500">
+                      {formatDate(device.createdAt)}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
       </div>
     </section>
   );
@@ -461,14 +806,22 @@ function DocumentModification() {
 
 export default function VendorDetail() {
   const { vendorId } = useParams();
-  const { data: vendorDetails, isSuccess } = useQuery<{
-    data: VendorFromQuery;
+  const queryClient = useQueryClient();
+  const { data: session } = useSession();
+  const {
+    data: vendorDetails,
+    isLoading,
+    isSuccess,
+  } = useQuery<{
+    data: IndividualVendorDetails;
   }>({
     queryKey: ["vendor_details", vendorId],
     staleTime: 30 * 60 * 1000,
+    enabled: !!vendorId && !!session?.user,
+    retry: false,
     queryFn: async () => {
       const request = await fetch(
-        `${import.meta.env.VITE_SERVER_BASE_URL}/vendors/${vendorId} `,
+        `${import.meta.env.VITE_SERVER_BASE_URL}/vendors/${vendorId}`,
         {
           credentials: "include",
         },
@@ -479,65 +832,46 @@ export default function VendorDetail() {
     },
   });
 
-  const metrics = [
-    {
-      label: "Trust score",
-      value: vendorDetails?.data.riskLevel,
-      icon: ShieldAlert,
-      color: "text-red-400",
-    },
-    {
-      label: "Documents",
-      value: "7",
-      icon: FileText,
-      color: "text-emerald-400",
-    },
-    {
-      label: "Graph links",
-      value: "18",
-      icon: GitBranch,
-      color: "text-cyan-400",
-    },
-    {
-      label: "Open alerts",
-      value: "5",
-      icon: AlertTriangle,
-      color: "text-amber-400",
-    },
-  ];
+  const {
+    data: userGraph,
+    isLoading: loadingGraph,
+    isSuccess: graphLoaded,
+  } = useQuery({
+    queryKey: ["vendorGraph", vendorId],
+    enabled: !!vendorId && !!session?.user,
+    retry: false,
+    queryFn: () => graphApi.getVendorGraph(String(vendorId)),
+    staleTime: 30 * 60 * 1000,
+  });
 
-  const timeline = [
-    [
-      "Document hash collision",
-      "CAC image matched Koro Market Services",
-      "12m ago",
-      "critical",
-    ],
-    [
-      "Reviewer edited field",
-      "Business name normalized after OCR check",
-      "18m ago",
-      "info",
-    ],
-    [
-      "Squad fee verified",
-      "sq_txn_9x2b4 confirmed NGN 15,000",
-      "24m ago",
-      "safe",
-    ],
-    [
-      "Device cluster detected",
-      "6 applications from same fingerprint",
-      "41m ago",
-      "critical",
-    ],
-  ];
+  const { isPending: isSyncing, mutateAsync: synchronise } = useMutation({
+    mutationFn: async () => {
+      const request = await fetch(
+        `${import.meta.env.VITE_SERVER_BASE_URL}/graph/sync`,
+        {
+          method: "POST",
+          credentials: "include",
+        },
+      );
+      const response = await request.json();
+      return response;
+    },
+    onSuccess: async () =>
+      queryClient.invalidateQueries({
+        queryKey: ["vendorGraph", vendorId],
+      }),
+  });
+
+  if (isLoading) {
+    return <VendorDetailSkeleton />;
+  }
 
   return (
     isSuccess && (
-      <div className="mx-auto max-w-7xl space-y-6">
-        <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-          <div>
+      <div className="mx-auto max-w-[1500px] space-y-6">
+        <section className="panel-card p-5 md:p-6">
+          <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+            <div className="min-w-0">
             <Link
               to="/dashboard/vendors"
               className="mb-4 inline-flex items-center gap-2 text-xs font-bold text-gray-500 transition-colors hover:text-white"
@@ -545,190 +879,76 @@ export default function VendorDetail() {
               <ArrowLeft className="h-4 w-4" />
               Back to vendors
             </Link>
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-3xl font-black tracking-tight text-white">
-                {vendorDetails.data.businessName}
-              </h1>
-              <span className="rounded border border-red-500/20 bg-red-500/10 px-2.5 py-1 text-xs font-black uppercase tracking-wider text-red-400">
-                High risk
-              </span>
-              <span className="rounded border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-bold text-gray-300">
-                {vendorId ?? "vendor"} profile
-              </span>
-            </div>
-            <p className="mt-2 max-w-2xl text-sm text-gray-400">
-              Individual vendor review workspace for trust scoring, document
-              correction, entity graph analysis, Squad payment telemetry, and
-              final reviewer decision.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <button className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-white/10">
-              <MessageSquareText className="h-4 w-4 text-gray-400" />
-              Add note
-            </button>
-            <button className="inline-flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-300 transition-colors hover:bg-red-500/20">
-              <X className="h-4 w-4" />
-              Reject
-            </button>
-            <button className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-3 text-sm font-black text-gray-950 shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all hover:-translate-y-0.5 hover:bg-emerald-400">
-              <Check className="h-4 w-4" />
-              Approve
-            </button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {metrics.map((metric) => (
-            <div key={metric.label} className="glass-panel rounded-xl p-4">
-              <div className="mb-3 flex items-start justify-between gap-3">
-                <p className="text-xs font-bold uppercase tracking-wider text-gray-500">
-                  {metric.label}
-                </p>
-                <metric.icon className={`h-5 w-5 ${metric.color}`} />
+              <div className="flex min-w-0 flex-wrap items-center gap-3">
+                <h1 className="min-w-0 break-words text-3xl font-black tracking-tight text-white">
+                  {displayValue(vendorDetails.data.businessName)}
+                </h1>
+                <span
+                  className={`rounded-lg border px-2.5 py-1 text-xs font-black uppercase tracking-wider ${riskBadgeClass(vendorDetails.data.riskLevel)}`}
+                >
+                  {displayValue(vendorDetails.data.riskLevel)} risk
+                </span>
               </div>
-              <p className={`text-3xl font-black ${metric.color}`}>
-                {metric.value}
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-300">
+                Review identity, document evidence, device intelligence, and trust
+                graph relationships before making a vendor decision.
+              </p>
+              <p className="mt-2 break-all font-mono text-[11px] text-zinc-500">
+                {vendorId ?? "Unknown vendor"}
               </p>
             </div>
-          ))}
-        </div>
 
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_22rem]">
-          <div className="space-y-6">
-            <TrustGraph />
-            <DocumentModification />
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => synchronise()}
+                className={`button-secondary rounded-xl ${isSyncing ? "opacity-70" : "opacity-100"}`}
+              >
+                <LucideClockArrowUp className="h-4 w-4 text-zinc-400" />
+                {isSyncing ? "Syncing..." : "Update graph"}
+              </button>
+              <button className="button-danger rounded-xl">
+                <X className="h-4 w-4" />
+                Reject
+              </button>
+              <button className="button-primary rounded-xl">
+                <Check className="h-4 w-4" />
+                Approve
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <EvidenceSummaryStrip vendor={vendorDetails.data} graph={userGraph} />
+
+        <section className="min-w-0">
+            {graphLoaded && userGraph && (
+              <GraphCanvas
+                graph={userGraph}
+                title="Vendor trust graph"
+                subtitle="Relationship evidence for this vendor. Node labels stay compact; select an entity to inspect full details."
+                height="vendor"
+                onRefresh={() => synchronise()}
+                isRefreshing={isSyncing}
+                showLegend
+              />
+            )}
+            {loadingGraph && <SkeletonGraphPanel />}
+        </section>
+
+        <div className="grid grid-cols-1 gap-6 2xl:grid-cols-[minmax(0,1fr)_21rem]">
+          <div className="min-w-0 space-y-6">
+            <DocumentModification vendorId={String(vendorId ?? "")} />
+            <DeviceIntelligencePanel vendorId={String(vendorId ?? "")} />
           </div>
 
-          <aside className="space-y-6">
-            <section className="glass-panel rounded-2xl p-6">
-              <div className="mb-5 flex items-center justify-between">
-                <p className={panelTitle}>Vendor snapshot</p>
-                <button className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-white/5 hover:text-white">
-                  <MoreHorizontal className="h-4 w-4" />
-                </button>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-cyan-500/20 bg-cyan-500/10 text-lg font-black text-cyan-300">
-                  NE
-                </div>
-                <div>
-                  <p className="font-bold text-white">
-                    {vendorDetails.data.businessName}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    Supplier - Lagos, Nigeria
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-5 space-y-3">
-                {(
-                  [
-                    [Building2, "RC 8129402"],
-                    [UserRound, "Emeka Nwosu"],
-                    [MapPin, "Lagos Island"],
-                    [Banknote, "Access Bank - 0192"],
-                    [Fingerprint, "Device fp_7ca91"],
-                  ] satisfies SnapshotItem[]
-                ).map(([Icon, value]) => (
-                  <div
-                    key={String(value)}
-                    className="flex items-center gap-3 rounded-xl border border-white/5 bg-black/30 p-3"
-                  >
-                    <Icon className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm font-semibold text-gray-300">
-                      {String(value)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <section className="glass-panel rounded-2xl p-6">
-              <p className={panelTitle}>Decision checklist</p>
-              <div className="mt-4 space-y-3">
-                {(
-                  [
-                    [ShieldCheck, "Business registry checked", true],
-                    [FileCheck2, "Document edits reviewed", false],
-                    [Link2, "Trust graph explained", false],
-                    [Banknote, "Squad payment verified", true],
-                  ] satisfies ChecklistItem[]
-                ).map(([Icon, label, complete]) => (
-                  <div
-                    key={String(label)}
-                    className="flex items-center justify-between rounded-xl border border-white/10 bg-black/30 p-3"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Icon
-                        className={`h-4 w-4 ${complete ? "text-emerald-400" : "text-gray-500"}`}
-                      />
-                      <span className="text-sm font-semibold text-gray-300">
-                        {String(label)}
-                      </span>
-                    </div>
-                    <span
-                      className={`h-5 w-5 rounded-full border ${complete ? "border-emerald-500 bg-emerald-500 text-gray-950" : "border-white/20"}`}
-                    >
-                      {complete && <Check className="h-4 w-4" />}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <section className="glass-panel rounded-2xl p-6">
-              <div className="mb-4 flex items-center justify-between">
-                <p className={panelTitle}>Activity timeline</p>
-                <Clock3 className="h-4 w-4 text-gray-500" />
-              </div>
-              <div className="space-y-4">
-                {timeline.map(([title, detail, time, tone]) => (
-                  <div key={title} className="flex gap-3">
-                    <span
-                      className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${
-                        tone === "critical"
-                          ? "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]"
-                          : tone === "safe"
-                            ? "bg-emerald-500"
-                            : "bg-cyan-500"
-                      }`}
-                    />
-                    <div>
-                      <p className="text-sm font-bold text-white">{title}</p>
-                      <p className="mt-1 text-xs leading-relaxed text-gray-400">
-                        {detail}
-                      </p>
-                      <p className="mt-1 text-[10px] font-mono text-gray-600">
-                        {time}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <section className="glass-panel rounded-2xl p-6">
-              <p className={panelTitle}>Reviewer notes</p>
-              <textarea
-                rows={4}
-                placeholder="Add investigation context..."
-                className="mt-4 w-full resize-none rounded-xl border border-white/10 bg-black/40 p-3 text-sm text-white placeholder-gray-600 focus:border-emerald-500/50 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
-              />
-              <div className="mt-3 grid grid-cols-2 gap-3">
-                <button className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-white/10">
-                  <Copy className="h-4 w-4 text-gray-400" />
-                  Copy
-                </button>
-                <button className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-3 py-2 text-xs font-black text-gray-950 transition-colors hover:bg-emerald-400">
-                  <Save className="h-4 w-4" />
-                  Save
-                </button>
-              </div>
-            </section>
+          <aside className="min-w-0 space-y-6">
+            <EntityProfilePanel vendor={vendorDetails.data} />
+            <ReviewerDecisionPanel
+              vendor={vendorDetails.data}
+              graph={userGraph}
+              onSync={() => synchronise()}
+              isSyncing={isSyncing}
+            />
           </aside>
         </div>
       </div>

@@ -108,8 +108,8 @@ function MarketingShellSkeleton({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-svh bg-gray-950 text-gray-200 font-sans selection:bg-emerald-500/30">
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] h-[40%] w-[40%] rounded-full bg-emerald-900/20 blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] h-[50%] w-[50%] rounded-full bg-cyan-900/10 blur-[150px]" />
+        <div className="absolute top-[-10%] left-[-10%] h-[40%] w-[40%] rounded-full bg-white/[0.035] blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] h-[50%] w-[50%] rounded-full bg-white/[0.025] blur-[150px]" />
       </div>
       {children}
     </div>
@@ -122,7 +122,7 @@ function LegalPageSkeleton() {
       <div className="relative z-10 mx-auto max-w-4xl px-6 pb-20 pt-10">
         <SkeletonBlock className="mb-8 h-5 w-40" />
         <div className="glass-panel relative rounded-3xl border border-white/10 p-8 shadow-2xl backdrop-blur-xl md:p-12">
-          <div className="absolute left-0 top-0 h-1 w-full rounded-t-3xl bg-linear-to-r from-emerald-500 to-cyan-500" />
+          <div className="absolute left-0 top-0 h-px w-full rounded-t-3xl bg-white/20" />
           <SkeletonBlock className="mb-10 h-10 w-72" />
           <div className="space-y-8">
             {Array.from({ length: 5 }).map((_, index) => (
@@ -190,7 +190,7 @@ export function AuthSkeleton() {
     <MarketingShellSkeleton>
       <div className="relative flex min-h-svh items-center justify-center p-6">
         <div className="glass-panel relative z-10 w-full max-w-md rounded-3xl border border-white/10 p-8 shadow-2xl backdrop-blur-xl">
-          <div className="absolute left-0 top-0 h-1 w-full rounded-t-3xl bg-linear-to-r from-emerald-500 to-cyan-500" />
+          <div className="absolute left-0 top-0 h-px w-full rounded-t-3xl bg-white/20" />
           <SkeletonBlock className="mx-auto mb-6 h-12 w-12 rounded-2xl" />
           <SkeletonBlock className="mx-auto mb-3 h-9 w-56" />
           <SkeletonBlock className="mx-auto mb-8 h-4 w-64" />
@@ -304,7 +304,7 @@ export function DashboardLayoutSkeleton() {
         </header>
         <main className="relative flex-1 p-4 md:p-8">
           <div className="absolute inset-0 z-0 overflow-hidden">
-            <div className="absolute right-0 top-0 rounded-full bg-emerald-900/10 blur-[150px] md:h-125 md:w-125" />
+            <div className="absolute right-0 top-0 rounded-full bg-white/[0.025] blur-[150px] md:h-125 md:w-125" />
           </div>
           <div className="relative z-10 mx-auto max-w-350">
             <DashboardHomeSkeleton />
@@ -418,8 +418,8 @@ export function VendorDetailSkeleton() {
 
 export function SkeletonGraphPanel() {
   return (
-    <div className="relative h-125 overflow-hidden rounded-2xl border border-white/10 bg-black/40">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.08)_0,transparent_60%)]" />
+    <div className="relative h-[560px] overflow-hidden rounded-2xl border border-white/10 bg-black/40">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.055)_0,transparent_60%)]" />
       <svg className="absolute inset-0 h-full w-full opacity-50">
         <line x1="50%" y1="50%" x2="25%" y2="30%" stroke="#f87171" />
         <line x1="50%" y1="50%" x2="75%" y2="34%" stroke="#fbbf24" />

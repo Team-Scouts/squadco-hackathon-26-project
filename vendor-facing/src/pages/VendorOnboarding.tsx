@@ -10,6 +10,7 @@ import {
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { LoaderCircle } from "lucide-react";
 import type { IndividualVendorDetails } from "../types";
+import FingerprintJS from "@fingerprintjs/fingerprintjs";
 
 type VendorOnboardingProps = {
   navigate: (path: AppRoute) => void;
@@ -27,6 +28,7 @@ type FormState = {
   sector: string;
   address: string;
   documentName: string;
+  deviceConsent: boolean;
   notes: string;
 };
 
@@ -42,6 +44,7 @@ const initialForm: FormState = {
   sector: "",
   address: "",
   documentName: "",
+  deviceConsent: true,
   notes: "",
 };
 
@@ -69,6 +72,7 @@ export default function VendorOnboarding({ navigate }: VendorOnboardingProps) {
   const stageTimer = useRef<number | null>(null);
   const fileTimer = useRef<number | null>(null);
   const [vendorID, updateVendorID] = useState("");
+  const [deviceCaptureWarning, setDeviceCaptureWarning] = useState("");
 
   useEffect(() => {
     return () => {
@@ -119,7 +123,7 @@ export default function VendorOnboarding({ navigate }: VendorOnboardingProps) {
     queryFn: async () => {
       if (vendorID.length > 1) {
         const request = await fetch(
-          `${import.meta.env.VITE_SERVER_BASE_URL}/vendors/${vendorID} `,
+          `${import.meta.env.VITE_SERVER_BASE_URL}/vendors/${vendorID}`,
           {
             credentials: "include",
           },
@@ -153,7 +157,39 @@ export default function VendorOnboarding({ navigate }: VendorOnboardingProps) {
       updateVendorID(response.data.id);
       return response;
     },
-    onSuccess: () => {
+    onSuccess: async (response) => {
+      const vendorId = response.data.id;
+      if (form.deviceConsent) {
+        try {
+          const fp = await FingerprintJS.load();
+          const result = await fp.get();
+          const captureResponse = await fetch(
+            `${import.meta.env.VITE_SERVER_BASE_URL}/devices`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                vendorId,
+                deviceHash: result.visitorId,
+                browser: navigator.userAgent,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+              }),
+              credentials: "include",
+            },
+          );
+
+          if (!captureResponse.ok) {
+            throw new Error(
+              `Device capture failed with status ${captureResponse.status}`,
+            );
+          }
+        } catch (error) {
+          console.warn("Device fingerprint capture failed", error);
+          setDeviceCaptureWarning(
+            "Your application was created, but device fingerprint capture failed.",
+          );
+        }
+      }
       moveToStage(2);
     },
   });
@@ -211,7 +247,7 @@ export default function VendorOnboarding({ navigate }: VendorOnboardingProps) {
     event.preventDefault();
     const formData = new FormData();
     formData.append("vendorId", vendorID);
-    formData.append("documentType", "CAC");
+    formData.append("documentType", "CAC_REGISTRATION");
     if (file) {
       formData.append("file", file);
     }
@@ -279,6 +315,7 @@ export default function VendorOnboarding({ navigate }: VendorOnboardingProps) {
                     onChange={updateField}
                     onSubmit={handleContactSubmit}
                     isProcessing={creatingVendor}
+                    deviceCaptureWarning={deviceCaptureWarning}
                   />
                 )}
                 {stage === 2 && gottenVendor && (
@@ -325,9 +362,11 @@ function ContactStage({
   onChange,
   onSubmit,
   isProcessing,
+  deviceCaptureWarning,
 }: StageProps & {
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
   isProcessing: boolean;
+  deviceCaptureWarning: string;
 }) {
   return (
     <form className="form-card glass-panel" onSubmit={onSubmit}>
@@ -392,6 +431,28 @@ function ContactStage({
             placeholder="Lagos"
           />
         </Field>
+        <label className="field field-full">
+          <span className="field-label">Device intelligence consent</span>
+          <span className="flex items-start gap-3 rounded-xl border border-white/10 bg-black/20 p-4">
+            <input
+              type="checkbox"
+              checked={form.deviceConsent}
+              onChange={(event) =>
+                onChange("deviceConsent", event.target.checked)
+              }
+              className="mt-1 h-4 w-4 accent-emerald-500"
+            />
+            <span className="text-sm text-slate-300">
+              Allow VeriSphere to capture a browser fingerprint for shared-device
+              fraud checks.
+            </span>
+          </span>
+        </label>
+        {deviceCaptureWarning && (
+          <p className="field field-full rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-xs text-amber-100">
+            {deviceCaptureWarning}
+          </p>
+        )}
       </div>
       <div className="form-actions">
         <button className="button button-primary flex gap-x-4" type="submit">

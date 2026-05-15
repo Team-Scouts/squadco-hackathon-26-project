@@ -1,5 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { createSign } from 'node:crypto';
+import { createSign, randomUUID } from 'node:crypto';
+import { unlink, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { extname, join } from 'node:path';
+import {
+  RealityDefender,
+  type DetectionResult,
+} from '@realitydefender/realitydefender';
 
 type VendorLike = {
   businessName?: string;
@@ -42,11 +49,22 @@ type OcrResult = {
 type AiDetectionResult = {
   score: number;
   detected: boolean;
-  signals: Array<{
-    code: string;
-    message: string;
-    weight: number;
-  }>;
+  signals: ForensicSignal[];
+};
+
+type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+
+type ForensicSignal = {
+  code: string;
+  message: string;
+  weight: number;
+  metadata?: Record<string, JsonValue>;
 };
 
 export type DocumentIntelligenceResult = {
@@ -70,15 +88,20 @@ export class DocumentIntelligenceService {
     vendor: VendorLike;
   }): Promise<DocumentIntelligenceResult> {
     const file = await this.fetchDocumentFile(input.document.fileUrl);
-  const ocr = await this.runOcr(input.document, input.vendor, file);
+    const ocr = await this.runOcr(input.document, input.vendor, file);
     const metadata = this.extractFileMetadata(input.document, file);
     const synthId = await this.checkSynthId(file);
+    const externalAiDetector = await this.checkExternalAiDocumentDetector(
+      input.document,
+      file,
+    );
     const aiDetection = this.runAiGeneratedDetection(
       input.document,
       ocr,
       file,
       metadata,
       synthId,
+      externalAiDetector,
     );
     const evaluation = this.evaluateDocumentRisk({
       document: input.document,
@@ -460,8 +483,13 @@ export class DocumentIntelligenceService {
     file: { bytes: Buffer; mimeType: string },
     metadata: AiDetectionResult['signals'],
     synthId: AiDetectionResult['signals'][number],
+    externalAiDetector: AiDetectionResult['signals'][number],
   ): AiDetectionResult {
-    const signals: AiDetectionResult['signals'] = [...metadata, synthId];
+    const signals: AiDetectionResult['signals'] = [
+      ...metadata,
+      synthId,
+      externalAiDetector,
+    ];
     let score = 0;
 
     if (document.duplicateDetected) {
@@ -518,6 +546,8 @@ export class DocumentIntelligenceService {
     if (synthId.code === 'SYNTHID_WATERMARK_DETECTED') {
       score += synthId.weight;
     }
+
+    score = Math.max(score, this.scoreFromDetectorSignal(externalAiDetector));
 
     return {
       score: Math.min(100, score),
@@ -738,6 +768,219 @@ export class DocumentIntelligenceService {
       message: `Unknown SynthID provider "${provider}" was configured.`,
       weight: 0,
     };
+  }
+
+  private async checkExternalAiDocumentDetector(
+    document: DocumentLike,
+    file: { bytes: Buffer; mimeType: string },
+  ): Promise<AiDetectionResult['signals'][number]> {
+    const provider = process.env.AI_DOCUMENT_DETECTOR_PROVIDER ?? 'heuristic';
+
+    if (provider === 'reality-defender') {
+      return this.checkRealityDefender(document, file);
+    }
+
+    if (provider === 'disabled') {
+      return {
+        code: 'EXTERNAL_AI_DETECTOR_UNAVAILABLE',
+        message: 'External AI document detection is disabled for this environment.',
+        weight: 0,
+        metadata: {
+          provider,
+        },
+      };
+    }
+
+    return {
+      code: 'EXTERNAL_AI_DETECTOR_UNAVAILABLE',
+      message:
+        provider === 'heuristic'
+          ? 'Only local heuristic AI document detection is configured.'
+          : `Unknown AI document detector provider "${provider}" was configured.`,
+      weight: 0,
+      metadata: {
+        provider,
+      },
+    };
+  }
+
+  private async checkRealityDefender(
+    document: DocumentLike,
+    file: { bytes: Buffer; mimeType: string },
+  ): Promise<AiDetectionResult['signals'][number]> {
+    const apiKey = process.env.REALITY_DEFENDER_API_KEY;
+
+    if (!apiKey) {
+      return {
+        code: 'EXTERNAL_AI_DETECTOR_UNAVAILABLE',
+        message: 'Reality Defender is configured but REALITY_DEFENDER_API_KEY is missing.',
+        weight: 0,
+        metadata: {
+          provider: 'reality-defender',
+        },
+      };
+    }
+
+    const tempFilePath = join(
+      tmpdir(),
+      `verisphere-reality-defender-${randomUUID()}${this.fileExtensionForDetector(
+        document,
+        file,
+      )}`,
+    );
+
+    try {
+      await writeFile(tempFilePath, file.bytes);
+
+      const client = new RealityDefender({ apiKey });
+      const result = await client.detect(
+        { filePath: tempFilePath },
+        {
+          maxAttempts: this.realityDefenderMaxAttempts(),
+          pollingInterval: this.realityDefenderPollingInterval(),
+        },
+      );
+
+      return this.realityDefenderResultToSignal(result);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+
+      this.logger.warn(`Reality Defender check failed: ${message}`);
+
+      return {
+        code: 'EXTERNAL_AI_DETECTOR_FAILED',
+        message: 'Reality Defender check failed; reviewer should rely on other risk signals.',
+        weight: 0,
+        metadata: {
+          provider: 'reality-defender',
+          error: message,
+        },
+      };
+    } finally {
+      await unlink(tempFilePath).catch(() => undefined);
+    }
+  }
+
+  private realityDefenderResultToSignal(
+    result: DetectionResult,
+  ): AiDetectionResult['signals'][number] {
+    const score = this.normalizeRealityDefenderScore(result.score);
+    const status = result.status?.toUpperCase() ?? 'UNKNOWN';
+    const metadata = {
+      provider: 'reality-defender',
+      requestId: result.requestId,
+      status: result.status,
+      score,
+      models: result.models.map((model) => ({
+        name: model.name,
+        status: model.status,
+        score: this.normalizeRealityDefenderScore(model.score),
+      })),
+    };
+
+    if (score >= 70 || /MANIPULATED|SYNTHETIC|FAKE|AI/.test(status)) {
+      return {
+        code: 'REALITY_DEFENDER_AI_DETECTED',
+        message: 'Reality Defender reported elevated synthetic-media risk.',
+        weight: score >= 90 ? 45 : score >= 70 ? 30 : 15,
+        metadata,
+      };
+    }
+
+    if (score >= 50 || /UNKNOWN|PROCESSING|ANALYZING/.test(status)) {
+      return {
+        code: 'REALITY_DEFENDER_UNCERTAIN',
+        message: 'Reality Defender returned an uncertain synthetic-media result.',
+        weight: score >= 50 ? 15 : 0,
+        metadata,
+      };
+    }
+
+    return {
+      code: 'REALITY_DEFENDER_LOW_RISK',
+      message: 'Reality Defender did not report elevated synthetic-media risk.',
+      weight: 0,
+      metadata,
+    };
+  }
+
+  private normalizeRealityDefenderScore(score: number | null) {
+    if (score === null || Number.isNaN(score)) {
+      return 0;
+    }
+
+    return Math.round(score <= 1 ? score * 100 : score);
+  }
+
+  private scoreFromDetectorSignal(signal: ForensicSignal) {
+    const score = signal.metadata?.score;
+
+    return typeof score === 'number' && Number.isFinite(score) ? score : 0;
+  }
+
+  private realityDefenderPollingInterval() {
+    return this.positiveIntegerFromEnv('REALITY_DEFENDER_POLL_INTERVAL_MS', 3_000);
+  }
+
+  private realityDefenderMaxAttempts() {
+    const configuredAttempts = this.positiveIntegerFromEnv(
+      'REALITY_DEFENDER_MAX_ATTEMPTS',
+      0,
+    );
+
+    if (configuredAttempts > 0) {
+      return configuredAttempts;
+    }
+
+    const timeoutMs = this.positiveIntegerFromEnv(
+      'REALITY_DEFENDER_TIMEOUT_MS',
+      45_000,
+    );
+
+    return Math.max(1, Math.ceil(timeoutMs / this.realityDefenderPollingInterval()));
+  }
+
+  private positiveIntegerFromEnv(name: string, fallback: number) {
+    const value = Number(process.env[name]);
+
+    return Number.isInteger(value) && value > 0 ? value : fallback;
+  }
+
+  private fileExtensionForDetector(
+    document: DocumentLike,
+    file: { bytes: Buffer; mimeType: string },
+  ) {
+    const extensionFromUrl = this.extensionFromFileUrl(document.fileUrl);
+
+    if (extensionFromUrl) {
+      return extensionFromUrl;
+    }
+
+    if (file.mimeType.includes('pdf') || this.isPdf(file.bytes)) {
+      return '.pdf';
+    }
+
+    if (file.mimeType.includes('png') || this.isPng(file.bytes)) {
+      return '.png';
+    }
+
+    if (file.mimeType.includes('jpeg') || file.mimeType.includes('jpg') || this.isJpeg(file.bytes)) {
+      return '.jpg';
+    }
+
+    return '.bin';
+  }
+
+  private extensionFromFileUrl(fileUrl: string) {
+    try {
+      const extension = extname(new URL(fileUrl).pathname).toLowerCase();
+
+      return ['.pdf', '.png', '.jpg', '.jpeg', '.webp'].includes(extension)
+        ? extension
+        : '';
+    } catch {
+      return '';
+    }
   }
 
   private isPdf(bytes: Buffer) {
@@ -967,7 +1210,12 @@ export class DocumentIntelligenceService {
     const forensicRiskSignals = input.aiDetection.signals.filter(
       (signal) =>
         signal.weight > 0 &&
-        !['MISSING_EXPECTED_FIELDS', 'LOW_OCR_CONFIDENCE'].includes(signal.code),
+        ![
+          'MISSING_EXPECTED_FIELDS',
+          'LOW_OCR_CONFIDENCE',
+          'REALITY_DEFENDER_AI_DETECTED',
+          'REALITY_DEFENDER_UNCERTAIN',
+        ].includes(signal.code),
     );
 
     for (const signal of forensicRiskSignals) {
@@ -977,6 +1225,7 @@ export class DocumentIntelligenceService {
         message: signal.message,
         severity: signal.weight >= 30 ? 'HIGH' : 'MEDIUM',
         scoreImpact: signal.weight,
+        metadata: signal.metadata,
       });
     }
 

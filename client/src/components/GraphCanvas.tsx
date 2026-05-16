@@ -195,6 +195,7 @@ export default function GraphCanvas({
     () => visibleGraph.nodes.map((node) => node.id),
     [visibleGraph.nodes],
   );
+  const nodeIdSignature = useMemo(() => nodeIds.join("|"), [nodeIds]);
   const nodeMap = useMemo(() => graphNodeById(graph.nodes), [graph.nodes]);
   const edgeMap = useMemo(() => graphEdgeById(graph.edges), [graph.edges]);
 
@@ -264,6 +265,20 @@ export default function GraphCanvas({
   };
 
   const allTypesVisible = hiddenTypes.length === 0;
+
+  useEffect(() => {
+    if (!nodeIds.length) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      window.requestAnimationFrame(() => {
+        graphRef.current?.fit(nodeIds);
+      });
+    }, 80);
+
+    return () => window.clearTimeout(timeout);
+  }, [nodeIdSignature]);
 
   return (
     <section className="panel-card p-4 shadow-cyber-soft md:p-5">
@@ -406,8 +421,10 @@ export default function GraphCanvas({
             interactionOptions={{
               selectOnClick: true,
               drawShadowOnHover: true,
+              excludeNodeMargin: true,
             }}
             mouseEventCallbacks={{
+              onPan: true,
               onNodeClick: (node: Node) => {
                 const apiNode = nodeMap.get(node.id);
 
@@ -457,6 +474,10 @@ export default function GraphCanvas({
                 focusRelationship(relationship);
               },
               onCanvasClick: () => setSelectedItem(null),
+              onCanvasDoubleClick: () => {
+                clearSelection();
+                fitGraph();
+              },
             }}
             nvlOptions={{
               renderer: "canvas",

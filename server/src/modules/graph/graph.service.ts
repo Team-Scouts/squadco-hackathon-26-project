@@ -93,6 +93,18 @@ export class GraphService {
     });
   }
 
+  async safeDeleteVendorById(vendorId: string) {
+    return this.safeGraphSync('Vendor', vendorId, 'deleteVendorById', async () => {
+      await this.neo4j.write(
+        `
+        MATCH (v:Vendor {id: $vendorId})
+        DETACH DELETE v
+        `,
+        { vendorId },
+      );
+    });
+  }
+
   async safeSyncWebhookEventById(webhookEventId: string) {
     return this.safeGraphSync(
       'WebhookEvent',

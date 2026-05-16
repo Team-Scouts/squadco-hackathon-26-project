@@ -16,6 +16,11 @@ import { useQuery } from "@tanstack/react-query";
 import GraphCanvas from "../components/GraphCanvas";
 import { graphApi } from "../lib/graphApi";
 import { useSession } from "../lib/authClient";
+import {
+  alertsApi,
+  type AlertRecord,
+  type AlertSeverity,
+} from "../lib/alertsApi";
 
 const exposureMetrics = [
   {
@@ -90,12 +95,36 @@ const signalSummary = [
   { label: "Graph clusters", value: "31", icon: GitBranch, tone: "text-violet-300" },
 ];
 
-const alerts = [
-  ["Critical", "Reality Defender signal raised on CAC upload", "7m ago", "badge-critical"],
-  ["Review", "Google OCR found business-name mismatch", "16m ago", "badge-review"],
-  ["High Risk", "Two vendors now share one device fingerprint", "42m ago", "badge-high"],
-  ["Low Risk", "Vendor graph sync completed for latest intake", "1h ago", "badge-low"],
-];
+function severityBadge(severity: AlertSeverity) {
+  if (severity === "CRITICAL") {
+    return "badge-critical";
+  }
+
+  if (severity === "HIGH") {
+    return "badge-high";
+  }
+
+  if (severity === "REVIEW") {
+    return "badge-review";
+  }
+
+  return "border-sky-300/25 bg-sky-300/10 text-sky-100";
+}
+
+function severityLabel(severity: AlertSeverity) {
+  if (severity === "HIGH") {
+    return "High Risk";
+  }
+
+  return severity.charAt(0) + severity.slice(1).toLowerCase();
+}
+
+function formatAlertDate(alert: AlertRecord) {
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(alert.createdAt));
+}
 
 export default function DashboardHome() {
   const { data: session } = useSession();
@@ -106,10 +135,18 @@ export default function DashboardHome() {
     retry: false,
     staleTime: 2 * 60 * 1000,
   });
+  const alertsQuery = useQuery({
+    queryKey: ["dashboard_active_alerts"],
+    queryFn: alertsApi.getActiveAlerts,
+    enabled: !!session?.user,
+    retry: false,
+    staleTime: 60 * 1000,
+  });
   const fraudGraph = fraudGraphQuery.data ?? { nodes: [], edges: [] };
   const graphClusterCount = fraudGraph.nodes.filter(
     (node) => node.type === "Cluster",
   ).length;
+  const recentAlerts = (alertsQuery.data ?? []).slice(0, 4);
 
   return (
     <div className="space-y-8">
@@ -273,15 +310,40 @@ export default function DashboardHome() {
               <ShieldCheck className="h-5 w-5 text-zinc-500" />
             </div>
             <div className="mt-5 space-y-3">
-              {alerts.map(([level, text, time, badge]) => (
-                <div key={text} className="rounded-2xl border border-white/5 bg-black/30 p-4">
+              {alertsQuery.isLoading && (
+                <div className="rounded-2xl border border-white/5 bg-black/30 p-4 text-sm font-semibold text-zinc-500">
+                  Loading active alerts...
+                </div>
+              )}
+              {!alertsQuery.isLoading && recentAlerts.length === 0 && (
+                <div className="rounded-2xl border border-white/5 bg-black/30 p-4">
+                  <p className="text-sm font-semibold text-zinc-400">
+                    No active alerts.
+                  </p>
+                  <p className="mt-2 text-xs leading-5 text-zinc-600">
+                    New risk signals will appear here after checks run.
+                  </p>
+                </div>
+              )}
+              {recentAlerts.map((alert) => (
+                <div
+                  key={alert.id}
+                  className="rounded-2xl border border-white/5 bg-black/30 p-4"
+                >
                   <div className="flex items-center justify-between gap-3">
-                    <span className={`status-badge ${badge}`}>{level}</span>
+                    <span className={`status-badge ${severityBadge(alert.severity)}`}>
+                      {severityLabel(alert.severity)}
+                    </span>
                     <span className="font-mono text-[11px] text-zinc-600">
-                      {time}
+                      {formatAlertDate(alert)}
                     </span>
                   </div>
-                  <p className="mt-3 text-sm leading-6 text-zinc-300">{text}</p>
+                  <p className="mt-3 text-sm font-bold text-white">
+                    {alert.title}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-zinc-300">
+                    {alert.message}
+                  </p>
                 </div>
               ))}
             </div>

@@ -1,11 +1,11 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 
 import { VendorsService } from './vendors.service';
 
 import { CreateVendorDto } from './dto/create-vendor.dto';
 
 import { UpdateVendorDto } from './dto/update-vendor.dto';
-import { OptionalAuth } from '@thallesp/nestjs-better-auth';
+import { OptionalAuth, Roles } from '@thallesp/nestjs-better-auth';
 
 @OptionalAuth()
 @Controller('vendors')
@@ -42,5 +42,11 @@ export class VendorsController {
     @Body() updateVendorDto: UpdateVendorDto,
   ) {
     return this.vendorsService.updateVendor(id, updateVendorDto);
+  }
+
+  @Delete(':id')
+  @Roles(['admin', 'reviewer'])
+  deleteVendor(@Param('id') id: string) {
+    return this.vendorsService.deleteVendor(id);
   }
 }

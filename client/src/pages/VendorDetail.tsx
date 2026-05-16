@@ -22,11 +22,12 @@ import {
   Phone,
   Save,
   ShieldAlert,
+  Trash2,
   User,
   X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { IndividualVendorDetails } from "../typesAndInterfaces";
 import { VendorDetailSkeleton, SkeletonGraphPanel } from "../Skeletons";
@@ -1046,9 +1047,11 @@ function FinancialActivityPanel({ vendorId }: { vendorId: string }) {
 
 export default function VendorDetail() {
   const { vendorId } = useParams();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: session } = useSession();
   const [virtual_account, updateVA] = useState("");
+  const [deleteError, setDeleteError] = useState("");
   const {
     data: vendorDetails,
     isLoading,
@@ -1203,6 +1206,64 @@ export default function VendorDetail() {
       },
     });
 
+  const { isPending: isDeleting, mutateAsync: deleteVendor } = useMutation({
+    mutationFn: async () => {
+      const request = await fetch(
+        `${import.meta.env.VITE_SERVER_BASE_URL}/vendors/${vendorId}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        },
+      );
+      const response = await request.json();
+
+      if (!request.ok || !response.success) {
+        throw new Error(response.message ?? "Vendor deletion failed");
+      }
+
+      return response;
+    },
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["vendors_list"] }),
+        queryClient.removeQueries({ queryKey: ["vendor_details", vendorId] }),
+        queryClient.removeQueries({ queryKey: ["vendor_documents", vendorId] }),
+        queryClient.removeQueries({ queryKey: ["vendorGraph", vendorId] }),
+        queryClient.removeQueries({
+          queryKey: ["vendor_financial_activity", vendorId],
+        }),
+        queryClient.removeQueries({
+          queryKey: ["vendor_virtual_accounts", vendorId],
+        }),
+      ]);
+      navigate("/dashboard/vendors");
+    },
+  });
+
+  const handleDeleteVendor = async () => {
+    if (!vendorId || !vendorDetails?.data) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Delete ${vendorDetails.data.businessName}? This removes the vendor and its related documents, devices, risk scores, financial records, alerts, and virtual accounts from PostgreSQL.`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setDeleteError("");
+
+    try {
+      await deleteVendor();
+    } catch (error) {
+      setDeleteError(
+        error instanceof Error ? error.message : "Vendor deletion failed",
+      );
+    }
+  };
+
   if (isLoading) {
     return <VendorDetailSkeleton />;
   }
@@ -1239,30 +1300,46 @@ export default function VendorDetail() {
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
-              <button
-                onClick={() => runAllChecks()}
-                disabled={isRunningAllChecks}
-                className="button-secondary rounded-xl disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <History className="h-4 w-4 text-zinc-400" />
-                {isRunningAllChecks ? "Running checks..." : "Run all checks"}
-              </button>
-              <button
-                onClick={() => synchronise()}
-                className={`button-secondary rounded-xl ${isSyncing ? "opacity-70" : "opacity-100"}`}
-              >
-                <LucideClockArrowUp className="h-4 w-4 text-zinc-400" />
-                {isSyncing ? "Syncing..." : "Update graph"}
-              </button>
-              <button className="button-danger rounded-xl">
-                <X className="h-4 w-4" />
-                Reject
-              </button>
-              <button className="button-primary rounded-xl">
-                <Check className="h-4 w-4" />
-                Approve
-              </button>
+            <div className="flex flex-col gap-2 xl:items-end">
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  onClick={() => runAllChecks()}
+                  disabled={isRunningAllChecks || isDeleting}
+                  className="button-secondary rounded-xl disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <History className="h-4 w-4 text-zinc-400" />
+                  {isRunningAllChecks ? "Running checks..." : "Run all checks"}
+                </button>
+                <button
+                  onClick={() => synchronise()}
+                  disabled={isDeleting}
+                  className={`button-secondary rounded-xl disabled:cursor-not-allowed disabled:opacity-60 ${isSyncing ? "opacity-70" : "opacity-100"}`}
+                >
+                  <LucideClockArrowUp className="h-4 w-4 text-zinc-400" />
+                  {isSyncing ? "Syncing..." : "Update graph"}
+                </button>
+                <button className="button-danger rounded-xl" disabled={isDeleting}>
+                  <X className="h-4 w-4" />
+                  Reject
+                </button>
+                <button className="button-primary rounded-xl" disabled={isDeleting}>
+                  <Check className="h-4 w-4" />
+                  Approve
+                </button>
+                <button
+                  onClick={handleDeleteVendor}
+                  disabled={isDeleting}
+                  className="button-danger rounded-xl disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  {isDeleting ? "Deleting..." : "Delete vendor"}
+                </button>
+              </div>
+              {deleteError && (
+                <p className="max-w-xl rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs font-semibold text-red-200">
+                  {deleteError}
+                </p>
+              )}
             </div>
           </div>
         </section>

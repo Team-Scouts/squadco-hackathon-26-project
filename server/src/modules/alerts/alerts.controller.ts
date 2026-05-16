@@ -1,9 +1,11 @@
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { Roles } from '@thallesp/nestjs-better-auth';
 
 import { AlertsService } from './alerts.service';
 import { CreateAlertDto } from './dto/create-alert.dto';
 
 @Controller('alerts')
+@Roles(['admin', 'reviewer'])
 export class AlertsController {
   constructor(private readonly alertsService: AlertsService) {}
 

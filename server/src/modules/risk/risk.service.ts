@@ -1,8 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { DocumentVerificationStatus, RiskLevel } from '../../generated/prisma/enums';
+import {
+  AlertSeverity,
+  AlertType,
+  DocumentVerificationStatus,
+  RiskLevel,
+} from '../../generated/prisma/enums';
 import { CreateRiskDto } from './dto/create-risk.dto';
 import { UpdateRiskDto } from './dto/update-risk.dto';
+import { AlertsService } from '../alerts/alerts.service';
 
 export type RiskSignal = {
   code: string;
@@ -31,7 +37,12 @@ const REQUIRED_DOCUMENT_TYPES = [
 
 @Injectable()
 export class RiskService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(RiskService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly alertsService: AlertsService,
+  ) {}
 
   async recomputeVendorRisk(vendorId: string, input: RiskRecomputeInput = {}) {
     const vendor = await this.prisma.vendor.findUnique({
@@ -121,6 +132,12 @@ export class RiskService {
         overallRiskScore: overallRisk,
         riskLevel,
       },
+    });
+    await this.createRiskAlerts({
+      vendorId,
+      overallRisk,
+      networkFraudRisk,
+      reasons: this.dedupeReasons(reasons),
     });
 
     return {
@@ -276,5 +293,114 @@ export class RiskService {
     }
 
     return 'APPROVE_IF_OTHER_CHECKS_PASS';
+  }
+
+  private async createRiskAlerts(input: {
+    vendorId: string;
+    overallRisk: number;
+    networkFraudRisk: number;
+    reasons: RiskSignal[];
+  }) {
+    try {
+      for (const reason of input.reasons) {
+        const alertType = this.resolveAlertType(reason.code);
+
+        if (!alertType) {
+          continue;
+        }
+
+        await this.alertsService.createRiskAlert({
+          vendorId: input.vendorId,
+          type: alertType,
+          severity: this.resolveAlertSeverity(reason.severity, reason.scoreImpact),
+          title: this.resolveAlertTitle(reason.code),
+          message: reason.message,
+        });
+      }
+
+      if (input.overallRisk >= 85 || input.networkFraudRisk >= 60) {
+        await this.alertsService.createRiskAlert({
+          vendorId: input.vendorId,
+          type: AlertType.FRAUD_RING,
+          severity: this.resolveAlertSeverity(undefined, input.overallRisk),
+          title:
+            input.networkFraudRisk >= 60
+              ? 'Network fraud risk detected'
+              : 'Critical vendor risk detected',
+          message:
+            input.networkFraudRisk >= 60
+              ? 'Vendor has elevated graph or network fraud risk signals.'
+              : `Vendor overall risk score is ${Math.round(input.overallRisk)}.`,
+        });
+      }
+    } catch (error) {
+      this.logger.warn(
+        `Failed to create risk alert for vendor ${input.vendorId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
+  }
+
+  private resolveAlertType(code: string): AlertType | null {
+    if (code === 'SHARED_DEVICE_FINGERPRINT') {
+      return AlertType.DEVICE_REUSE;
+    }
+
+    if (code === 'DUPLICATE_DOCUMENT') {
+      return AlertType.DUPLICATE_DOCUMENT;
+    }
+
+    if (
+      [
+        'REPEATED_FAILED_PAYMENTS',
+        'UNUSUALLY_HIGH_AMOUNT',
+        'RAPID_TRANSACTION_VELOCITY',
+        'WEBHOOK_REPLAY_OR_IDEMPOTENCY_CONFLICT',
+        'MANY_REFUNDS',
+        'TRANSFER_TO_SHARED_BANK_ACCOUNT',
+        'BANK_ACCOUNT_IDENTITY_MISMATCH',
+      ].includes(code)
+    ) {
+      return AlertType.SUSPICIOUS_TRANSACTION;
+    }
+
+    return null;
+  }
+
+  private resolveAlertSeverity(
+    severity: RiskSignal['severity'] | undefined,
+    score: number,
+  ): AlertSeverity {
+    if (severity === 'CRITICAL' || score >= 85) {
+      return AlertSeverity.CRITICAL;
+    }
+
+    if (severity === 'HIGH' || score >= 60) {
+      return AlertSeverity.HIGH;
+    }
+
+    if (severity === 'MEDIUM' || score >= 30) {
+      return AlertSeverity.REVIEW;
+    }
+
+    return AlertSeverity.INFO;
+  }
+
+  private resolveAlertTitle(code: string) {
+    const titles: Record<string, string> = {
+      SHARED_DEVICE_FINGERPRINT: 'Shared device fingerprint',
+      DUPLICATE_DOCUMENT: 'Duplicate document detected',
+      REPEATED_FAILED_PAYMENTS: 'Repeated failed payments',
+      UNUSUALLY_HIGH_AMOUNT: 'Unusually high transaction',
+      RAPID_TRANSACTION_VELOCITY: 'Rapid transaction velocity',
+      WEBHOOK_REPLAY_OR_IDEMPOTENCY_CONFLICT:
+        'Webhook replay or idempotency conflict',
+      MANY_REFUNDS: 'Multiple refund events',
+      TRANSFER_TO_SHARED_BANK_ACCOUNT: 'Shared bank account transfer risk',
+      BANK_ACCOUNT_IDENTITY_MISMATCH: 'Bank account identity mismatch',
+    };
+
+    return titles[code] ?? 'Risk signal detected';
   }
 }

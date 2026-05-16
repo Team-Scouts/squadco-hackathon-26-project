@@ -144,6 +144,73 @@ export class VendorsService {
     };
   }
 
+  async deleteVendor(id: string) {
+    const vendor = await this.prisma.vendor.findUnique({
+      where: { id },
+      include: {
+        transactions: {
+          select: {
+            transactionRef: true,
+          },
+        },
+        transfers: {
+          select: {
+            transferReference: true,
+          },
+        },
+      },
+    });
+
+    if (!vendor) {
+      throw new NotFoundException('Vendor not found');
+    }
+
+    const transactionReferences = vendor.transactions.map(
+      (transaction) => transaction.transactionRef,
+    );
+    const transferReferences = vendor.transfers.map(
+      (transfer) => transfer.transferReference,
+    );
+
+    await this.prisma.$transaction(async (tx) => {
+      if (transactionReferences.length || transferReferences.length) {
+        await tx.webhookEvent.deleteMany({
+          where: {
+            OR: [
+              ...(transactionReferences.length
+                ? [{ transactionReference: { in: transactionReferences } }]
+                : []),
+              ...(transferReferences.length
+                ? [{ transferReference: { in: transferReferences } }]
+                : []),
+            ],
+          },
+        });
+      }
+
+      await tx.alert.deleteMany({ where: { vendorId: id } });
+      await tx.riskScore.deleteMany({ where: { vendorId: id } });
+      await tx.document.deleteMany({ where: { vendorId: id } });
+      await tx.device.deleteMany({ where: { vendorId: id } });
+      await tx.virtualAccount.deleteMany({ where: { vendorId: id } });
+      await tx.transfer.deleteMany({ where: { vendorId: id } });
+      await tx.bankAccount.deleteMany({ where: { vendorId: id } });
+      await tx.transaction.deleteMany({ where: { vendorId: id } });
+      await tx.vendor.delete({ where: { id } });
+    });
+    const graphDeleted = await this.graphService.safeDeleteVendorById(id);
+
+    return {
+      success: true,
+      message: 'Vendor deleted successfully',
+      data: {
+        id,
+        businessName: vendor.businessName,
+      },
+      graphDeleted,
+    };
+  }
+
   async runChecks(id: string) {
     const vendor = await this.prisma.vendor.findUnique({
       where: { id },

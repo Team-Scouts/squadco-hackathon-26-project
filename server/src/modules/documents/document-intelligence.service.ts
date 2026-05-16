@@ -36,6 +36,11 @@ export type ExtractedDocumentField = {
   status: 'match' | 'edited' | 'flagged' | 'missing';
 };
 
+type ExtractionCandidate = {
+  value: string;
+  score: number;
+};
+
 export type VerificationReason = {
   code: string;
   message: string;
@@ -328,11 +333,16 @@ export class DocumentIntelligenceService {
     text: string,
     confidence: number,
   ): ExtractedDocumentField[] {
-    const businessName = this.extractCacBusinessName(text);
-    const registrationNumber = this.extractCacRegistrationNumber(text);
     const vendorBusinessName = vendor.businessName ?? '';
     const vendorRegistrationNumber = vendor.registrationNumber ?? '';
-    const roundedConfidence = Math.round(confidence);
+    const businessNameCandidate = this.extractCacBusinessNameCandidate(
+      text,
+      vendorBusinessName,
+    );
+    const registrationNumberCandidate =
+      this.extractCacRegistrationNumberCandidate(text, vendorRegistrationNumber);
+    const businessName = businessNameCandidate?.value ?? '';
+    const registrationNumber = registrationNumberCandidate?.value ?? '';
 
     const businessNameStatus: ExtractedDocumentField['status'] = businessName
       ? this.businessNamesMatch(businessName, vendorBusinessName)
@@ -354,33 +364,50 @@ export class DocumentIntelligenceService {
         'Legal business name',
         businessName,
         vendorBusinessName,
-        businessName ? roundedConfidence : 0,
+        this.candidateConfidence(confidence, businessNameCandidate),
         businessNameStatus,
       ),
       this.field(
         'Registration number',
         registrationNumber,
         vendorRegistrationNumber,
-        registrationNumber ? roundedConfidence : 0,
+        this.candidateConfidence(confidence, registrationNumberCandidate),
         registrationNumberStatus,
       ),
     ];
   }
 
-  private extractCacBusinessName(text: string) {
+  private extractCacBusinessNameCandidate(
+    text: string,
+    vendorBusinessName = '',
+  ): ExtractionCandidate | null {
     const certificateMatch = text.match(
       /I\s+hereby\s+certify\s+that\s+([\s\S]+?)\s+is\s+this\s+day\s+incorporated/i,
     );
+    const candidates: ExtractionCandidate[] = [];
 
     if (certificateMatch?.[1]) {
-      const candidate = this.pickBestBusinessNameLine(certificateMatch[1]);
+      const candidate = this.pickBestBusinessNameCandidate(
+        certificateMatch[1],
+        vendorBusinessName,
+        35,
+      );
 
       if (candidate) {
-        return candidate;
+        candidates.push(candidate);
       }
     }
 
-    return this.pickBestBusinessNameLine(text);
+    const fullTextCandidate = this.pickBestBusinessNameCandidate(
+      text,
+      vendorBusinessName,
+    );
+
+    if (fullTextCandidate) {
+      candidates.push(fullTextCandidate);
+    }
+
+    return this.bestCandidate(candidates, 45);
   }
 
   private extractTaxFieldsFromText(
@@ -388,25 +415,34 @@ export class DocumentIntelligenceService {
     text: string,
     confidence: number,
   ): ExtractedDocumentField[] {
-    const businessName = this.extractNamedValue(text, [
-      'business name',
-      'company name',
-      'taxpayer name',
-      'registered name',
-      'name',
-    ]) || this.pickBestBusinessNameLine(text);
-    const tin = this.extractTin(text);
-    const roundedConfidence = Math.round(confidence);
+    const vendorBusinessName = vendor.businessName ?? '';
+    const businessNameCandidate =
+      this.extractNamedValueCandidate(
+        text,
+        [
+          'business name',
+          'company name',
+          'taxpayer name',
+          'tax payer name',
+          'registered name',
+          'name',
+        ],
+        vendorBusinessName,
+        this.businessNamesMatch.bind(this),
+      ) || this.pickBestBusinessNameCandidate(text, vendorBusinessName);
+    const tinCandidate = this.extractTinCandidate(text);
+    const businessName = businessNameCandidate?.value ?? '';
+    const tin = tinCandidate?.value ?? '';
 
     return [
       this.field(
         'Legal business name',
         businessName,
-        vendor.businessName ?? '',
-        businessName ? roundedConfidence : 0,
+        vendorBusinessName,
+        this.candidateConfidence(confidence, businessNameCandidate),
         this.textFieldStatus(
           businessName,
-          vendor.businessName ?? '',
+          vendorBusinessName,
           this.businessNamesMatch.bind(this),
         ),
       ),
@@ -414,7 +450,7 @@ export class DocumentIntelligenceService {
         'Tax identification number',
         tin,
         '',
-        tin ? roundedConfidence : 0,
+        this.candidateConfidence(confidence, tinCandidate),
         tin ? 'match' : 'missing',
       ),
     ];
@@ -425,26 +461,34 @@ export class DocumentIntelligenceService {
     text: string,
     confidence: number,
   ): ExtractedDocumentField[] {
-    const ownerName =
-      this.extractNamedValue(text, [
-        'name',
-        'full name',
-        'surname',
-        'given names',
-        'holder',
-      ]) || this.pickLikelyPersonNameLine(text);
-    const documentNumber = this.extractIdentityDocumentNumber(text);
-    const roundedConfidence = Math.round(confidence);
+    const contactName = vendor.contactName ?? '';
+    const ownerNameCandidate =
+      this.extractNamedValueCandidate(
+        text,
+        [
+          'full name',
+          'name',
+          'surname',
+          'given names',
+          'given name',
+          'holder',
+        ],
+        contactName,
+        this.personNamesMatch.bind(this),
+      ) || this.pickLikelyPersonNameCandidate(text, contactName);
+    const documentNumberCandidate = this.extractIdentityDocumentNumberCandidate(text);
+    const ownerName = ownerNameCandidate?.value ?? '';
+    const documentNumber = documentNumberCandidate?.value ?? '';
 
     return [
       this.field(
         'Owner name',
         ownerName,
-        vendor.contactName ?? '',
-        ownerName ? roundedConfidence : 0,
+        contactName,
+        this.candidateConfidence(confidence, ownerNameCandidate),
         this.textFieldStatus(
           ownerName,
-          vendor.contactName ?? '',
+          contactName,
           this.personNamesMatch.bind(this),
         ),
       ),
@@ -452,7 +496,7 @@ export class DocumentIntelligenceService {
         'Document number',
         documentNumber,
         '',
-        documentNumber ? roundedConfidence : 0,
+        this.candidateConfidence(confidence, documentNumberCandidate),
         documentNumber ? 'match' : 'missing',
       ),
     ];
@@ -463,42 +507,54 @@ export class DocumentIntelligenceService {
     text: string,
     confidence: number,
   ): ExtractedDocumentField[] {
-    const address =
-      this.extractNamedValue(text, [
-        'address',
-        'service address',
-        'billing address',
-        'premises',
-      ]) || this.pickLikelyAddressLine(text);
-    const businessName = this.extractNamedValue(text, [
-      'customer name',
-      'account name',
-      'business name',
-      'name',
-    ]) || this.pickBestBusinessNameLine(text);
-    const issueDate = this.extractDocumentDate(text);
-    const roundedConfidence = Math.round(confidence);
+    const vendorAddress = this.vendorAddress(vendor);
+    const vendorBusinessName = vendor.businessName ?? '';
+    const addressCandidate =
+      this.extractNamedValueCandidate(
+        text,
+        [
+          'service address',
+          'billing address',
+          'business address',
+          'customer address',
+          'premises',
+          'address',
+        ],
+        vendorAddress,
+        this.addressesMatch.bind(this),
+      ) || this.pickLikelyAddressCandidate(text, vendorAddress);
+    const businessNameCandidate =
+      this.extractNamedValueCandidate(
+        text,
+        ['customer name', 'account name', 'business name', 'company name', 'name'],
+        vendorBusinessName,
+        this.businessNamesMatch.bind(this),
+      ) || this.pickBestBusinessNameCandidate(text, vendorBusinessName);
+    const issueDateCandidate = this.extractDocumentDateCandidate(text);
+    const address = addressCandidate?.value ?? '';
+    const businessName = businessNameCandidate?.value ?? '';
+    const issueDate = issueDateCandidate?.value ?? '';
 
     return [
       this.field(
         'Business address',
         address,
-        this.vendorAddress(vendor),
-        address ? roundedConfidence : 0,
+        vendorAddress,
+        this.candidateConfidence(confidence, addressCandidate),
         this.textFieldStatus(
           address,
-          this.vendorAddress(vendor),
+          vendorAddress,
           this.addressesMatch.bind(this),
         ),
       ),
       this.field(
         'Legal business name',
         businessName,
-        vendor.businessName ?? '',
-        businessName ? roundedConfidence : 0,
+        vendorBusinessName,
+        this.candidateConfidence(confidence, businessNameCandidate),
         this.textFieldStatus(
           businessName,
-          vendor.businessName ?? '',
+          vendorBusinessName,
           this.businessNamesMatch.bind(this),
         ),
       ),
@@ -506,150 +562,415 @@ export class DocumentIntelligenceService {
         'Issue date',
         issueDate,
         '',
-        issueDate ? roundedConfidence : 0,
+        this.candidateConfidence(confidence, issueDateCandidate),
         issueDate ? 'match' : 'missing',
       ),
     ];
   }
 
   private pickBestBusinessNameLine(text: string) {
-    const ignoredLines = new Set([
+    return this.pickBestBusinessNameCandidate(text)?.value ?? '';
+  }
+
+  private pickBestBusinessNameCandidate(
+    text: string,
+    vendorBusinessName = '',
+    scoreBoost = 0,
+  ): ExtractionCandidate | null {
+    const candidates = this.ocrLines(text)
+      .map((line) => ({
+        value: line,
+        score: this.scoreBusinessNameCandidate(line, vendorBusinessName) + scoreBoost,
+      }))
+      .filter((candidate) => candidate.score > 0);
+
+    return this.bestCandidate(candidates, 45);
+  }
+
+  private scoreBusinessNameCandidate(line: string, vendorBusinessName = '') {
+    if (!line || this.isBoilerplateDocumentLine(line)) {
+      return 0;
+    }
+
+    let score = 20;
+
+    if (/\b(LTD|LIMITED|PLC|LLC|INC|COMPANY|ENTERPRISES?|VENTURES?|SERVICES?)\b\.?$/i.test(line)) {
+      score += 35;
+    } else if (/\b(LTD|LIMITED|PLC|LLC|INC|COMPANY|ENTERPRISES?|VENTURES?|SERVICES?)\b/i.test(line)) {
+      score += 25;
+    }
+
+    if (vendorBusinessName) {
+      const ratio = this.sharedTokenRatio(
+        this.normalizeBusinessName(line),
+        this.normalizeBusinessName(vendorBusinessName),
+      );
+
+      if (ratio >= 0.8) {
+        score += 35;
+      } else if (ratio >= 0.5) {
+        score += 25;
+      } else if (ratio > 0) {
+        score += 10;
+      }
+    }
+
+    if (/^(email|phone|status|date|tin|tax|address)\s*:/i.test(line)) {
+      score -= 35;
+    }
+
+    if (/^\d{1,2}\s+[A-Z]+\s+\d{4}$/i.test(line) || /@/.test(line)) {
+      score -= 45;
+    }
+
+    return score;
+  }
+
+  private extractCacRegistrationNumberCandidate(
+    text: string,
+    vendorRegistrationNumber = '',
+  ) {
+    const candidates: ExtractionCandidate[] = [];
+    const patterns: Array<{ regex: RegExp; score: number; prefixGroup?: number; numberGroup: number }> = [
+      {
+        regex: /\bCAC\s*[/-]\s*(RC|BN|IT)\s*[/-]\s*([0-9][0-9,\s.-]{2,})\b/gi,
+        score: 95,
+        prefixGroup: 1,
+        numberGroup: 2,
+      },
+      {
+        regex: /\b(RC|BN|IT)\s*[-/:]?\s*([0-9][0-9,\s.-]{2,})\b/gi,
+        score: 85,
+        prefixGroup: 1,
+        numberGroup: 2,
+      },
+      {
+        regex: /\b(?:registration|reg\.?|company|certificate)\s*(?:number|no\.?|num)?\s*[:#-]?\s*(?:CAC\s*[/-]\s*)?(RC|BN|IT)?\s*[/-]?\s*([0-9][0-9,\s.-]{2,})\b/gi,
+        score: 80,
+        prefixGroup: 1,
+        numberGroup: 2,
+      },
+      {
+        regex: /\bR\s*[-:]?\s*([0-9][0-9,\s.-]{2,})\b/gi,
+        score: 52,
+        numberGroup: 1,
+      },
+    ];
+
+    for (const pattern of patterns) {
+      for (const match of text.matchAll(pattern.regex)) {
+        const prefix = pattern.prefixGroup
+          ? match[pattern.prefixGroup]?.toUpperCase()
+          : pattern.regex.source.startsWith('\\bR')
+            ? 'RC'
+            : '';
+        const number = match[pattern.numberGroup]?.replace(/[\s,.-]+/g, '') ?? '';
+
+        if (number.length < 3) {
+          continue;
+        }
+
+        let score = pattern.score + this.scoreRegistrationContext(text, match.index ?? 0);
+        const value = `${prefix}${number}`;
+
+        if (this.registrationNumbersMatch(value, vendorRegistrationNumber)) {
+          score += 35;
+        }
+
+        candidates.push({
+          value,
+          score,
+        });
+      }
+    }
+
+    return this.bestCandidate(candidates, 55);
+  }
+
+  private scoreRegistrationContext(text: string, index: number) {
+    const context = text.slice(Math.max(0, index - 60), index + 80).toLowerCase();
+    let score = 0;
+
+    if (/cac|registration|reg\.?|company|certificate|incorporated/.test(context)) {
+      score += 15;
+    }
+
+    if (/phone|mobile|email|date|status|amount|total/.test(context)) {
+      score -= 35;
+    }
+
+    return score;
+  }
+
+  private extractTinCandidate(text: string) {
+    const candidates: ExtractionCandidate[] = [];
+
+    for (const match of text.matchAll(
+      /\b(?:TIN|TAX\s*(?:IDENTIFICATION)?\s*(?:NUMBER|NO\.?)?)\s*[:#-]?\s*([0-9][0-9\s.-]{5,})\b/gi,
+    )) {
+      const value = match[1]?.replace(/[\s.-]+/g, '') ?? '';
+
+      if (value.length >= 6) {
+        candidates.push({ value, score: 90 });
+      }
+    }
+
+    for (const match of text.matchAll(/\b([0-9]{8,14})\b/g)) {
+      const contextScore = this.scoreRegistrationContext(text, match.index ?? 0);
+      candidates.push({
+        value: match[1],
+        score: 45 + Math.max(-20, contextScore),
+      });
+    }
+
+    return this.bestCandidate(candidates, 45);
+  }
+
+  private extractIdentityDocumentNumberCandidate(text: string) {
+    const candidates: ExtractionCandidate[] = [];
+
+    for (const match of text.matchAll(
+      /\b(?:NIN|PASSPORT|LICENSE|LICENCE|ID\s*(?:NO\.?|NUMBER)?)\s*[:#-]?\s*([A-Z0-9][A-Z0-9\s-]{5,})\b/gi,
+    )) {
+      const value = match[1]?.replace(/\s+/g, '').toUpperCase() ?? '';
+
+      if (value.length >= 6) {
+        candidates.push({ value, score: 90 });
+      }
+    }
+
+    for (const match of text.matchAll(/\b([A-Z]{1,3}[0-9]{6,12}|[0-9]{10,14})\b/gi)) {
+      const context = text.slice(Math.max(0, (match.index ?? 0) - 50), (match.index ?? 0) + 70);
+      const penalty = /phone|mobile|date|amount|total/i.test(context) ? 35 : 0;
+
+      candidates.push({
+        value: match[1].toUpperCase(),
+        score: 55 - penalty,
+      });
+    }
+
+    return this.bestCandidate(candidates, 45);
+  }
+
+  private extractDocumentDateCandidate(text: string) {
+    const patterns = [
+      /\b(?:date|issued|issue date|bill date|statement date)\s*[:#-]?\s*([0-9]{1,2}[/-][0-9]{1,2}[/-][0-9]{2,4}|[0-9]{1,2}\s+[A-Z][a-z]+\s+[0-9]{4})/i,
+      /\b([0-9]{1,2}\s+[A-Z][a-z]+\s+[0-9]{4})\b/i,
+      /\b([0-9]{1,2}[/-][0-9]{1,2}[/-][0-9]{2,4})\b/i,
+    ];
+
+    for (const [index, pattern] of patterns.entries()) {
+      const match = text.match(pattern);
+
+      if (match?.[1]) {
+        return {
+          value: match[1],
+          score: index === 0 ? 90 : 55,
+        };
+      }
+    }
+
+    return null;
+  }
+
+  private extractNamedValueCandidate(
+    text: string,
+    labels: string[],
+    verified = '',
+    matcher?: (first: string, second: string) => boolean,
+  ) {
+    const candidates: ExtractionCandidate[] = [];
+
+    for (const label of labels) {
+      const pattern = new RegExp(
+        `\\b${label.replace(/\s+/g, '\\s+')}\\s*[:#-]\\s*([^\\n\\r]{3,100})`,
+        'gi',
+      );
+
+      for (const match of text.matchAll(pattern)) {
+        const value = match?.[1] ? this.cleanOcrLine(match[1]) : '';
+
+        if (!value || this.isBoilerplateDocumentLine(value)) {
+          continue;
+        }
+
+        let score = 75;
+
+        if (verified && matcher?.(value, verified)) {
+          score += 25;
+        }
+
+        candidates.push({ value, score });
+      }
+    }
+
+    return this.bestCandidate(candidates, 50);
+  }
+
+  private pickLikelyPersonNameCandidate(
+    text: string,
+    verifiedName = '',
+  ): ExtractionCandidate | null {
+    const candidates = this.ocrLines(text)
+      .map((line) => {
+        let score = /^[A-Z][A-Z.'-]+(?:\s+[A-Z][A-Z.'-]+){1,3}$/i.test(line)
+          ? 50
+          : 0;
+
+        if (verifiedName) {
+          const ratio = this.sharedTokenRatio(
+            this.normalizeLooseText(line),
+            this.normalizeLooseText(verifiedName),
+          );
+
+          if (ratio >= 0.8) {
+            score += 35;
+          } else if (ratio >= 0.5) {
+            score += 20;
+          }
+        }
+
+        if (this.isBoilerplateDocumentLine(line)) {
+          score = 0;
+        }
+
+        return { value: line, score };
+      })
+      .filter((candidate) => candidate.score > 0);
+
+    return this.bestCandidate(candidates, 45);
+  }
+
+  private pickLikelyAddressCandidate(
+    text: string,
+    verifiedAddress = '',
+  ): ExtractionCandidate | null {
+    const candidates = this.ocrLines(text)
+      .map((line) => {
+        let score = /\b(street|road|avenue|close|crescent|estate|lagos|abuja|state|city|suite|flat|plot|drive|lane|way)\b/i.test(line)
+          ? 55
+          : 0;
+
+        if (verifiedAddress) {
+          const ratio = this.sharedTokenRatio(
+            this.normalizeLooseText(line),
+            this.normalizeLooseText(verifiedAddress),
+          );
+
+          if (ratio >= 0.6) {
+            score += 30;
+          } else if (ratio >= 0.35) {
+            score += 15;
+          }
+        }
+
+        if (this.isBoilerplateDocumentLine(line)) {
+          score = 0;
+        }
+
+        return { value: line, score };
+      })
+      .filter((candidate) => candidate.score > 0);
+
+    return this.bestCandidate(candidates, 45);
+  }
+
+  private pickLikelyPersonNameLine(text: string) {
+    return this.pickLikelyPersonNameCandidate(text)?.value ?? '';
+  }
+
+  private pickLikelyAddressLine(text: string) {
+    return this.pickLikelyAddressCandidate(text)?.value ?? '';
+  }
+
+  private extractCacRegistrationNumber(text: string) {
+    return this.extractCacRegistrationNumberCandidate(text)?.value ?? '';
+  }
+
+  private extractTin(text: string) {
+    return this.extractTinCandidate(text)?.value ?? '';
+  }
+
+  private extractIdentityDocumentNumber(text: string) {
+    return this.extractIdentityDocumentNumberCandidate(text)?.value ?? '';
+  }
+
+  private extractDocumentDate(text: string) {
+    return this.extractDocumentDateCandidate(text)?.value ?? '';
+  }
+
+  private extractNamedValue(text: string, labels: string[]) {
+    return this.extractNamedValueCandidate(text, labels)?.value ?? '';
+  }
+
+  private bestCandidate(
+    candidates: Array<ExtractionCandidate | null | undefined>,
+    minimumScore = 45,
+  ) {
+    const deduped = new Map<string, ExtractionCandidate>();
+
+    for (const candidate of candidates) {
+      if (!candidate?.value) {
+        continue;
+      }
+
+      const cleanedValue = this.cleanOcrLine(candidate.value);
+      const key = this.normalizeLooseText(cleanedValue);
+      const existing = deduped.get(key);
+
+      if (!existing || candidate.score > existing.score) {
+        deduped.set(key, {
+          value: cleanedValue,
+          score: candidate.score,
+        });
+      }
+    }
+
+    const best = [...deduped.values()].sort((a, b) => b.score - a.score)[0];
+
+    return best && best.score >= minimumScore ? best : null;
+  }
+
+  private candidateConfidence(
+    ocrConfidence: number,
+    candidate?: ExtractionCandidate | null,
+  ) {
+    if (!candidate) {
+      return 0;
+    }
+
+    return Math.max(
+      1,
+      Math.min(100, Math.round(ocrConfidence * 0.65 + candidate.score * 0.35)),
+    );
+  }
+
+  private ocrLines(text: string) {
+    return text
+      .split(/\r?\n/)
+      .map((line) => this.cleanOcrLine(line))
+      .filter((line) => line.length >= 3);
+  }
+
+  private isBoilerplateDocumentLine(line: string) {
+    const normalized = line.toLowerCase();
+    const boilerplate = new Set([
       'certificate of',
       'incorporation',
+      'certificate of incorporation',
       'corporate affairs commission',
       'federal republic of nigeria',
       'federal republic of nire',
       'registrar-general',
       'registered details',
       'mock',
+      'tax identification number',
+      'national identity management commission',
     ]);
 
-    const lines = text
-      .split(/\r?\n/)
-      .map((line) => this.cleanOcrLine(line))
-      .filter((line) => line.length >= 3)
-      .filter((line) => !ignoredLines.has(line.toLowerCase()))
-      .filter((line) => !/^(email|phone|status)\s*:/i.test(line))
-      .filter((line) => !/^\d{1,2}\s+[A-Z]+\s+\d{4}$/i.test(line));
-
     return (
-      lines.find((line) => /\b(LTD|LIMITED|PLC|LLC|INC|COMPANY)\b\.?$/i.test(line)) ??
-      lines.find((line) => /\b(LTD|LIMITED|PLC|LLC|INC|COMPANY)\b/i.test(line)) ??
-      ''
-    );
-  }
-
-  private extractCacRegistrationNumber(text: string) {
-    const prefixedMatch = text.match(
-      /\b(RC|BN|IT)\s*[-:]?\s*([0-9][0-9,\s.-]{2,})\b/i,
-    );
-
-    if (prefixedMatch) {
-      const cleanedValue = prefixedMatch[2].replace(/[\s,.-]+/g, '');
-
-      if (cleanedValue.length >= 3) {
-        return `${prefixedMatch[1].toUpperCase()}${cleanedValue}`;
-      }
-    }
-
-    const singleLetterMatch = text.match(/\bR\s*[-:]?\s*([0-9][0-9,\s.-]{2,})\b/i);
-
-    if (singleLetterMatch) {
-      const cleanedValue = singleLetterMatch[1].replace(/[\s,.-]+/g, '');
-
-      if (cleanedValue.length >= 3) {
-        return `R${cleanedValue}`;
-      }
-    }
-
-    const labelledMatch = text.match(
-      /\b(?:registration|reg\.?|certificate)\s*(?:number|no\.?|num)?\s*[:#-]?\s*([A-Z]{0,3}\s*[0-9][0-9,\s.-]{2,})\b/i,
-    );
-
-    if (labelledMatch) {
-      const cleanedValue = labelledMatch[1].replace(/[\s,.-]+/g, '').toUpperCase();
-
-      if (cleanedValue.length >= 3) {
-        return cleanedValue;
-      }
-    }
-
-    return '';
-  }
-
-  private extractTin(text: string) {
-    const labelledMatch = text.match(
-      /\b(?:TIN|TAX\s*(?:IDENTIFICATION)?\s*(?:NUMBER|NO\.?)?)\s*[:#-]?\s*([0-9][0-9\s.-]{5,})\b/i,
-    );
-
-    if (labelledMatch?.[1]) {
-      return labelledMatch[1].replace(/[\s.-]+/g, '');
-    }
-
-    const genericMatch = text.match(/\b([0-9]{8,14})\b/);
-
-    return genericMatch?.[1] ?? '';
-  }
-
-  private extractIdentityDocumentNumber(text: string) {
-    const labelledMatch = text.match(
-      /\b(?:NIN|PASSPORT|LICENSE|LICENCE|ID\s*(?:NO\.?|NUMBER)?)\s*[:#-]?\s*([A-Z0-9][A-Z0-9\s-]{5,})\b/i,
-    );
-
-    if (labelledMatch?.[1]) {
-      return labelledMatch[1].replace(/\s+/g, '').toUpperCase();
-    }
-
-    const genericMatch = text.match(/\b([A-Z]{1,3}[0-9]{6,12}|[0-9]{10,14})\b/i);
-
-    return genericMatch?.[1]?.toUpperCase() ?? '';
-  }
-
-  private extractDocumentDate(text: string) {
-    const match = text.match(
-      /\b(?:date|issued|bill date|statement date)\s*[:#-]?\s*([0-9]{1,2}[/-][0-9]{1,2}[/-][0-9]{2,4}|[0-9]{1,2}\s+[A-Z][a-z]+\s+[0-9]{4})/i,
-    );
-
-    return match?.[1] ?? '';
-  }
-
-  private extractNamedValue(text: string, labels: string[]) {
-    for (const label of labels) {
-      const pattern = new RegExp(
-        `\\b${label.replace(/\s+/g, '\\s+')}\\s*[:#-]\\s*([^\\n\\r]{3,80})`,
-        'i',
-      );
-      const match = text.match(pattern);
-      const value = match?.[1] ? this.cleanOcrLine(match[1]) : '';
-
-      if (value) {
-        return value;
-      }
-    }
-
-    return '';
-  }
-
-  private pickLikelyPersonNameLine(text: string) {
-    return (
-      text
-        .split(/\r?\n/)
-        .map((line) => this.cleanOcrLine(line))
-        .find((line) => /^[A-Z][A-Z.'-]+(?:\s+[A-Z][A-Z.'-]+){1,3}$/i.test(line)) ??
-      ''
-    );
-  }
-
-  private pickLikelyAddressLine(text: string) {
-    return (
-      text
-        .split(/\r?\n/)
-        .map((line) => this.cleanOcrLine(line))
-        .find((line) =>
-          /\b(street|road|avenue|close|crescent|estate|lagos|abuja|state|city|suite|flat|plot)\b/i.test(
-            line,
-          ),
-        ) ?? ''
+      boilerplate.has(normalized) ||
+      /^(email|phone|status|date|tin|tax|address)\s*:/i.test(line)
     );
   }
 
@@ -1606,13 +1927,16 @@ export class DocumentIntelligenceService {
   }
 
   private normalizeRegistrationNumber(value: string) {
-    const raw = value.toUpperCase().replace(/[^A-Z0-9]+/g, '');
-    const match = raw.match(/^(RC|BN|IT|R)?([0-9]+)$/);
+    const rawInput = value.toUpperCase().replace(/[^A-Z0-9]+/g, '');
+    const withoutCacPrefix = rawInput.replace(/^CAC(?=RC|BN|IT|\d)/, '');
+    const match = withoutCacPrefix.match(/^(RC|BN|IT|R)?([0-9]+)$/);
+    const prefix = match?.[1] === 'R' ? 'RC' : match?.[1] ?? '';
+    const numericPart = match?.[2] ?? withoutCacPrefix.replace(/^[A-Z]+/, '');
 
     return {
-      raw,
-      prefix: match?.[1] ?? '',
-      numericPart: match?.[2] ?? raw.replace(/^[A-Z]+/, ''),
+      raw: `${prefix}${numericPart}`,
+      prefix,
+      numericPart,
     };
   }
 

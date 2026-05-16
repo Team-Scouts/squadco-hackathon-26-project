@@ -21,11 +21,11 @@ import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     VendorsModule,
     DocumentsModule,
     TransactionsModule,
-    ConfigModule.forRoot({ isGlobal: true }),
     UserModule,
     // Register SquadModule asynchronously so ConfigService is available
     SquadModule.registerAsync({

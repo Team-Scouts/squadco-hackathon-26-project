@@ -14,16 +14,7 @@ import Settings from "./pages/Settings";
 import FraudGraph from "./pages/FraudGraph";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-const queryClient = new QueryClient();
-
 // TypeScript only:
-declare global {
-  interface Window {
-    __TANSTACK_QUERY_CLIENT__: import("@tanstack/query-core").QueryClient;
-  }
-}
-
-window.__TANSTACK_QUERY_CLIENT__ = queryClient;
 
 function App() {
   const queryClient = new QueryClient();

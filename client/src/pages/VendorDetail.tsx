@@ -258,7 +258,7 @@ function EvidenceSummaryStrip({
   );
 }
 
-function EntityProfilePanel({ vendor }: { vendor: IndividualVendorDetails }) {
+function EntityProfilePanel({ vendor }: { vendor: any }) {
   const deviceRisk = highestDeviceRisk(vendor.devices ?? []);
   const snapshotItems = [
     [Building2, "Business name", vendor.businessName],
@@ -268,7 +268,11 @@ function EntityProfilePanel({ vendor }: { vendor: IndividualVendorDetails }) {
     [GitBranch, "Sector", vendor.sector],
     [Mail, "Email", vendor.email],
     [Phone, "Phone", vendor.phone],
-    [MapPin, "Address", [vendor.address, vendor.state, vendor.country].filter(Boolean).join(", ")],
+    [
+      MapPin,
+      "Address",
+      [vendor.address, vendor.state, vendor.country].filter(Boolean).join(", "),
+    ],
     [ShieldAlert, "Status", vendor.status],
     [Banknote, "Risk level", vendor.riskLevel],
     [Fingerprint, "Highest device risk", `${deviceRisk}%`],
@@ -529,7 +533,9 @@ function DocumentModification({ vendorId }: { vendorId: string }) {
             {runChecksMutation.isPending ? "Running..." : "Run checks"}
           </button>
           <button
-            disabled={documents.length === 0 || runAllDocumentChecksMutation.isPending}
+            disabled={
+              documents.length === 0 || runAllDocumentChecksMutation.isPending
+            }
             onClick={() => runAllDocumentChecksMutation.mutate()}
             className="button-secondary min-h-0 rounded-xl px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-60"
           >
@@ -913,16 +919,14 @@ function FinancialActivityPanel({ vendorId }: { vendorId: string }) {
   };
 
   return (
-    <section className="panel-card min-w-0 p-6">
+    <section className="panel-card min-w-0 p-6" id="financial">
       <div className="flex flex-col gap-3 border-b border-white/10 pb-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <span className="icon-box border border-white/10 bg-white/[0.04]">
               <Banknote className="h-4 w-4 text-zinc-100" />
             </span>
-            <h2 className="text-xl font-bold text-white">
-              Financial activity
-            </h2>
+            <h2 className="text-xl font-bold text-white">Financial Activity</h2>
           </div>
           <p className="mt-2 text-sm leading-6 text-zinc-300">
             PostgreSQL-backed payments and transfers linked to this vendor.
@@ -963,12 +967,14 @@ function FinancialActivityPanel({ vendorId }: { vendorId: string }) {
             {(activityQuery.error as Error).message}
           </p>
         )}
-        {!activityQuery.isLoading && !activityQuery.isError && activity.length === 0 && (
-          <p className="rounded-2xl border border-white/10 bg-black/50 p-4 text-sm text-zinc-400">
-            No transaction or transfer webhook has been recorded for this vendor
-            yet.
-          </p>
-        )}
+        {!activityQuery.isLoading &&
+          !activityQuery.isError &&
+          activity.length === 0 && (
+            <p className="rounded-2xl border border-white/10 bg-black/50 p-4 text-sm text-zinc-400">
+              No transaction or transfer webhook has been recorded for this
+              vendor yet.
+            </p>
+          )}
         {activity.length > 0 && (
           <table className="w-full min-w-[840px] text-left text-sm">
             <thead className="border-b border-white/10 text-xs uppercase tracking-wider text-gray-500">
@@ -1068,7 +1074,6 @@ export default function VendorDetail() {
         },
       );
       const response = await request.json();
-      console.log(response);
       return response;
     },
   });
@@ -1100,7 +1105,8 @@ export default function VendorDetail() {
 
   const virtualAccountsQuery = useQuery({
     queryKey: ["vendor_virtual_accounts", vendorId],
-    queryFn: () => financialActivityApi.getVendorVirtualAccounts(String(vendorId)),
+    queryFn: () =>
+      financialActivityApi.getVendorVirtualAccounts(String(vendorId)),
     enabled: !!vendorId && !!session?.user,
     retry: false,
     staleTime: 5 * 60 * 1000,
@@ -1110,10 +1116,7 @@ export default function VendorDetail() {
     virtual_account || savedVirtualAccount?.virtualAccountNumber || "";
 
   //User VA generation mutation
-  const {
-    isPending: isGenerating,
-    mutateAsync: getVirtual,
-  } = useMutation({
+  const { isPending: isGenerating, mutateAsync: getVirtual } = useMutation({
     mutationFn: async (body: VirtualAccountRequest) => {
       const response = await financialActivityApi.createVirtualAccount(body);
       updateVA(
@@ -1193,12 +1196,18 @@ export default function VendorDetail() {
       },
       onSuccess: async () => {
         await Promise.all([
-          queryClient.invalidateQueries({ queryKey: ["vendor_details", vendorId] }),
-          queryClient.invalidateQueries({ queryKey: ["vendor_documents", vendorId] }),
+          queryClient.invalidateQueries({
+            queryKey: ["vendor_details", vendorId],
+          }),
+          queryClient.invalidateQueries({
+            queryKey: ["vendor_documents", vendorId],
+          }),
           queryClient.invalidateQueries({
             queryKey: ["vendor_financial_activity", vendorId],
           }),
-          queryClient.invalidateQueries({ queryKey: ["vendorGraph", vendorId] }),
+          queryClient.invalidateQueries({
+            queryKey: ["vendorGraph", vendorId],
+          }),
         ]);
       },
     });
@@ -1277,8 +1286,10 @@ export default function VendorDetail() {
               </h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-300">
                 Generate a Squad virtual account and simulate sandbox payment
-                events. Real payment history is shown in Financial Activity
-                below.
+                events. Real payment history is shown below in{" "}
+                <a href="#financial" className="hover:underline">
+                  Financial Activity
+                </a>
               </p>
             </div>
             {activeVirtualAccountNumber && (

@@ -134,7 +134,6 @@ export class DocumentIntelligenceService {
     file: { bytes: Buffer; mimeType: string },
   ): Promise<OcrResult> {
     const provider = process.env.OCR_PROVIDER ?? 'heuristic';
-
     if (provider === 'google-document-ai') {
       try {
         return await this.runGoogleDocumentAi(document, vendor, file);
@@ -159,7 +158,9 @@ export class DocumentIntelligenceService {
     const processorId = process.env.GOOGLE_DOCUMENT_AI_PROCESSOR_ID;
 
     if (!projectId || !location || !processorId) {
-      throw new Error('Google Document AI project/location/processor config missing');
+      throw new Error(
+        'Google Document AI project/location/processor config missing',
+      );
     }
 
     const accessToken = await this.getGoogleAccessToken();
@@ -182,13 +183,20 @@ export class DocumentIntelligenceService {
     });
 
     if (!response.ok) {
-      throw new Error(`Document AI request failed with status ${response.status}`);
+      throw new Error(
+        `Document AI request failed with status ${response.status}`,
+      );
     }
 
     const body = (await response.json()) as any;
     const text = String(body.document?.text ?? '');
     const confidence = this.averageConfidence(body.document?.pages ?? []);
-    const fields = this.extractFieldsFromText(document, vendor, text, confidence);
+    const fields = this.extractFieldsFromText(
+      document,
+      vendor,
+      text,
+      confidence,
+    );
 
     return {
       provider: 'google-document-ai',
@@ -210,7 +218,9 @@ export class DocumentIntelligenceService {
     }
 
     const fs = await import('node:fs/promises');
-    const credentials = JSON.parse(await fs.readFile(credentialsPath, 'utf8')) as {
+    const credentials = JSON.parse(
+      await fs.readFile(`${credentialsPath}.json`, 'utf8'),
+    ) as {
       client_email?: string;
       private_key?: string;
     };
@@ -245,7 +255,9 @@ export class DocumentIntelligenceService {
     });
 
     if (!response.ok) {
-      throw new Error(`Google token exchange failed with status ${response.status}`);
+      throw new Error(
+        `Google token exchange failed with status ${response.status}`,
+      );
     }
 
     const body = (await response.json()) as { access_token?: string };
@@ -317,7 +329,9 @@ export class DocumentIntelligenceService {
 
       return {
         ...field,
-        confidence: found ? Math.round(confidence) : Math.max(45, Math.round(confidence - 20)),
+        confidence: found
+          ? Math.round(confidence)
+          : Math.max(45, Math.round(confidence - 20)),
         status: found ? ('match' as const) : field.status,
       };
     });
@@ -388,13 +402,14 @@ export class DocumentIntelligenceService {
     text: string,
     confidence: number,
   ): ExtractedDocumentField[] {
-    const businessName = this.extractNamedValue(text, [
-      'business name',
-      'company name',
-      'taxpayer name',
-      'registered name',
-      'name',
-    ]) || this.pickBestBusinessNameLine(text);
+    const businessName =
+      this.extractNamedValue(text, [
+        'business name',
+        'company name',
+        'taxpayer name',
+        'registered name',
+        'name',
+      ]) || this.pickBestBusinessNameLine(text);
     const tin = this.extractTin(text);
     const roundedConfidence = Math.round(confidence);
 
@@ -470,12 +485,13 @@ export class DocumentIntelligenceService {
         'billing address',
         'premises',
       ]) || this.pickLikelyAddressLine(text);
-    const businessName = this.extractNamedValue(text, [
-      'customer name',
-      'account name',
-      'business name',
-      'name',
-    ]) || this.pickBestBusinessNameLine(text);
+    const businessName =
+      this.extractNamedValue(text, [
+        'customer name',
+        'account name',
+        'business name',
+        'name',
+      ]) || this.pickBestBusinessNameLine(text);
     const issueDate = this.extractDocumentDate(text);
     const roundedConfidence = Math.round(confidence);
 
@@ -533,8 +549,12 @@ export class DocumentIntelligenceService {
       .filter((line) => !/^\d{1,2}\s+[A-Z]+\s+\d{4}$/i.test(line));
 
     return (
-      lines.find((line) => /\b(LTD|LIMITED|PLC|LLC|INC|COMPANY)\b\.?$/i.test(line)) ??
-      lines.find((line) => /\b(LTD|LIMITED|PLC|LLC|INC|COMPANY)\b/i.test(line)) ??
+      lines.find((line) =>
+        /\b(LTD|LIMITED|PLC|LLC|INC|COMPANY)\b\.?$/i.test(line),
+      ) ??
+      lines.find((line) =>
+        /\b(LTD|LIMITED|PLC|LLC|INC|COMPANY)\b/i.test(line),
+      ) ??
       ''
     );
   }
@@ -552,7 +572,9 @@ export class DocumentIntelligenceService {
       }
     }
 
-    const singleLetterMatch = text.match(/\bR\s*[-:]?\s*([0-9][0-9,\s.-]{2,})\b/i);
+    const singleLetterMatch = text.match(
+      /\bR\s*[-:]?\s*([0-9][0-9,\s.-]{2,})\b/i,
+    );
 
     if (singleLetterMatch) {
       const cleanedValue = singleLetterMatch[1].replace(/[\s,.-]+/g, '');
@@ -567,7 +589,9 @@ export class DocumentIntelligenceService {
     );
 
     if (labelledMatch) {
-      const cleanedValue = labelledMatch[1].replace(/[\s,.-]+/g, '').toUpperCase();
+      const cleanedValue = labelledMatch[1]
+        .replace(/[\s,.-]+/g, '')
+        .toUpperCase();
 
       if (cleanedValue.length >= 3) {
         return cleanedValue;
@@ -600,7 +624,9 @@ export class DocumentIntelligenceService {
       return labelledMatch[1].replace(/\s+/g, '').toUpperCase();
     }
 
-    const genericMatch = text.match(/\b([A-Z]{1,3}[0-9]{6,12}|[0-9]{10,14})\b/i);
+    const genericMatch = text.match(
+      /\b([A-Z]{1,3}[0-9]{6,12}|[0-9]{10,14})\b/i,
+    );
 
     return genericMatch?.[1]?.toUpperCase() ?? '';
   }
@@ -635,8 +661,9 @@ export class DocumentIntelligenceService {
       text
         .split(/\r?\n/)
         .map((line) => this.cleanOcrLine(line))
-        .find((line) => /^[A-Z][A-Z.'-]+(?:\s+[A-Z][A-Z.'-]+){1,3}$/i.test(line)) ??
-      ''
+        .find((line) =>
+          /^[A-Z][A-Z.'-]+(?:\s+[A-Z][A-Z.'-]+){1,3}$/i.test(line),
+        ) ?? ''
     );
   }
 
@@ -760,7 +787,9 @@ export class DocumentIntelligenceService {
       score += 15;
     }
 
-    const missingFields = ocr.fields.filter((field) => field.status === 'missing');
+    const missingFields = ocr.fields.filter(
+      (field) => field.status === 'missing',
+    );
     if (missingFields.length) {
       signals.push({
         code: 'MISSING_EXPECTED_FIELDS',
@@ -819,14 +848,19 @@ export class DocumentIntelligenceService {
         return this.extractPngMetadata(document, file.bytes);
       }
 
-      if (file.mimeType.includes('jpeg') || file.mimeType.includes('jpg') || this.isJpeg(file.bytes)) {
+      if (
+        file.mimeType.includes('jpeg') ||
+        file.mimeType.includes('jpg') ||
+        this.isJpeg(file.bytes)
+      ) {
         return this.extractJpegMetadata(document, file.bytes);
       }
 
       return [
         {
           code: 'MISSING_METADATA',
-          message: 'Metadata checks could not identify a supported document file type.',
+          message:
+            'Metadata checks could not identify a supported document file type.',
           weight: 5,
         },
       ];
@@ -852,12 +886,23 @@ export class DocumentIntelligenceService {
     const producer = this.extractPdfInfoValue(content, 'Producer');
     const title = this.extractPdfInfoValue(content, 'Title');
     const author = this.extractPdfInfoValue(content, 'Author');
-    const createdAt = this.parsePdfDate(this.extractPdfInfoValue(content, 'CreationDate'));
-    const modifiedAt = this.parsePdfDate(this.extractPdfInfoValue(content, 'ModDate'));
+    const createdAt = this.parsePdfDate(
+      this.extractPdfInfoValue(content, 'CreationDate'),
+    );
+    const modifiedAt = this.parsePdfDate(
+      this.extractPdfInfoValue(content, 'ModDate'),
+    );
     const pageCount = (content.match(/\/Type\s*\/Page\b/g) ?? []).length;
     const signals: AiDetectionResult['signals'] = [];
 
-    if (!creator && !producer && !title && !author && !createdAt && !modifiedAt) {
+    if (
+      !creator &&
+      !producer &&
+      !title &&
+      !author &&
+      !createdAt &&
+      !modifiedAt
+    ) {
       signals.push({
         code: 'MISSING_METADATA',
         message: 'PDF metadata is missing or unavailable.',
@@ -877,7 +922,8 @@ export class DocumentIntelligenceService {
     if (this.isSuspiciousCreatorTool(tool)) {
       signals.push({
         code: 'SUSPICIOUS_CREATOR_TOOL',
-        message: 'Document metadata references a generator or editing tool often used to create synthetic documents.',
+        message:
+          'Document metadata references a generator or editing tool often used to create synthetic documents.',
         weight: 20,
       });
     }
@@ -901,7 +947,9 @@ export class DocumentIntelligenceService {
     const dimensions = this.readPngDimensions(bytes);
     const textChunks = this.readPngTextChunks(bytes);
     const software = textChunks
-      .filter((chunk) => /software|creator|producer|prompt|parameters/i.test(chunk.keyword))
+      .filter((chunk) =>
+        /software|creator|producer|prompt|parameters/i.test(chunk.keyword),
+      )
       .map((chunk) => `${chunk.keyword}: ${chunk.value}`)
       .join(' ');
 
@@ -950,7 +998,9 @@ export class DocumentIntelligenceService {
     const ascii = bytes.toString('latin1');
     const hasExif = ascii.includes('Exif');
     const hasXmp = ascii.includes('http://ns.adobe.com/xap/1.0/');
-    const softwareMatch = ascii.match(/(?:Software|CreatorTool|xmp:CreatorTool)[^A-Za-z0-9]{1,20}([A-Za-z0-9 ._-]{3,80})/i);
+    const softwareMatch = ascii.match(
+      /(?:Software|CreatorTool|xmp:CreatorTool)[^A-Za-z0-9]{1,20}([A-Za-z0-9 ._-]{3,80})/i,
+    );
     const software = softwareMatch?.[1]?.trim() ?? '';
     const signals: AiDetectionResult['signals'] = [];
 
@@ -991,15 +1041,17 @@ export class DocumentIntelligenceService {
     return signals;
   }
 
-  private async checkSynthId(
-    file: { bytes: Buffer; mimeType: string },
-  ): Promise<AiDetectionResult['signals'][number]> {
+  private async checkSynthId(file: {
+    bytes: Buffer;
+    mimeType: string;
+  }): Promise<AiDetectionResult['signals'][number]> {
     const provider = process.env.SYNTHID_PROVIDER ?? 'disabled';
 
     if (provider === 'disabled') {
       return {
         code: 'SYNTHID_CHECK_UNAVAILABLE',
-        message: 'SynthID backend verification is not configured for this environment.',
+        message:
+          'SynthID backend verification is not configured for this environment.',
         weight: 0,
       };
     }
@@ -1033,7 +1085,8 @@ export class DocumentIntelligenceService {
     if (provider === 'disabled') {
       return {
         code: 'EXTERNAL_AI_DETECTOR_UNAVAILABLE',
-        message: 'External AI document detection is disabled for this environment.',
+        message:
+          'External AI document detection is disabled for this environment.',
         weight: 0,
         metadata: {
           provider,
@@ -1063,7 +1116,8 @@ export class DocumentIntelligenceService {
     if (!apiKey) {
       return {
         code: 'EXTERNAL_AI_DETECTOR_UNAVAILABLE',
-        message: 'Reality Defender is configured but REALITY_DEFENDER_API_KEY is missing.',
+        message:
+          'Reality Defender is configured but REALITY_DEFENDER_API_KEY is missing.',
         weight: 0,
         metadata: {
           provider: 'reality-defender',
@@ -1099,7 +1153,8 @@ export class DocumentIntelligenceService {
 
       return {
         code: 'EXTERNAL_AI_DETECTOR_FAILED',
-        message: 'Reality Defender check failed; reviewer should rely on other risk signals.',
+        message:
+          'Reality Defender check failed; reviewer should rely on other risk signals.',
         weight: 0,
         metadata: {
           provider: 'reality-defender',
@@ -1140,7 +1195,8 @@ export class DocumentIntelligenceService {
     if (score >= 50 || /UNKNOWN|PROCESSING|ANALYZING/.test(status)) {
       return {
         code: 'REALITY_DEFENDER_UNCERTAIN',
-        message: 'Reality Defender returned an uncertain synthetic-media result.',
+        message:
+          'Reality Defender returned an uncertain synthetic-media result.',
         weight: score >= 50 ? 15 : 0,
         metadata,
       };
@@ -1169,7 +1225,10 @@ export class DocumentIntelligenceService {
   }
 
   private realityDefenderPollingInterval() {
-    return this.positiveIntegerFromEnv('REALITY_DEFENDER_POLL_INTERVAL_MS', 3_000);
+    return this.positiveIntegerFromEnv(
+      'REALITY_DEFENDER_POLL_INTERVAL_MS',
+      3_000,
+    );
   }
 
   private realityDefenderMaxAttempts() {
@@ -1187,7 +1246,10 @@ export class DocumentIntelligenceService {
       45_000,
     );
 
-    return Math.max(1, Math.ceil(timeoutMs / this.realityDefenderPollingInterval()));
+    return Math.max(
+      1,
+      Math.ceil(timeoutMs / this.realityDefenderPollingInterval()),
+    );
   }
 
   private positiveIntegerFromEnv(name: string, fallback: number) {
@@ -1214,7 +1276,11 @@ export class DocumentIntelligenceService {
       return '.png';
     }
 
-    if (file.mimeType.includes('jpeg') || file.mimeType.includes('jpg') || this.isJpeg(file.bytes)) {
+    if (
+      file.mimeType.includes('jpeg') ||
+      file.mimeType.includes('jpg') ||
+      this.isJpeg(file.bytes)
+    ) {
       return '.jpg';
     }
 
@@ -1238,9 +1304,9 @@ export class DocumentIntelligenceService {
   }
 
   private isPng(bytes: Buffer) {
-    return bytes.subarray(0, 8).equals(
-      Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
-    );
+    return bytes
+      .subarray(0, 8)
+      .equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
   }
 
   private isJpeg(bytes: Buffer) {
@@ -1328,13 +1394,16 @@ export class DocumentIntelligenceService {
   }
 
   private parsePdfDate(value: string) {
-    const match = value.match(/D:(\d{4})(\d{2})(\d{2})(\d{2})?(\d{2})?(\d{2})?/);
+    const match = value.match(
+      /D:(\d{4})(\d{2})(\d{2})(\d{2})?(\d{2})?(\d{2})?/,
+    );
 
     if (!match) {
       return null;
     }
 
-    const [, year, month, day, hour = '00', minute = '00', second = '00'] = match;
+    const [, year, month, day, hour = '00', minute = '00', second = '00'] =
+      match;
     const date = new Date(
       Date.UTC(
         Number(year),
@@ -1372,7 +1441,8 @@ export class DocumentIntelligenceService {
       ) {
         signals.push({
           code: 'METADATA_DATE_AFTER_UPLOAD',
-          message: 'Document metadata timestamp is later than the upload timestamp.',
+          message:
+            'Document metadata timestamp is later than the upload timestamp.',
           weight: 10,
         });
       }
@@ -1441,7 +1511,8 @@ export class DocumentIntelligenceService {
       tamperScore += 25;
       reasons.push({
         code: 'REGISTRATION_NUMBER_MISMATCH',
-        message: 'Extracted registration number differs from the vendor profile.',
+        message:
+          'Extracted registration number differs from the vendor profile.',
         severity: 'HIGH',
         scoreImpact: 25,
       });
@@ -1530,7 +1601,8 @@ export class DocumentIntelligenceService {
     if (aiScore >= 50) {
       reasons.push({
         code: 'SUSPECTED_AI_GENERATED_DOCUMENT',
-        message: 'Synthetic document risk is elevated and requires reviewer confirmation.',
+        message:
+          'Synthetic document risk is elevated and requires reviewer confirmation.',
         severity: aiScore >= 90 ? 'CRITICAL' : 'HIGH',
         scoreImpact: aiScore >= 90 ? 45 : aiScore >= 70 ? 30 : 15,
         metadata: {
@@ -1546,7 +1618,9 @@ export class DocumentIntelligenceService {
   }
 
   private businessNamesMatch(first: string, second: string) {
-    return this.normalizeBusinessName(first) === this.normalizeBusinessName(second);
+    return (
+      this.normalizeBusinessName(first) === this.normalizeBusinessName(second)
+    );
   }
 
   private personNamesMatch(first: string, second: string) {
@@ -1635,14 +1709,20 @@ export class DocumentIntelligenceService {
   }
 
   private sharedTokenRatio(first: string, second: string) {
-    const firstTokens = new Set(first.split(' ').filter((token) => token.length > 2));
-    const secondTokens = new Set(second.split(' ').filter((token) => token.length > 2));
+    const firstTokens = new Set(
+      first.split(' ').filter((token) => token.length > 2),
+    );
+    const secondTokens = new Set(
+      second.split(' ').filter((token) => token.length > 2),
+    );
 
     if (!firstTokens.size || !secondTokens.size) {
       return 0;
     }
 
-    const shared = [...firstTokens].filter((token) => secondTokens.has(token)).length;
+    const shared = [...firstTokens].filter((token) =>
+      secondTokens.has(token),
+    ).length;
 
     return shared / Math.max(firstTokens.size, secondTokens.size);
   }

@@ -6,6 +6,9 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { UpdateVendorDto } from './dto/update-vendor.dto';
 import { GraphService } from '../graph/graph.service';
 import { SquadService } from '../squad/squad.service';
+import { DocumentsService } from '../documents/documents.service';
+import { TransactionsService } from '../transactions/transactions.service';
+import { RiskService } from '../risk/risk.service';
 
 const testVirtualAccountObject = {
   address: '22 Kota street, UK',
@@ -26,6 +29,9 @@ export class VendorsService {
     private prisma: PrismaService,
     private graphService: GraphService,
     private squad: SquadService,
+    private documentsService: DocumentsService,
+    private transactionsService: TransactionsService,
+    private riskService: RiskService,
   ) {}
 
   // CREATE VENDOR
@@ -42,17 +48,27 @@ export class VendorsService {
     const vendor = await this.prisma.vendor.create({
       data: {
         businessName: createVendorDto.businessName,
+        registrationNumber: createVendorDto.registrationNumber,
+        vendorType: createVendorDto.vendorType,
+        sector: createVendorDto.sector,
+        contactName: createVendorDto.contactName,
         email: createVendorDto.email,
         phone: createVendorDto.phone,
+        country: createVendorDto.country,
+        state: createVendorDto.state,
+        address: createVendorDto.address,
       },
     });
     const graphSynced = await this.graphService.safeSyncVendorById(vendor.id);
+    const risk = await this.riskService.recomputeVendorRisk(vendor.id);
 
     return {
       success: true,
       message: 'Vendor created successfully',
       data: vendor,
       graphSynced,
+      checksStatus: 'COMPLETED',
+      risk,
     };
   }
 
@@ -80,6 +96,11 @@ export class VendorsService {
         documents: true,
         devices: true,
         transactions: true,
+        transfers: {
+          include: {
+            bankAccount: true,
+          },
+        },
         alerts: true,
       },
     });
@@ -119,6 +140,32 @@ export class VendorsService {
       success: true,
       message: 'Vendor updated successfully',
       data: updatedVendor,
+      graphSynced,
+    };
+  }
+
+  async runChecks(id: string) {
+    const vendor = await this.prisma.vendor.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+
+    if (!vendor) {
+      throw new NotFoundException('Vendor not found');
+    }
+
+    const documents = await this.documentsService.runVendorChecks(id);
+    const financial = await this.transactionsService.evaluateVendorFinancialRisk(id);
+    const risk = await this.riskService.recomputeVendorRisk(id);
+    const graphSynced = await this.graphService.safeSyncVendorById(id);
+
+    return {
+      success: true,
+      message: 'Vendor checks completed',
+      checksStatus: 'COMPLETED',
+      documents,
+      financial,
+      risk,
       graphSynced,
     };
   }

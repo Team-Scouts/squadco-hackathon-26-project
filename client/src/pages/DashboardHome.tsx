@@ -44,7 +44,7 @@ const exposureMetrics = [
     value: "91",
     detail: "Cases with open evidence, graph links, or reviewer notes.",
     icon: Activity,
-    tone: "text-cyan-200",
+    tone: "text-sky-200",
   },
 ];
 
@@ -134,7 +134,7 @@ export default function DashboardHome() {
               New vendor
             </Link>
             <Link to="/dashboard/fraud-graph" className="button-secondary">
-              <GitBranch className="h-4 w-4 text-cyan-300" />
+              <GitBranch className="h-4 w-4 text-sky-300" />
               Open trust graph
             </Link>
           </div>

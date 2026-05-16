@@ -3,6 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CreateDeviceDto } from './dto/create-device-dto';
 import { GraphService } from '../graph/graph.service';
 import { RiskLevel } from '../../generated/prisma/enums';
+import { RiskService } from '../risk/risk.service';
 
 type DeviceRiskReason = {
   code: string;
@@ -17,6 +18,7 @@ export class DeviceIntelligenceService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly graphService: GraphService,
+    private readonly riskService: RiskService,
   ) {}
 
   async createDevice(createDeviceDto: CreateDeviceDto, ipAddress: string) {
@@ -123,10 +125,6 @@ export class DeviceIntelligenceService {
       deviceHash: string;
     },
   ) {
-    const latestRisk = await this.prisma.riskScore.findFirst({
-      where: { vendorId },
-      orderBy: { createdAt: 'desc' },
-    });
     const devices = await this.prisma.device.findMany({
       where: { vendorId },
     });
@@ -146,53 +144,18 @@ export class DeviceIntelligenceService {
           },
         ]
       : [];
-    const documentRisk = latestRisk?.documentRisk ?? 0;
-    const networkFraudRisk = latestRisk?.networkFraudRisk ?? 0;
-    const financialAnomalyRisk = latestRisk?.financialAnomalyRisk ?? 0;
-    const identityMismatchRisk = latestRisk?.identityMismatchRisk ?? 0;
-    const manualReviewPenalty = latestRisk?.manualReviewPenalty ?? 0;
-    const overallRisk = Math.max(
-      documentRisk,
-      networkFraudRisk,
-      financialAnomalyRisk,
+    const risk = await this.riskService.recomputeVendorRisk(vendorId, {
       deviceRisk,
-      identityMismatchRisk,
-      manualReviewPenalty,
-    );
-    const riskLevel = this.resolveRiskLevel(overallRisk);
-    const recommendedAction = this.resolveRecommendedAction(riskLevel);
-
-    const riskScore = await this.prisma.riskScore.create({
-      data: {
-        vendorId,
-        documentRisk,
-        networkFraudRisk,
-        financialAnomalyRisk,
-        deviceRisk,
-        identityMismatchRisk,
-        manualReviewPenalty,
-        overallRisk,
-        riskLevel,
-        recommendedAction,
-        reasons: reasons as any,
-      },
-    });
-
-    await this.prisma.vendor.update({
-      where: { id: vendorId },
-      data: {
-        overallRiskScore: overallRisk,
-        riskLevel,
-      },
+      reasons,
     });
 
     return {
       deviceRisk,
-      overallRisk,
-      riskLevel,
-      recommendedAction,
+      overallRisk: risk.overallRisk,
+      riskLevel: risk.riskLevel,
+      recommendedAction: risk.recommendedAction,
       reasons,
-      riskScore,
+      riskScore: risk.riskScore,
     };
   }
 

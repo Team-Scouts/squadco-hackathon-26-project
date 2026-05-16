@@ -91,7 +91,7 @@ export default function FraudGraph() {
           <p className="text-xs font-bold uppercase tracking-wider text-zinc-500">
             Nodes shown
           </p>
-          <p className="mt-2 text-3xl font-black text-cyan-300">
+          <p className="mt-2 text-3xl font-black text-sky-200">
             {filteredGraph.nodes.length}
           </p>
         </div>
@@ -118,7 +118,7 @@ export default function FraudGraph() {
                 onClick={() => setActiveFilter(filter.value)}
                 className={`rounded-lg border px-3 py-2 text-xs font-bold transition-colors ${
                   activeFilter === filter.value
-                    ? "border-cyan-300/30 bg-cyan-300/10 text-cyan-100"
+                    ? "border-sky-300/30 bg-sky-300/10 text-sky-100"
                     : "border-white/10 bg-white/5 text-zinc-400 hover:text-white"
                 }`}
               >

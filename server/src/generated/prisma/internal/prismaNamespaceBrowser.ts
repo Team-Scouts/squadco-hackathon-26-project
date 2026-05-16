@@ -58,6 +58,7 @@ export const ModelName = {
   Transaction: 'Transaction',
   BankAccount: 'BankAccount',
   Transfer: 'Transfer',
+  VirtualAccount: 'VirtualAccount',
   WebhookEvent: 'WebhookEvent',
   RiskScore: 'RiskScore',
   GraphSyncFailure: 'GraphSyncFailure',
@@ -104,8 +105,15 @@ export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof User
 export const VendorScalarFieldEnum = {
   id: 'id',
   businessName: 'businessName',
+  registrationNumber: 'registrationNumber',
+  vendorType: 'vendorType',
+  sector: 'sector',
+  contactName: 'contactName',
   email: 'email',
   phone: 'phone',
+  country: 'country',
+  state: 'state',
+  address: 'address',
   status: 'status',
   overallRiskScore: 'overallRiskScore',
   riskLevel: 'riskLevel',
@@ -205,6 +213,22 @@ export const TransferScalarFieldEnum = {
 } as const
 
 export type TransferScalarFieldEnum = (typeof TransferScalarFieldEnum)[keyof typeof TransferScalarFieldEnum]
+
+
+export const VirtualAccountScalarFieldEnum = {
+  id: 'id',
+  vendorId: 'vendorId',
+  provider: 'provider',
+  customerIdentifier: 'customerIdentifier',
+  virtualAccountNumber: 'virtualAccountNumber',
+  currency: 'currency',
+  active: 'active',
+  rawResponse: 'rawResponse',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type VirtualAccountScalarFieldEnum = (typeof VirtualAccountScalarFieldEnum)[keyof typeof VirtualAccountScalarFieldEnum]
 
 
 export const WebhookEventScalarFieldEnum = {

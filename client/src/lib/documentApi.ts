@@ -193,10 +193,24 @@ export function runDocumentChecks(id: string) {
   });
 }
 
+export function runVendorDocumentChecks(vendorId: string) {
+  return requestJson<{
+    success: boolean;
+    message: string;
+    count: number;
+    data: unknown[];
+    risk: unknown;
+    graphSynced: boolean;
+  }>(`/documents/vendor/${encodeURIComponent(vendorId)}/run-checks`, {
+    method: "POST",
+  });
+}
+
 export const documentApi = {
   uploadDocument,
   getVendorDocuments,
   getDocumentById,
   updateDocumentVerification,
   runDocumentChecks,
+  runVendorDocumentChecks,
 };

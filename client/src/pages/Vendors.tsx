@@ -206,7 +206,7 @@ export default function Vendors() {
                     <td className="px-6 py-4 text-right">
                       <Link
                         to={`/dashboard/vendors/${vendor.id}`}
-                        className="inline-flex items-center gap-1 text-xs font-bold text-cyan-200 opacity-0 transition-opacity group-hover:opacity-100"
+                        className="inline-flex items-center gap-1 text-xs font-bold text-zinc-200 opacity-0 transition-opacity group-hover:opacity-100"
                       >
                         Review <ArrowRight className="h-3 w-3" />
                       </Link>

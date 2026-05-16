@@ -71,7 +71,7 @@ export default function Settings() {
                     : "border-transparent text-zinc-500 hover:border-white/5 hover:bg-white/5 hover:text-white"
                 }`}
               >
-                <tab.icon className={`h-4 w-4 ${selected ? "text-cyan-300" : ""}`} />
+                <tab.icon className={`h-4 w-4 ${selected ? "text-sky-300" : ""}`} />
                 {tab.label}
               </button>
             );

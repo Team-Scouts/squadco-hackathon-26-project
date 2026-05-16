@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   ArrowLeft,
+  AlertTriangle,
   Building2,
   CheckCircle2,
   FileUp,
@@ -37,6 +38,48 @@ type FormState = {
   notes: string;
 };
 
+type KycDocumentType =
+  | "CAC_REGISTRATION"
+  | "TAX_ID"
+  | "OWNER_ID"
+  | "ADDRESS_PROOF";
+
+type UploadedDocumentSummary = {
+  id: string;
+  documentType: KycDocumentType;
+  fileName: string;
+  verificationStatus?: string;
+  duplicateDetected?: boolean;
+  duplicateVendorCount?: number;
+};
+
+const kycDocumentTypes: Array<{
+  type: KycDocumentType;
+  label: string;
+  description: string;
+}> = [
+  {
+    type: "CAC_REGISTRATION",
+    label: "CAC registration",
+    description: "Company incorporation certificate or CAC registration proof.",
+  },
+  {
+    type: "TAX_ID",
+    label: "Tax ID",
+    description: "TIN/FIRS registration evidence for tax identity checks.",
+  },
+  {
+    type: "OWNER_ID",
+    label: "Owner ID",
+    description: "Government ID for the owner, director, or principal contact.",
+  },
+  {
+    type: "ADDRESS_PROOF",
+    label: "Address proof",
+    description: "Utility bill, tenancy document, or other business address proof.",
+  },
+];
+
 const inputClass =
   "field-control";
 
@@ -70,6 +113,12 @@ export default function CreateVendor() {
   const [vendorID, updateVendorID] = useState("");
   const [formStage, updateFormStage] = useState(1);
   const [file, updateFile] = useState<File | null>();
+  const [selectedDocumentType, setSelectedDocumentType] =
+    useState<KycDocumentType>("CAC_REGISTRATION");
+  const [uploadedDocuments, setUploadedDocuments] = useState<
+    UploadedDocumentSummary[]
+  >([]);
+  const [uploadError, setUploadError] = useState("");
   const [deviceCaptureWarning, setDeviceCaptureWarning] = useState("");
   const navigate = useNavigate();
   const browser = navigator.userAgent;
@@ -100,11 +149,24 @@ export default function CreateVendor() {
     },
   });
 
+  const contactNameParts = form.contactName.trim().split(/\s+/);
+  const firstName = contactNameParts[0] ?? "";
+  const lastName = contactNameParts.slice(1).join(" ") || firstName;
+
   const vendorCreateMutation = useMutation({
     mutationFn: async (body: {
       businessName: string;
+      registrationNumber: string;
+      vendorType: string;
+      sector: string;
+      contactName: string;
       email: string;
       phone: string;
+      country: string;
+      state: string;
+      address: string;
+      firstName: string;
+      lastName: string;
     }) => {
       const request = await fetch(
         `${import.meta.env.VITE_SERVER_BASE_URL}/vendors`,
@@ -116,6 +178,11 @@ export default function CreateVendor() {
         },
       );
       const response = await request.json();
+
+      if (!request.ok || !response.success) {
+        throw new Error(response.message ?? "Vendor creation failed.");
+      }
+
       updateVendorID(response.data.id);
       return response;
     },
@@ -161,7 +228,15 @@ export default function CreateVendor() {
   });
 
   const uploadDocumentsMutation = useMutation({
-    mutationFn: async (body: FormData) => {
+    mutationFn: async ({
+      body,
+      fileName,
+      documentType,
+    }: {
+      body: FormData;
+      fileName: string;
+      documentType: KycDocumentType;
+    }) => {
       const postRequest = await fetch(
         `${import.meta.env.VITE_SERVER_BASE_URL}/documents/upload`,
         {
@@ -171,10 +246,42 @@ export default function CreateVendor() {
         },
       );
       const postResponse = await postRequest.json();
-      return postResponse;
+
+      if (!postRequest.ok || !postResponse.success) {
+        throw new Error(postResponse.message ?? "Document upload failed.");
+      }
+
+      return { ...postResponse, fileName, documentType };
     },
-    onSuccess: () => {
-      navigate(`/dashboard/vendors/${vendorID}`);
+    onSuccess: (response) => {
+      setUploadError("");
+      updateFile(null);
+      setUploadedDocuments((current) => {
+        const nextDocument: UploadedDocumentSummary = {
+          id: response.data.id,
+          documentType: response.documentType,
+          fileName: response.fileName,
+          verificationStatus: response.data.verificationStatus,
+          duplicateDetected:
+            response.duplicateSummary?.duplicateDetected ??
+            response.data.duplicateDetected,
+          duplicateVendorCount:
+            response.duplicateSummary?.duplicateVendorCount ??
+            response.data.duplicateVendorCount,
+        };
+
+        return [
+          ...current.filter(
+            (document) => document.documentType !== response.documentType,
+          ),
+          nextDocument,
+        ];
+      });
+    },
+    onError: (error) => {
+      setUploadError(
+        error instanceof Error ? error.message : "Document upload failed.",
+      );
     },
   });
 
@@ -182,11 +289,18 @@ export default function CreateVendor() {
     e.preventDefault();
     const formData = new FormData();
     formData.append("vendorId", vendorID);
-    if (file) {
-      formData.append("file", file);
+    if (!file) {
+      setUploadError("Choose a file before uploading this KYC document.");
+      return;
     }
-    formData.append("documentType", "CAC_REGISTRATION");
-    await uploadDocumentsMutation.mutateAsync(formData);
+
+    formData.append("file", file);
+    formData.append("documentType", selectedDocumentType);
+    await uploadDocumentsMutation.mutateAsync({
+      body: formData,
+      fileName: file.name,
+      documentType: selectedDocumentType,
+    });
   };
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -199,10 +313,28 @@ export default function CreateVendor() {
     e.preventDefault();
     vendorCreateMutation.mutateAsync({
       businessName: form.businessName,
+      registrationNumber: form.registrationNumber,
+      vendorType: form.vendorType,
+      sector: form.sector,
+      contactName: form.contactName,
       email: form.contactEmail,
       phone: form.contactPhone,
+      country: form.country,
+      state: form.state,
+      address: form.address,
+      firstName,
+      lastName,
     });
   };
+
+  const uploadedDocumentTypes = new Set(
+    uploadedDocuments.map((document) => document.documentType),
+  );
+  const selectedDocumentLabel =
+    kycDocumentTypes.find((document) => document.type === selectedDocumentType)
+      ?.label ?? "KYC document";
+  const allRequiredKycUploaded =
+    uploadedDocumentTypes.size === kycDocumentTypes.length;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -267,40 +399,242 @@ export default function CreateVendor() {
         {formStage === 2 && isSuccess && (
           <form onSubmit={handleDocumentSubmit}>
             <section className="panel-card p-6">
-              <div className="mb-6 rounded-2xl border border-white/5 bg-black/30 p-4">
-                <p className="text-xs font-bold uppercase tracking-wider text-zinc-500">
-                  Vendor created
-                </p>
-                <p className="mt-2 font-mono text-xs text-zinc-400">
-                  {data.data.id}
-                </p>
-                <p className="mt-1 text-sm font-bold text-white">
-                  {data.data.businessName}
-                </p>
+              <div className="mb-6 grid gap-4 lg:grid-cols-[1fr_18rem]">
+                <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                  <p className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+                    Vendor created
+                  </p>
+                  <p className="mt-2 font-mono text-xs text-zinc-400 break-all">
+                    {data.data.id}
+                  </p>
+                  <p className="mt-1 text-sm font-bold text-white">
+                    {data.data.businessName}
+                  </p>
+                  <p className="mt-1 text-xs text-zinc-500">
+                    Registration:{" "}
+                    <span className="text-zinc-300">
+                      {data.data.registrationNumber ?? form.registrationNumber}
+                    </span>
+                  </p>
+                </div>
+                <div
+                  className={`rounded-2xl border p-4 ${
+                    allRequiredKycUploaded
+                      ? "border-green-500/30 bg-green-500/10"
+                      : "border-white/10 bg-black/30"
+                  }`}
+                >
+                  <p className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+                    KYC progress
+                  </p>
+                  <p className="mt-2 text-2xl font-black text-white">
+                    {uploadedDocumentTypes.size}/{kycDocumentTypes.length}
+                  </p>
+                  <p className="text-xs text-zinc-500">
+                    Required documents uploaded
+                  </p>
+                </div>
               </div>
+
               <div className="mb-6 flex items-start gap-4 border-b border-white/10 pb-5">
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-green-500/20 bg-green-500/10">
                   <Building2 className="h-5 w-5 text-green-300" />
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-white">
-                    Business Identity
+                    Required KYC Documents
                   </h2>
                   <p className="text-sm text-gray-400 mt-1">
-                    Core registration details used for document extraction and
-                    identity mismatch checks.
+                    Upload each required document type. CAC registration will be
+                    compared against the saved registration number.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid gap-5 lg:grid-cols-[1fr_18rem]">
+                <div className="space-y-4">
+                  <label className="block">
+                    <span className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                      Document type
+                    </span>
+                    <select
+                      value={selectedDocumentType}
+                      onChange={(event) =>
+                        setSelectedDocumentType(
+                          event.target.value as KycDocumentType,
+                        )
+                      }
+                      className={selectClass}
+                    >
+                      {kycDocumentTypes.map((document) => (
+                        <option key={document.type} value={document.type}>
+                          {document.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-black/30 p-5 text-center transition-colors hover:border-white/40 hover:bg-white/5">
+                    <FileUp className="mb-3 h-8 w-8 text-zinc-200" />
+                    <span className="text-sm font-bold text-white">
+                      {file ? file.name : `Upload ${selectedDocumentLabel}`}
+                    </span>
+                    <span className="text-xs text-gray-500 mt-1">
+                      PDF, JPG, or PNG files
+                    </span>
+                    <input
+                      type="file"
+                      className="sr-only"
+                      name="file"
+                      accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                      onChange={handleFile}
+                    />
+                  </label>
+
+                  {uploadError && (
+                    <div className="flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-100">
+                      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                      <span>{uploadError}</span>
+                    </div>
+                  )}
+
+                  {uploadedDocuments.length > 0 && (
+                    <div className="rounded-2xl border border-green-500/20 bg-green-500/10 p-4">
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-green-300" />
+                        <div>
+                          <p className="text-sm font-bold text-white">
+                            Document upload saved
+                          </p>
+                          <p className="mt-1 text-xs text-green-100/80">
+                            Latest upload:{" "}
+                            {uploadedDocuments[uploadedDocuments.length - 1]
+                              ?.fileName ?? "KYC document"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <button
+                      type="submit"
+                      disabled={uploadDocumentsMutation.isPending}
+                      className="button-primary disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <Send className="h-4 w-4" />
+                      {uploadDocumentsMutation.isPending
+                        ? "Uploading..."
+                        : "Upload document"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/dashboard/vendors/${vendorID}`)}
+                      className="button-secondary"
+                    >
+                      Continue to vendor review
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  {kycDocumentTypes.map((document) => {
+                    const uploadedDocument = uploadedDocuments.find(
+                      (uploaded) => uploaded.documentType === document.type,
+                    );
+
+                    return (
+                      <div
+                        key={document.type}
+                        className={`rounded-2xl border p-4 ${
+                          uploadedDocument
+                            ? "border-green-500/25 bg-green-500/10"
+                            : "border-white/10 bg-black/30"
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <CheckCircle2
+                            className={`mt-0.5 h-4 w-4 shrink-0 ${
+                              uploadedDocument
+                                ? "text-green-300"
+                                : "text-zinc-600"
+                            }`}
+                          />
+                          <div className="min-w-0">
+                            <p className="text-sm font-bold text-white">
+                              {document.label}
+                            </p>
+                            <p className="mt-1 text-xs leading-5 text-zinc-500">
+                              {uploadedDocument
+                                ? uploadedDocument.fileName
+                                : document.description}
+                            </p>
+                            {uploadedDocument?.duplicateDetected && (
+                              <p className="mt-2 text-xs font-bold text-amber-200">
+                                Duplicate detected across{" "}
+                                {uploadedDocument.duplicateVendorCount} vendor(s)
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </section>
+          </form>
+        )}
+
+        {formStage === 2 && uploadDocumentsMutation.isPending && (
+          <UploadingDocumentSkeleton />
+        )}
+
+        {formStage === 1 && (
+          <section className="panel-card p-6">
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6">
+              <div className="border-b border-white/10 pb-5 mb-6 items-start gap-4">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-sky-300/20 bg-sky-300/10">
+                  <User className="h-5 w-5 text-sky-200" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white">
+                    Step 1: Contact & Location
+                  </h2>
+                  <p className="text-sm text-gray-400 mt-1">
+                    Add basic contact information for the entity being uploaded
+                    to the VeriSphere Database.
                   </p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <label className="block md:col-span-2">
+                  <span className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                    Primary contact
+                  </span>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                    <input
+                      required
+                      value={form.contactName}
+                      onChange={(event) =>
+                        updateField("contactName", event.target.value)
+                      }
+                      placeholder="Full name"
+                      className={`${inputClass} pl-10`}
+                    />
+                  </div>
+                </label>
+
                 <label className="block">
                   <span className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
                     Legal business name
                   </span>
                   <input
                     required
-                    defaultValue={data.data.businessName}
+                    value={form.businessName}
                     onChange={(event) =>
                       updateField("businessName", event.target.value)
                     }
@@ -354,89 +688,6 @@ export default function CreateVendor() {
                       updateField("sector", event.target.value)
                     }
                     placeholder="Logistics, agriculture, construction..."
-                    className={inputClass}
-                  />
-                </label>
-
-                <label className="flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-black/30 p-5 text-center transition-colors hover:border-cyan-300/40 hover:bg-cyan-300/5">
-                  <FileUp className="mb-3 h-8 w-8 text-cyan-300" />
-                  <span className="text-sm font-bold text-white">
-                    Upload vendor documents
-                  </span>
-                  <span className="text-xs text-gray-500 mt-1">
-                    PDF, JPG, or PNG files
-                  </span>
-                  <input
-                    type="file"
-                    className="sr-only"
-                    name="file"
-                    onChange={handleFile}
-                  />
-                </label>
-              </div>
-              <button
-                type="submit"
-                className="button-primary mt-5"
-              >
-                <Send className="h-4 w-4" />
-                Upload Docs
-              </button>
-            </section>
-          </form>
-        )}
-
-        {formStage === 2 && uploadDocumentsMutation.isPending && (
-          <UploadingDocumentSkeleton />
-        )}
-
-        {formStage === 1 && (
-          <section className="panel-card p-6">
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6">
-              <div className="border-b border-white/10 pb-5 mb-6 items-start gap-4">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-cyan-300/20 bg-cyan-300/10">
-                  <User className="h-5 w-5 text-cyan-300" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-white">
-                    Step 1: Contact & Location
-                  </h2>
-                  <p className="text-sm text-gray-400 mt-1">
-                    Add basic contact information for the entity being uploaded
-                    to the VeriSphere Database.
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <label className="block md:col-span-2">
-                  <span className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-                    Primary contact
-                  </span>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                    <input
-                      required
-                      value={form.contactName}
-                      onChange={(event) =>
-                        updateField("contactName", event.target.value)
-                      }
-                      placeholder="Full name"
-                      className={`${inputClass} pl-10`}
-                    />
-                  </div>
-                </label>
-
-                <label className="block">
-                  <span className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-                    Legal business name
-                  </span>
-                  <input
-                    required
-                    value={form.businessName}
-                    onChange={(event) =>
-                      updateField("businessName", event.target.value)
-                    }
-                    placeholder="Adenike Supplies Ltd"
                     className={inputClass}
                   />
                 </label>
@@ -499,6 +750,22 @@ export default function CreateVendor() {
                   />
                 </label>
 
+                <label className="block md:col-span-2">
+                  <span className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                    Business address
+                  </span>
+                  <textarea
+                    required
+                    value={form.address}
+                    onChange={(event) =>
+                      updateField("address", event.target.value)
+                    }
+                    placeholder="Street, area, city"
+                    rows={3}
+                    className={`${inputClass} resize-none`}
+                  />
+                </label>
+
                 <label className="flex items-start gap-3 rounded-xl border border-white/10 bg-black/30 p-4 md:col-span-2">
                   <input
                     type="checkbox"
@@ -506,11 +773,11 @@ export default function CreateVendor() {
                     onChange={(event) =>
                       updateField("deviceConsent", event.target.checked)
                     }
-                    className="mt-1 h-4 w-4 accent-cyan-300"
+                    className="mt-1 h-4 w-4 accent-white"
                   />
                   <span>
                     <span className="flex items-center gap-2 text-sm font-bold text-white">
-                      <Fingerprint className="h-4 w-4 text-cyan-300" />
+                      <Fingerprint className="h-4 w-4 text-sky-200" />
                       Capture device fingerprint
                     </span>
                     <span className="block text-xs text-gray-500 mt-1">
@@ -522,6 +789,14 @@ export default function CreateVendor() {
                 {deviceCaptureWarning && (
                   <p className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-xs text-amber-100 md:col-span-2">
                     {deviceCaptureWarning}
+                  </p>
+                )}
+
+                {vendorCreateMutation.isError && (
+                  <p className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-100 md:col-span-2">
+                    {vendorCreateMutation.error instanceof Error
+                      ? vendorCreateMutation.error.message
+                      : "Vendor creation failed."}
                   </p>
                 )}
 
@@ -547,10 +822,13 @@ export default function CreateVendor() {
               <div className="flex justify-end p-2">
                 <button
                   type="submit"
-                  className="button-primary"
+                  disabled={vendorCreateMutation.isPending}
+                  className="button-primary disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <Send className="h-4 w-4" />
-                  Create vendor
+                  {vendorCreateMutation.isPending
+                    ? "Creating vendor..."
+                    : "Create vendor"}
                 </button>
               </div>
             </form>
@@ -673,7 +951,7 @@ export default function CreateVendor() {
 
         <section className="glass-panel rounded-2xl p-6">
           <div className="flex items-center gap-3 mb-5">
-            <ShieldCheck className="h-5 w-5 text-cyan-400" />
+            <ShieldCheck className="h-5 w-5 text-emerald-300" />
             <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">
               Risk Workflow
             </h2>
@@ -733,7 +1011,7 @@ export default function CreateVendor() {
               />
               <span>
                 <span className="flex items-center gap-2 text-sm font-bold text-white">
-                  <CreditCard className="h-4 w-4 text-cyan-400" />
+                  <CreditCard className="h-4 w-4 text-sky-200" />
                   Initiate Squad fee
                 </span>
                 <span className="block text-xs text-gray-500 mt-1">

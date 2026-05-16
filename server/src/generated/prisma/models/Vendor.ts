@@ -37,8 +37,15 @@ export type VendorSumAggregateOutputType = {
 export type VendorMinAggregateOutputType = {
   id: string | null
   businessName: string | null
+  registrationNumber: string | null
+  vendorType: string | null
+  sector: string | null
+  contactName: string | null
   email: string | null
   phone: string | null
+  country: string | null
+  state: string | null
+  address: string | null
   status: $Enums.VendorStatus | null
   overallRiskScore: number | null
   riskLevel: $Enums.RiskLevel | null
@@ -49,8 +56,15 @@ export type VendorMinAggregateOutputType = {
 export type VendorMaxAggregateOutputType = {
   id: string | null
   businessName: string | null
+  registrationNumber: string | null
+  vendorType: string | null
+  sector: string | null
+  contactName: string | null
   email: string | null
   phone: string | null
+  country: string | null
+  state: string | null
+  address: string | null
   status: $Enums.VendorStatus | null
   overallRiskScore: number | null
   riskLevel: $Enums.RiskLevel | null
@@ -61,8 +75,15 @@ export type VendorMaxAggregateOutputType = {
 export type VendorCountAggregateOutputType = {
   id: number
   businessName: number
+  registrationNumber: number
+  vendorType: number
+  sector: number
+  contactName: number
   email: number
   phone: number
+  country: number
+  state: number
+  address: number
   status: number
   overallRiskScore: number
   riskLevel: number
@@ -83,8 +104,15 @@ export type VendorSumAggregateInputType = {
 export type VendorMinAggregateInputType = {
   id?: true
   businessName?: true
+  registrationNumber?: true
+  vendorType?: true
+  sector?: true
+  contactName?: true
   email?: true
   phone?: true
+  country?: true
+  state?: true
+  address?: true
   status?: true
   overallRiskScore?: true
   riskLevel?: true
@@ -95,8 +123,15 @@ export type VendorMinAggregateInputType = {
 export type VendorMaxAggregateInputType = {
   id?: true
   businessName?: true
+  registrationNumber?: true
+  vendorType?: true
+  sector?: true
+  contactName?: true
   email?: true
   phone?: true
+  country?: true
+  state?: true
+  address?: true
   status?: true
   overallRiskScore?: true
   riskLevel?: true
@@ -107,8 +142,15 @@ export type VendorMaxAggregateInputType = {
 export type VendorCountAggregateInputType = {
   id?: true
   businessName?: true
+  registrationNumber?: true
+  vendorType?: true
+  sector?: true
+  contactName?: true
   email?: true
   phone?: true
+  country?: true
+  state?: true
+  address?: true
   status?: true
   overallRiskScore?: true
   riskLevel?: true
@@ -206,8 +248,15 @@ export type VendorGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalA
 export type VendorGroupByOutputType = {
   id: string
   businessName: string
+  registrationNumber: string | null
+  vendorType: string | null
+  sector: string | null
+  contactName: string | null
   email: string
   phone: string
+  country: string | null
+  state: string | null
+  address: string | null
   status: $Enums.VendorStatus
   overallRiskScore: number
   riskLevel: $Enums.RiskLevel
@@ -241,8 +290,15 @@ export type VendorWhereInput = {
   NOT?: Prisma.VendorWhereInput | Prisma.VendorWhereInput[]
   id?: Prisma.StringFilter<"Vendor"> | string
   businessName?: Prisma.StringFilter<"Vendor"> | string
+  registrationNumber?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  vendorType?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  sector?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  contactName?: Prisma.StringNullableFilter<"Vendor"> | string | null
   email?: Prisma.StringFilter<"Vendor"> | string
   phone?: Prisma.StringFilter<"Vendor"> | string
+  country?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  state?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  address?: Prisma.StringNullableFilter<"Vendor"> | string | null
   status?: Prisma.EnumVendorStatusFilter<"Vendor"> | $Enums.VendorStatus
   overallRiskScore?: Prisma.FloatFilter<"Vendor"> | number
   riskLevel?: Prisma.EnumRiskLevelFilter<"Vendor"> | $Enums.RiskLevel
@@ -254,14 +310,22 @@ export type VendorWhereInput = {
   alerts?: Prisma.AlertListRelationFilter
   bankAccounts?: Prisma.BankAccountListRelationFilter
   transfers?: Prisma.TransferListRelationFilter
+  virtualAccounts?: Prisma.VirtualAccountListRelationFilter
   riskScores?: Prisma.RiskScoreListRelationFilter
 }
 
 export type VendorOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   businessName?: Prisma.SortOrder
+  registrationNumber?: Prisma.SortOrderInput | Prisma.SortOrder
+  vendorType?: Prisma.SortOrderInput | Prisma.SortOrder
+  sector?: Prisma.SortOrderInput | Prisma.SortOrder
+  contactName?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrder
   phone?: Prisma.SortOrder
+  country?: Prisma.SortOrderInput | Prisma.SortOrder
+  state?: Prisma.SortOrderInput | Prisma.SortOrder
+  address?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   overallRiskScore?: Prisma.SortOrder
   riskLevel?: Prisma.SortOrder
@@ -273,6 +337,7 @@ export type VendorOrderByWithRelationInput = {
   alerts?: Prisma.AlertOrderByRelationAggregateInput
   bankAccounts?: Prisma.BankAccountOrderByRelationAggregateInput
   transfers?: Prisma.TransferOrderByRelationAggregateInput
+  virtualAccounts?: Prisma.VirtualAccountOrderByRelationAggregateInput
   riskScores?: Prisma.RiskScoreOrderByRelationAggregateInput
 }
 
@@ -283,7 +348,14 @@ export type VendorWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.VendorWhereInput[]
   NOT?: Prisma.VendorWhereInput | Prisma.VendorWhereInput[]
   businessName?: Prisma.StringFilter<"Vendor"> | string
+  registrationNumber?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  vendorType?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  sector?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  contactName?: Prisma.StringNullableFilter<"Vendor"> | string | null
   phone?: Prisma.StringFilter<"Vendor"> | string
+  country?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  state?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  address?: Prisma.StringNullableFilter<"Vendor"> | string | null
   status?: Prisma.EnumVendorStatusFilter<"Vendor"> | $Enums.VendorStatus
   overallRiskScore?: Prisma.FloatFilter<"Vendor"> | number
   riskLevel?: Prisma.EnumRiskLevelFilter<"Vendor"> | $Enums.RiskLevel
@@ -295,14 +367,22 @@ export type VendorWhereUniqueInput = Prisma.AtLeast<{
   alerts?: Prisma.AlertListRelationFilter
   bankAccounts?: Prisma.BankAccountListRelationFilter
   transfers?: Prisma.TransferListRelationFilter
+  virtualAccounts?: Prisma.VirtualAccountListRelationFilter
   riskScores?: Prisma.RiskScoreListRelationFilter
 }, "id" | "email">
 
 export type VendorOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   businessName?: Prisma.SortOrder
+  registrationNumber?: Prisma.SortOrderInput | Prisma.SortOrder
+  vendorType?: Prisma.SortOrderInput | Prisma.SortOrder
+  sector?: Prisma.SortOrderInput | Prisma.SortOrder
+  contactName?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrder
   phone?: Prisma.SortOrder
+  country?: Prisma.SortOrderInput | Prisma.SortOrder
+  state?: Prisma.SortOrderInput | Prisma.SortOrder
+  address?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   overallRiskScore?: Prisma.SortOrder
   riskLevel?: Prisma.SortOrder
@@ -321,8 +401,15 @@ export type VendorScalarWhereWithAggregatesInput = {
   NOT?: Prisma.VendorScalarWhereWithAggregatesInput | Prisma.VendorScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Vendor"> | string
   businessName?: Prisma.StringWithAggregatesFilter<"Vendor"> | string
+  registrationNumber?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
+  vendorType?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
+  sector?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
+  contactName?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
   email?: Prisma.StringWithAggregatesFilter<"Vendor"> | string
   phone?: Prisma.StringWithAggregatesFilter<"Vendor"> | string
+  country?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
+  state?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
+  address?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
   status?: Prisma.EnumVendorStatusWithAggregatesFilter<"Vendor"> | $Enums.VendorStatus
   overallRiskScore?: Prisma.FloatWithAggregatesFilter<"Vendor"> | number
   riskLevel?: Prisma.EnumRiskLevelWithAggregatesFilter<"Vendor"> | $Enums.RiskLevel
@@ -333,8 +420,15 @@ export type VendorScalarWhereWithAggregatesInput = {
 export type VendorCreateInput = {
   id?: string
   businessName: string
+  registrationNumber?: string | null
+  vendorType?: string | null
+  sector?: string | null
+  contactName?: string | null
   email: string
   phone: string
+  country?: string | null
+  state?: string | null
+  address?: string | null
   status?: $Enums.VendorStatus
   overallRiskScore?: number
   riskLevel?: $Enums.RiskLevel
@@ -346,14 +440,22 @@ export type VendorCreateInput = {
   alerts?: Prisma.AlertCreateNestedManyWithoutVendorInput
   bankAccounts?: Prisma.BankAccountCreateNestedManyWithoutVendorInput
   transfers?: Prisma.TransferCreateNestedManyWithoutVendorInput
+  virtualAccounts?: Prisma.VirtualAccountCreateNestedManyWithoutVendorInput
   riskScores?: Prisma.RiskScoreCreateNestedManyWithoutVendorInput
 }
 
 export type VendorUncheckedCreateInput = {
   id?: string
   businessName: string
+  registrationNumber?: string | null
+  vendorType?: string | null
+  sector?: string | null
+  contactName?: string | null
   email: string
   phone: string
+  country?: string | null
+  state?: string | null
+  address?: string | null
   status?: $Enums.VendorStatus
   overallRiskScore?: number
   riskLevel?: $Enums.RiskLevel
@@ -365,14 +467,22 @@ export type VendorUncheckedCreateInput = {
   alerts?: Prisma.AlertUncheckedCreateNestedManyWithoutVendorInput
   bankAccounts?: Prisma.BankAccountUncheckedCreateNestedManyWithoutVendorInput
   transfers?: Prisma.TransferUncheckedCreateNestedManyWithoutVendorInput
+  virtualAccounts?: Prisma.VirtualAccountUncheckedCreateNestedManyWithoutVendorInput
   riskScores?: Prisma.RiskScoreUncheckedCreateNestedManyWithoutVendorInput
 }
 
 export type VendorUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumVendorStatusFieldUpdateOperationsInput | $Enums.VendorStatus
   overallRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
   riskLevel?: Prisma.EnumRiskLevelFieldUpdateOperationsInput | $Enums.RiskLevel
@@ -384,14 +494,22 @@ export type VendorUpdateInput = {
   alerts?: Prisma.AlertUpdateManyWithoutVendorNestedInput
   bankAccounts?: Prisma.BankAccountUpdateManyWithoutVendorNestedInput
   transfers?: Prisma.TransferUpdateManyWithoutVendorNestedInput
+  virtualAccounts?: Prisma.VirtualAccountUpdateManyWithoutVendorNestedInput
   riskScores?: Prisma.RiskScoreUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumVendorStatusFieldUpdateOperationsInput | $Enums.VendorStatus
   overallRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
   riskLevel?: Prisma.EnumRiskLevelFieldUpdateOperationsInput | $Enums.RiskLevel
@@ -403,14 +521,22 @@ export type VendorUncheckedUpdateInput = {
   alerts?: Prisma.AlertUncheckedUpdateManyWithoutVendorNestedInput
   bankAccounts?: Prisma.BankAccountUncheckedUpdateManyWithoutVendorNestedInput
   transfers?: Prisma.TransferUncheckedUpdateManyWithoutVendorNestedInput
+  virtualAccounts?: Prisma.VirtualAccountUncheckedUpdateManyWithoutVendorNestedInput
   riskScores?: Prisma.RiskScoreUncheckedUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorCreateManyInput = {
   id?: string
   businessName: string
+  registrationNumber?: string | null
+  vendorType?: string | null
+  sector?: string | null
+  contactName?: string | null
   email: string
   phone: string
+  country?: string | null
+  state?: string | null
+  address?: string | null
   status?: $Enums.VendorStatus
   overallRiskScore?: number
   riskLevel?: $Enums.RiskLevel
@@ -421,8 +547,15 @@ export type VendorCreateManyInput = {
 export type VendorUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumVendorStatusFieldUpdateOperationsInput | $Enums.VendorStatus
   overallRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
   riskLevel?: Prisma.EnumRiskLevelFieldUpdateOperationsInput | $Enums.RiskLevel
@@ -433,8 +566,15 @@ export type VendorUpdateManyMutationInput = {
 export type VendorUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumVendorStatusFieldUpdateOperationsInput | $Enums.VendorStatus
   overallRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
   riskLevel?: Prisma.EnumRiskLevelFieldUpdateOperationsInput | $Enums.RiskLevel
@@ -445,8 +585,15 @@ export type VendorUncheckedUpdateManyInput = {
 export type VendorCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   businessName?: Prisma.SortOrder
+  registrationNumber?: Prisma.SortOrder
+  vendorType?: Prisma.SortOrder
+  sector?: Prisma.SortOrder
+  contactName?: Prisma.SortOrder
   email?: Prisma.SortOrder
   phone?: Prisma.SortOrder
+  country?: Prisma.SortOrder
+  state?: Prisma.SortOrder
+  address?: Prisma.SortOrder
   status?: Prisma.SortOrder
   overallRiskScore?: Prisma.SortOrder
   riskLevel?: Prisma.SortOrder
@@ -461,8 +608,15 @@ export type VendorAvgOrderByAggregateInput = {
 export type VendorMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   businessName?: Prisma.SortOrder
+  registrationNumber?: Prisma.SortOrder
+  vendorType?: Prisma.SortOrder
+  sector?: Prisma.SortOrder
+  contactName?: Prisma.SortOrder
   email?: Prisma.SortOrder
   phone?: Prisma.SortOrder
+  country?: Prisma.SortOrder
+  state?: Prisma.SortOrder
+  address?: Prisma.SortOrder
   status?: Prisma.SortOrder
   overallRiskScore?: Prisma.SortOrder
   riskLevel?: Prisma.SortOrder
@@ -473,8 +627,15 @@ export type VendorMaxOrderByAggregateInput = {
 export type VendorMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   businessName?: Prisma.SortOrder
+  registrationNumber?: Prisma.SortOrder
+  vendorType?: Prisma.SortOrder
+  sector?: Prisma.SortOrder
+  contactName?: Prisma.SortOrder
   email?: Prisma.SortOrder
   phone?: Prisma.SortOrder
+  country?: Prisma.SortOrder
+  state?: Prisma.SortOrder
+  address?: Prisma.SortOrder
   status?: Prisma.SortOrder
   overallRiskScore?: Prisma.SortOrder
   riskLevel?: Prisma.SortOrder
@@ -577,6 +738,20 @@ export type VendorUpdateOneRequiredWithoutTransfersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.VendorUpdateToOneWithWhereWithoutTransfersInput, Prisma.VendorUpdateWithoutTransfersInput>, Prisma.VendorUncheckedUpdateWithoutTransfersInput>
 }
 
+export type VendorCreateNestedOneWithoutVirtualAccountsInput = {
+  create?: Prisma.XOR<Prisma.VendorCreateWithoutVirtualAccountsInput, Prisma.VendorUncheckedCreateWithoutVirtualAccountsInput>
+  connectOrCreate?: Prisma.VendorCreateOrConnectWithoutVirtualAccountsInput
+  connect?: Prisma.VendorWhereUniqueInput
+}
+
+export type VendorUpdateOneRequiredWithoutVirtualAccountsNestedInput = {
+  create?: Prisma.XOR<Prisma.VendorCreateWithoutVirtualAccountsInput, Prisma.VendorUncheckedCreateWithoutVirtualAccountsInput>
+  connectOrCreate?: Prisma.VendorCreateOrConnectWithoutVirtualAccountsInput
+  upsert?: Prisma.VendorUpsertWithoutVirtualAccountsInput
+  connect?: Prisma.VendorWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.VendorUpdateToOneWithWhereWithoutVirtualAccountsInput, Prisma.VendorUpdateWithoutVirtualAccountsInput>, Prisma.VendorUncheckedUpdateWithoutVirtualAccountsInput>
+}
+
 export type VendorCreateNestedOneWithoutRiskScoresInput = {
   create?: Prisma.XOR<Prisma.VendorCreateWithoutRiskScoresInput, Prisma.VendorUncheckedCreateWithoutRiskScoresInput>
   connectOrCreate?: Prisma.VendorCreateOrConnectWithoutRiskScoresInput
@@ -608,8 +783,15 @@ export type VendorUpdateOneRequiredWithoutAlertsNestedInput = {
 export type VendorCreateWithoutDocumentsInput = {
   id?: string
   businessName: string
+  registrationNumber?: string | null
+  vendorType?: string | null
+  sector?: string | null
+  contactName?: string | null
   email: string
   phone: string
+  country?: string | null
+  state?: string | null
+  address?: string | null
   status?: $Enums.VendorStatus
   overallRiskScore?: number
   riskLevel?: $Enums.RiskLevel
@@ -620,14 +802,22 @@ export type VendorCreateWithoutDocumentsInput = {
   alerts?: Prisma.AlertCreateNestedManyWithoutVendorInput
   bankAccounts?: Prisma.BankAccountCreateNestedManyWithoutVendorInput
   transfers?: Prisma.TransferCreateNestedManyWithoutVendorInput
+  virtualAccounts?: Prisma.VirtualAccountCreateNestedManyWithoutVendorInput
   riskScores?: Prisma.RiskScoreCreateNestedManyWithoutVendorInput
 }
 
 export type VendorUncheckedCreateWithoutDocumentsInput = {
   id?: string
   businessName: string
+  registrationNumber?: string | null
+  vendorType?: string | null
+  sector?: string | null
+  contactName?: string | null
   email: string
   phone: string
+  country?: string | null
+  state?: string | null
+  address?: string | null
   status?: $Enums.VendorStatus
   overallRiskScore?: number
   riskLevel?: $Enums.RiskLevel
@@ -638,6 +828,7 @@ export type VendorUncheckedCreateWithoutDocumentsInput = {
   alerts?: Prisma.AlertUncheckedCreateNestedManyWithoutVendorInput
   bankAccounts?: Prisma.BankAccountUncheckedCreateNestedManyWithoutVendorInput
   transfers?: Prisma.TransferUncheckedCreateNestedManyWithoutVendorInput
+  virtualAccounts?: Prisma.VirtualAccountUncheckedCreateNestedManyWithoutVendorInput
   riskScores?: Prisma.RiskScoreUncheckedCreateNestedManyWithoutVendorInput
 }
 
@@ -660,8 +851,15 @@ export type VendorUpdateToOneWithWhereWithoutDocumentsInput = {
 export type VendorUpdateWithoutDocumentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumVendorStatusFieldUpdateOperationsInput | $Enums.VendorStatus
   overallRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
   riskLevel?: Prisma.EnumRiskLevelFieldUpdateOperationsInput | $Enums.RiskLevel
@@ -672,14 +870,22 @@ export type VendorUpdateWithoutDocumentsInput = {
   alerts?: Prisma.AlertUpdateManyWithoutVendorNestedInput
   bankAccounts?: Prisma.BankAccountUpdateManyWithoutVendorNestedInput
   transfers?: Prisma.TransferUpdateManyWithoutVendorNestedInput
+  virtualAccounts?: Prisma.VirtualAccountUpdateManyWithoutVendorNestedInput
   riskScores?: Prisma.RiskScoreUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUncheckedUpdateWithoutDocumentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumVendorStatusFieldUpdateOperationsInput | $Enums.VendorStatus
   overallRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
   riskLevel?: Prisma.EnumRiskLevelFieldUpdateOperationsInput | $Enums.RiskLevel
@@ -690,14 +896,22 @@ export type VendorUncheckedUpdateWithoutDocumentsInput = {
   alerts?: Prisma.AlertUncheckedUpdateManyWithoutVendorNestedInput
   bankAccounts?: Prisma.BankAccountUncheckedUpdateManyWithoutVendorNestedInput
   transfers?: Prisma.TransferUncheckedUpdateManyWithoutVendorNestedInput
+  virtualAccounts?: Prisma.VirtualAccountUncheckedUpdateManyWithoutVendorNestedInput
   riskScores?: Prisma.RiskScoreUncheckedUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorCreateWithoutDevicesInput = {
   id?: string
   businessName: string
+  registrationNumber?: string | null
+  vendorType?: string | null
+  sector?: string | null
+  contactName?: string | null
   email: string
   phone: string
+  country?: string | null
+  state?: string | null
+  address?: string | null
   status?: $Enums.VendorStatus
   overallRiskScore?: number
   riskLevel?: $Enums.RiskLevel
@@ -708,14 +922,22 @@ export type VendorCreateWithoutDevicesInput = {
   alerts?: Prisma.AlertCreateNestedManyWithoutVendorInput
   bankAccounts?: Prisma.BankAccountCreateNestedManyWithoutVendorInput
   transfers?: Prisma.TransferCreateNestedManyWithoutVendorInput
+  virtualAccounts?: Prisma.VirtualAccountCreateNestedManyWithoutVendorInput
   riskScores?: Prisma.RiskScoreCreateNestedManyWithoutVendorInput
 }
 
 export type VendorUncheckedCreateWithoutDevicesInput = {
   id?: string
   businessName: string
+  registrationNumber?: string | null
+  vendorType?: string | null
+  sector?: string | null
+  contactName?: string | null
   email: string
   phone: string
+  country?: string | null
+  state?: string | null
+  address?: string | null
   status?: $Enums.VendorStatus
   overallRiskScore?: number
   riskLevel?: $Enums.RiskLevel
@@ -726,6 +948,7 @@ export type VendorUncheckedCreateWithoutDevicesInput = {
   alerts?: Prisma.AlertUncheckedCreateNestedManyWithoutVendorInput
   bankAccounts?: Prisma.BankAccountUncheckedCreateNestedManyWithoutVendorInput
   transfers?: Prisma.TransferUncheckedCreateNestedManyWithoutVendorInput
+  virtualAccounts?: Prisma.VirtualAccountUncheckedCreateNestedManyWithoutVendorInput
   riskScores?: Prisma.RiskScoreUncheckedCreateNestedManyWithoutVendorInput
 }
 
@@ -748,8 +971,15 @@ export type VendorUpdateToOneWithWhereWithoutDevicesInput = {
 export type VendorUpdateWithoutDevicesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumVendorStatusFieldUpdateOperationsInput | $Enums.VendorStatus
   overallRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
   riskLevel?: Prisma.EnumRiskLevelFieldUpdateOperationsInput | $Enums.RiskLevel
@@ -760,14 +990,22 @@ export type VendorUpdateWithoutDevicesInput = {
   alerts?: Prisma.AlertUpdateManyWithoutVendorNestedInput
   bankAccounts?: Prisma.BankAccountUpdateManyWithoutVendorNestedInput
   transfers?: Prisma.TransferUpdateManyWithoutVendorNestedInput
+  virtualAccounts?: Prisma.VirtualAccountUpdateManyWithoutVendorNestedInput
   riskScores?: Prisma.RiskScoreUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUncheckedUpdateWithoutDevicesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumVendorStatusFieldUpdateOperationsInput | $Enums.VendorStatus
   overallRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
   riskLevel?: Prisma.EnumRiskLevelFieldUpdateOperationsInput | $Enums.RiskLevel
@@ -778,14 +1016,22 @@ export type VendorUncheckedUpdateWithoutDevicesInput = {
   alerts?: Prisma.AlertUncheckedUpdateManyWithoutVendorNestedInput
   bankAccounts?: Prisma.BankAccountUncheckedUpdateManyWithoutVendorNestedInput
   transfers?: Prisma.TransferUncheckedUpdateManyWithoutVendorNestedInput
+  virtualAccounts?: Prisma.VirtualAccountUncheckedUpdateManyWithoutVendorNestedInput
   riskScores?: Prisma.RiskScoreUncheckedUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorCreateWithoutTransactionsInput = {
   id?: string
   businessName: string
+  registrationNumber?: string | null
+  vendorType?: string | null
+  sector?: string | null
+  contactName?: string | null
   email: string
   phone: string
+  country?: string | null
+  state?: string | null
+  address?: string | null
   status?: $Enums.VendorStatus
   overallRiskScore?: number
   riskLevel?: $Enums.RiskLevel
@@ -796,14 +1042,22 @@ export type VendorCreateWithoutTransactionsInput = {
   alerts?: Prisma.AlertCreateNestedManyWithoutVendorInput
   bankAccounts?: Prisma.BankAccountCreateNestedManyWithoutVendorInput
   transfers?: Prisma.TransferCreateNestedManyWithoutVendorInput
+  virtualAccounts?: Prisma.VirtualAccountCreateNestedManyWithoutVendorInput
   riskScores?: Prisma.RiskScoreCreateNestedManyWithoutVendorInput
 }
 
 export type VendorUncheckedCreateWithoutTransactionsInput = {
   id?: string
   businessName: string
+  registrationNumber?: string | null
+  vendorType?: string | null
+  sector?: string | null
+  contactName?: string | null
   email: string
   phone: string
+  country?: string | null
+  state?: string | null
+  address?: string | null
   status?: $Enums.VendorStatus
   overallRiskScore?: number
   riskLevel?: $Enums.RiskLevel
@@ -814,6 +1068,7 @@ export type VendorUncheckedCreateWithoutTransactionsInput = {
   alerts?: Prisma.AlertUncheckedCreateNestedManyWithoutVendorInput
   bankAccounts?: Prisma.BankAccountUncheckedCreateNestedManyWithoutVendorInput
   transfers?: Prisma.TransferUncheckedCreateNestedManyWithoutVendorInput
+  virtualAccounts?: Prisma.VirtualAccountUncheckedCreateNestedManyWithoutVendorInput
   riskScores?: Prisma.RiskScoreUncheckedCreateNestedManyWithoutVendorInput
 }
 
@@ -836,8 +1091,15 @@ export type VendorUpdateToOneWithWhereWithoutTransactionsInput = {
 export type VendorUpdateWithoutTransactionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumVendorStatusFieldUpdateOperationsInput | $Enums.VendorStatus
   overallRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
   riskLevel?: Prisma.EnumRiskLevelFieldUpdateOperationsInput | $Enums.RiskLevel
@@ -848,14 +1110,22 @@ export type VendorUpdateWithoutTransactionsInput = {
   alerts?: Prisma.AlertUpdateManyWithoutVendorNestedInput
   bankAccounts?: Prisma.BankAccountUpdateManyWithoutVendorNestedInput
   transfers?: Prisma.TransferUpdateManyWithoutVendorNestedInput
+  virtualAccounts?: Prisma.VirtualAccountUpdateManyWithoutVendorNestedInput
   riskScores?: Prisma.RiskScoreUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUncheckedUpdateWithoutTransactionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumVendorStatusFieldUpdateOperationsInput | $Enums.VendorStatus
   overallRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
   riskLevel?: Prisma.EnumRiskLevelFieldUpdateOperationsInput | $Enums.RiskLevel
@@ -866,14 +1136,22 @@ export type VendorUncheckedUpdateWithoutTransactionsInput = {
   alerts?: Prisma.AlertUncheckedUpdateManyWithoutVendorNestedInput
   bankAccounts?: Prisma.BankAccountUncheckedUpdateManyWithoutVendorNestedInput
   transfers?: Prisma.TransferUncheckedUpdateManyWithoutVendorNestedInput
+  virtualAccounts?: Prisma.VirtualAccountUncheckedUpdateManyWithoutVendorNestedInput
   riskScores?: Prisma.RiskScoreUncheckedUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorCreateWithoutBankAccountsInput = {
   id?: string
   businessName: string
+  registrationNumber?: string | null
+  vendorType?: string | null
+  sector?: string | null
+  contactName?: string | null
   email: string
   phone: string
+  country?: string | null
+  state?: string | null
+  address?: string | null
   status?: $Enums.VendorStatus
   overallRiskScore?: number
   riskLevel?: $Enums.RiskLevel
@@ -884,14 +1162,22 @@ export type VendorCreateWithoutBankAccountsInput = {
   transactions?: Prisma.TransactionCreateNestedManyWithoutVendorInput
   alerts?: Prisma.AlertCreateNestedManyWithoutVendorInput
   transfers?: Prisma.TransferCreateNestedManyWithoutVendorInput
+  virtualAccounts?: Prisma.VirtualAccountCreateNestedManyWithoutVendorInput
   riskScores?: Prisma.RiskScoreCreateNestedManyWithoutVendorInput
 }
 
 export type VendorUncheckedCreateWithoutBankAccountsInput = {
   id?: string
   businessName: string
+  registrationNumber?: string | null
+  vendorType?: string | null
+  sector?: string | null
+  contactName?: string | null
   email: string
   phone: string
+  country?: string | null
+  state?: string | null
+  address?: string | null
   status?: $Enums.VendorStatus
   overallRiskScore?: number
   riskLevel?: $Enums.RiskLevel
@@ -902,6 +1188,7 @@ export type VendorUncheckedCreateWithoutBankAccountsInput = {
   transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutVendorInput
   alerts?: Prisma.AlertUncheckedCreateNestedManyWithoutVendorInput
   transfers?: Prisma.TransferUncheckedCreateNestedManyWithoutVendorInput
+  virtualAccounts?: Prisma.VirtualAccountUncheckedCreateNestedManyWithoutVendorInput
   riskScores?: Prisma.RiskScoreUncheckedCreateNestedManyWithoutVendorInput
 }
 
@@ -924,8 +1211,15 @@ export type VendorUpdateToOneWithWhereWithoutBankAccountsInput = {
 export type VendorUpdateWithoutBankAccountsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumVendorStatusFieldUpdateOperationsInput | $Enums.VendorStatus
   overallRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
   riskLevel?: Prisma.EnumRiskLevelFieldUpdateOperationsInput | $Enums.RiskLevel
@@ -936,14 +1230,22 @@ export type VendorUpdateWithoutBankAccountsInput = {
   transactions?: Prisma.TransactionUpdateManyWithoutVendorNestedInput
   alerts?: Prisma.AlertUpdateManyWithoutVendorNestedInput
   transfers?: Prisma.TransferUpdateManyWithoutVendorNestedInput
+  virtualAccounts?: Prisma.VirtualAccountUpdateManyWithoutVendorNestedInput
   riskScores?: Prisma.RiskScoreUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUncheckedUpdateWithoutBankAccountsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumVendorStatusFieldUpdateOperationsInput | $Enums.VendorStatus
   overallRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
   riskLevel?: Prisma.EnumRiskLevelFieldUpdateOperationsInput | $Enums.RiskLevel
@@ -954,14 +1256,22 @@ export type VendorUncheckedUpdateWithoutBankAccountsInput = {
   transactions?: Prisma.TransactionUncheckedUpdateManyWithoutVendorNestedInput
   alerts?: Prisma.AlertUncheckedUpdateManyWithoutVendorNestedInput
   transfers?: Prisma.TransferUncheckedUpdateManyWithoutVendorNestedInput
+  virtualAccounts?: Prisma.VirtualAccountUncheckedUpdateManyWithoutVendorNestedInput
   riskScores?: Prisma.RiskScoreUncheckedUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorCreateWithoutTransfersInput = {
   id?: string
   businessName: string
+  registrationNumber?: string | null
+  vendorType?: string | null
+  sector?: string | null
+  contactName?: string | null
   email: string
   phone: string
+  country?: string | null
+  state?: string | null
+  address?: string | null
   status?: $Enums.VendorStatus
   overallRiskScore?: number
   riskLevel?: $Enums.RiskLevel
@@ -972,14 +1282,22 @@ export type VendorCreateWithoutTransfersInput = {
   transactions?: Prisma.TransactionCreateNestedManyWithoutVendorInput
   alerts?: Prisma.AlertCreateNestedManyWithoutVendorInput
   bankAccounts?: Prisma.BankAccountCreateNestedManyWithoutVendorInput
+  virtualAccounts?: Prisma.VirtualAccountCreateNestedManyWithoutVendorInput
   riskScores?: Prisma.RiskScoreCreateNestedManyWithoutVendorInput
 }
 
 export type VendorUncheckedCreateWithoutTransfersInput = {
   id?: string
   businessName: string
+  registrationNumber?: string | null
+  vendorType?: string | null
+  sector?: string | null
+  contactName?: string | null
   email: string
   phone: string
+  country?: string | null
+  state?: string | null
+  address?: string | null
   status?: $Enums.VendorStatus
   overallRiskScore?: number
   riskLevel?: $Enums.RiskLevel
@@ -990,6 +1308,7 @@ export type VendorUncheckedCreateWithoutTransfersInput = {
   transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutVendorInput
   alerts?: Prisma.AlertUncheckedCreateNestedManyWithoutVendorInput
   bankAccounts?: Prisma.BankAccountUncheckedCreateNestedManyWithoutVendorInput
+  virtualAccounts?: Prisma.VirtualAccountUncheckedCreateNestedManyWithoutVendorInput
   riskScores?: Prisma.RiskScoreUncheckedCreateNestedManyWithoutVendorInput
 }
 
@@ -1012,8 +1331,15 @@ export type VendorUpdateToOneWithWhereWithoutTransfersInput = {
 export type VendorUpdateWithoutTransfersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumVendorStatusFieldUpdateOperationsInput | $Enums.VendorStatus
   overallRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
   riskLevel?: Prisma.EnumRiskLevelFieldUpdateOperationsInput | $Enums.RiskLevel
@@ -1024,14 +1350,22 @@ export type VendorUpdateWithoutTransfersInput = {
   transactions?: Prisma.TransactionUpdateManyWithoutVendorNestedInput
   alerts?: Prisma.AlertUpdateManyWithoutVendorNestedInput
   bankAccounts?: Prisma.BankAccountUpdateManyWithoutVendorNestedInput
+  virtualAccounts?: Prisma.VirtualAccountUpdateManyWithoutVendorNestedInput
   riskScores?: Prisma.RiskScoreUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUncheckedUpdateWithoutTransfersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumVendorStatusFieldUpdateOperationsInput | $Enums.VendorStatus
   overallRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
   riskLevel?: Prisma.EnumRiskLevelFieldUpdateOperationsInput | $Enums.RiskLevel
@@ -1042,14 +1376,22 @@ export type VendorUncheckedUpdateWithoutTransfersInput = {
   transactions?: Prisma.TransactionUncheckedUpdateManyWithoutVendorNestedInput
   alerts?: Prisma.AlertUncheckedUpdateManyWithoutVendorNestedInput
   bankAccounts?: Prisma.BankAccountUncheckedUpdateManyWithoutVendorNestedInput
+  virtualAccounts?: Prisma.VirtualAccountUncheckedUpdateManyWithoutVendorNestedInput
   riskScores?: Prisma.RiskScoreUncheckedUpdateManyWithoutVendorNestedInput
 }
 
-export type VendorCreateWithoutRiskScoresInput = {
+export type VendorCreateWithoutVirtualAccountsInput = {
   id?: string
   businessName: string
+  registrationNumber?: string | null
+  vendorType?: string | null
+  sector?: string | null
+  contactName?: string | null
   email: string
   phone: string
+  country?: string | null
+  state?: string | null
+  address?: string | null
   status?: $Enums.VendorStatus
   overallRiskScore?: number
   riskLevel?: $Enums.RiskLevel
@@ -1061,13 +1403,21 @@ export type VendorCreateWithoutRiskScoresInput = {
   alerts?: Prisma.AlertCreateNestedManyWithoutVendorInput
   bankAccounts?: Prisma.BankAccountCreateNestedManyWithoutVendorInput
   transfers?: Prisma.TransferCreateNestedManyWithoutVendorInput
+  riskScores?: Prisma.RiskScoreCreateNestedManyWithoutVendorInput
 }
 
-export type VendorUncheckedCreateWithoutRiskScoresInput = {
+export type VendorUncheckedCreateWithoutVirtualAccountsInput = {
   id?: string
   businessName: string
+  registrationNumber?: string | null
+  vendorType?: string | null
+  sector?: string | null
+  contactName?: string | null
   email: string
   phone: string
+  country?: string | null
+  state?: string | null
+  address?: string | null
   status?: $Enums.VendorStatus
   overallRiskScore?: number
   riskLevel?: $Enums.RiskLevel
@@ -1079,6 +1429,127 @@ export type VendorUncheckedCreateWithoutRiskScoresInput = {
   alerts?: Prisma.AlertUncheckedCreateNestedManyWithoutVendorInput
   bankAccounts?: Prisma.BankAccountUncheckedCreateNestedManyWithoutVendorInput
   transfers?: Prisma.TransferUncheckedCreateNestedManyWithoutVendorInput
+  riskScores?: Prisma.RiskScoreUncheckedCreateNestedManyWithoutVendorInput
+}
+
+export type VendorCreateOrConnectWithoutVirtualAccountsInput = {
+  where: Prisma.VendorWhereUniqueInput
+  create: Prisma.XOR<Prisma.VendorCreateWithoutVirtualAccountsInput, Prisma.VendorUncheckedCreateWithoutVirtualAccountsInput>
+}
+
+export type VendorUpsertWithoutVirtualAccountsInput = {
+  update: Prisma.XOR<Prisma.VendorUpdateWithoutVirtualAccountsInput, Prisma.VendorUncheckedUpdateWithoutVirtualAccountsInput>
+  create: Prisma.XOR<Prisma.VendorCreateWithoutVirtualAccountsInput, Prisma.VendorUncheckedCreateWithoutVirtualAccountsInput>
+  where?: Prisma.VendorWhereInput
+}
+
+export type VendorUpdateToOneWithWhereWithoutVirtualAccountsInput = {
+  where?: Prisma.VendorWhereInput
+  data: Prisma.XOR<Prisma.VendorUpdateWithoutVirtualAccountsInput, Prisma.VendorUncheckedUpdateWithoutVirtualAccountsInput>
+}
+
+export type VendorUpdateWithoutVirtualAccountsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumVendorStatusFieldUpdateOperationsInput | $Enums.VendorStatus
+  overallRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  riskLevel?: Prisma.EnumRiskLevelFieldUpdateOperationsInput | $Enums.RiskLevel
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documents?: Prisma.DocumentUpdateManyWithoutVendorNestedInput
+  devices?: Prisma.DeviceUpdateManyWithoutVendorNestedInput
+  transactions?: Prisma.TransactionUpdateManyWithoutVendorNestedInput
+  alerts?: Prisma.AlertUpdateManyWithoutVendorNestedInput
+  bankAccounts?: Prisma.BankAccountUpdateManyWithoutVendorNestedInput
+  transfers?: Prisma.TransferUpdateManyWithoutVendorNestedInput
+  riskScores?: Prisma.RiskScoreUpdateManyWithoutVendorNestedInput
+}
+
+export type VendorUncheckedUpdateWithoutVirtualAccountsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumVendorStatusFieldUpdateOperationsInput | $Enums.VendorStatus
+  overallRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  riskLevel?: Prisma.EnumRiskLevelFieldUpdateOperationsInput | $Enums.RiskLevel
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutVendorNestedInput
+  devices?: Prisma.DeviceUncheckedUpdateManyWithoutVendorNestedInput
+  transactions?: Prisma.TransactionUncheckedUpdateManyWithoutVendorNestedInput
+  alerts?: Prisma.AlertUncheckedUpdateManyWithoutVendorNestedInput
+  bankAccounts?: Prisma.BankAccountUncheckedUpdateManyWithoutVendorNestedInput
+  transfers?: Prisma.TransferUncheckedUpdateManyWithoutVendorNestedInput
+  riskScores?: Prisma.RiskScoreUncheckedUpdateManyWithoutVendorNestedInput
+}
+
+export type VendorCreateWithoutRiskScoresInput = {
+  id?: string
+  businessName: string
+  registrationNumber?: string | null
+  vendorType?: string | null
+  sector?: string | null
+  contactName?: string | null
+  email: string
+  phone: string
+  country?: string | null
+  state?: string | null
+  address?: string | null
+  status?: $Enums.VendorStatus
+  overallRiskScore?: number
+  riskLevel?: $Enums.RiskLevel
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  documents?: Prisma.DocumentCreateNestedManyWithoutVendorInput
+  devices?: Prisma.DeviceCreateNestedManyWithoutVendorInput
+  transactions?: Prisma.TransactionCreateNestedManyWithoutVendorInput
+  alerts?: Prisma.AlertCreateNestedManyWithoutVendorInput
+  bankAccounts?: Prisma.BankAccountCreateNestedManyWithoutVendorInput
+  transfers?: Prisma.TransferCreateNestedManyWithoutVendorInput
+  virtualAccounts?: Prisma.VirtualAccountCreateNestedManyWithoutVendorInput
+}
+
+export type VendorUncheckedCreateWithoutRiskScoresInput = {
+  id?: string
+  businessName: string
+  registrationNumber?: string | null
+  vendorType?: string | null
+  sector?: string | null
+  contactName?: string | null
+  email: string
+  phone: string
+  country?: string | null
+  state?: string | null
+  address?: string | null
+  status?: $Enums.VendorStatus
+  overallRiskScore?: number
+  riskLevel?: $Enums.RiskLevel
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutVendorInput
+  devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutVendorInput
+  transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutVendorInput
+  alerts?: Prisma.AlertUncheckedCreateNestedManyWithoutVendorInput
+  bankAccounts?: Prisma.BankAccountUncheckedCreateNestedManyWithoutVendorInput
+  transfers?: Prisma.TransferUncheckedCreateNestedManyWithoutVendorInput
+  virtualAccounts?: Prisma.VirtualAccountUncheckedCreateNestedManyWithoutVendorInput
 }
 
 export type VendorCreateOrConnectWithoutRiskScoresInput = {
@@ -1100,8 +1571,15 @@ export type VendorUpdateToOneWithWhereWithoutRiskScoresInput = {
 export type VendorUpdateWithoutRiskScoresInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumVendorStatusFieldUpdateOperationsInput | $Enums.VendorStatus
   overallRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
   riskLevel?: Prisma.EnumRiskLevelFieldUpdateOperationsInput | $Enums.RiskLevel
@@ -1113,13 +1591,21 @@ export type VendorUpdateWithoutRiskScoresInput = {
   alerts?: Prisma.AlertUpdateManyWithoutVendorNestedInput
   bankAccounts?: Prisma.BankAccountUpdateManyWithoutVendorNestedInput
   transfers?: Prisma.TransferUpdateManyWithoutVendorNestedInput
+  virtualAccounts?: Prisma.VirtualAccountUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUncheckedUpdateWithoutRiskScoresInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumVendorStatusFieldUpdateOperationsInput | $Enums.VendorStatus
   overallRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
   riskLevel?: Prisma.EnumRiskLevelFieldUpdateOperationsInput | $Enums.RiskLevel
@@ -1131,13 +1617,21 @@ export type VendorUncheckedUpdateWithoutRiskScoresInput = {
   alerts?: Prisma.AlertUncheckedUpdateManyWithoutVendorNestedInput
   bankAccounts?: Prisma.BankAccountUncheckedUpdateManyWithoutVendorNestedInput
   transfers?: Prisma.TransferUncheckedUpdateManyWithoutVendorNestedInput
+  virtualAccounts?: Prisma.VirtualAccountUncheckedUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorCreateWithoutAlertsInput = {
   id?: string
   businessName: string
+  registrationNumber?: string | null
+  vendorType?: string | null
+  sector?: string | null
+  contactName?: string | null
   email: string
   phone: string
+  country?: string | null
+  state?: string | null
+  address?: string | null
   status?: $Enums.VendorStatus
   overallRiskScore?: number
   riskLevel?: $Enums.RiskLevel
@@ -1148,14 +1642,22 @@ export type VendorCreateWithoutAlertsInput = {
   transactions?: Prisma.TransactionCreateNestedManyWithoutVendorInput
   bankAccounts?: Prisma.BankAccountCreateNestedManyWithoutVendorInput
   transfers?: Prisma.TransferCreateNestedManyWithoutVendorInput
+  virtualAccounts?: Prisma.VirtualAccountCreateNestedManyWithoutVendorInput
   riskScores?: Prisma.RiskScoreCreateNestedManyWithoutVendorInput
 }
 
 export type VendorUncheckedCreateWithoutAlertsInput = {
   id?: string
   businessName: string
+  registrationNumber?: string | null
+  vendorType?: string | null
+  sector?: string | null
+  contactName?: string | null
   email: string
   phone: string
+  country?: string | null
+  state?: string | null
+  address?: string | null
   status?: $Enums.VendorStatus
   overallRiskScore?: number
   riskLevel?: $Enums.RiskLevel
@@ -1166,6 +1668,7 @@ export type VendorUncheckedCreateWithoutAlertsInput = {
   transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutVendorInput
   bankAccounts?: Prisma.BankAccountUncheckedCreateNestedManyWithoutVendorInput
   transfers?: Prisma.TransferUncheckedCreateNestedManyWithoutVendorInput
+  virtualAccounts?: Prisma.VirtualAccountUncheckedCreateNestedManyWithoutVendorInput
   riskScores?: Prisma.RiskScoreUncheckedCreateNestedManyWithoutVendorInput
 }
 
@@ -1188,8 +1691,15 @@ export type VendorUpdateToOneWithWhereWithoutAlertsInput = {
 export type VendorUpdateWithoutAlertsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumVendorStatusFieldUpdateOperationsInput | $Enums.VendorStatus
   overallRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
   riskLevel?: Prisma.EnumRiskLevelFieldUpdateOperationsInput | $Enums.RiskLevel
@@ -1200,14 +1710,22 @@ export type VendorUpdateWithoutAlertsInput = {
   transactions?: Prisma.TransactionUpdateManyWithoutVendorNestedInput
   bankAccounts?: Prisma.BankAccountUpdateManyWithoutVendorNestedInput
   transfers?: Prisma.TransferUpdateManyWithoutVendorNestedInput
+  virtualAccounts?: Prisma.VirtualAccountUpdateManyWithoutVendorNestedInput
   riskScores?: Prisma.RiskScoreUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUncheckedUpdateWithoutAlertsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumVendorStatusFieldUpdateOperationsInput | $Enums.VendorStatus
   overallRiskScore?: Prisma.FloatFieldUpdateOperationsInput | number
   riskLevel?: Prisma.EnumRiskLevelFieldUpdateOperationsInput | $Enums.RiskLevel
@@ -1218,6 +1736,7 @@ export type VendorUncheckedUpdateWithoutAlertsInput = {
   transactions?: Prisma.TransactionUncheckedUpdateManyWithoutVendorNestedInput
   bankAccounts?: Prisma.BankAccountUncheckedUpdateManyWithoutVendorNestedInput
   transfers?: Prisma.TransferUncheckedUpdateManyWithoutVendorNestedInput
+  virtualAccounts?: Prisma.VirtualAccountUncheckedUpdateManyWithoutVendorNestedInput
   riskScores?: Prisma.RiskScoreUncheckedUpdateManyWithoutVendorNestedInput
 }
 
@@ -1233,6 +1752,7 @@ export type VendorCountOutputType = {
   alerts: number
   bankAccounts: number
   transfers: number
+  virtualAccounts: number
   riskScores: number
 }
 
@@ -1243,6 +1763,7 @@ export type VendorCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   alerts?: boolean | VendorCountOutputTypeCountAlertsArgs
   bankAccounts?: boolean | VendorCountOutputTypeCountBankAccountsArgs
   transfers?: boolean | VendorCountOutputTypeCountTransfersArgs
+  virtualAccounts?: boolean | VendorCountOutputTypeCountVirtualAccountsArgs
   riskScores?: boolean | VendorCountOutputTypeCountRiskScoresArgs
 }
 
@@ -1301,6 +1822,13 @@ export type VendorCountOutputTypeCountTransfersArgs<ExtArgs extends runtime.Type
 /**
  * VendorCountOutputType without action
  */
+export type VendorCountOutputTypeCountVirtualAccountsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.VirtualAccountWhereInput
+}
+
+/**
+ * VendorCountOutputType without action
+ */
 export type VendorCountOutputTypeCountRiskScoresArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.RiskScoreWhereInput
 }
@@ -1309,8 +1837,15 @@ export type VendorCountOutputTypeCountRiskScoresArgs<ExtArgs extends runtime.Typ
 export type VendorSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   businessName?: boolean
+  registrationNumber?: boolean
+  vendorType?: boolean
+  sector?: boolean
+  contactName?: boolean
   email?: boolean
   phone?: boolean
+  country?: boolean
+  state?: boolean
+  address?: boolean
   status?: boolean
   overallRiskScore?: boolean
   riskLevel?: boolean
@@ -1322,6 +1857,7 @@ export type VendorSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   alerts?: boolean | Prisma.Vendor$alertsArgs<ExtArgs>
   bankAccounts?: boolean | Prisma.Vendor$bankAccountsArgs<ExtArgs>
   transfers?: boolean | Prisma.Vendor$transfersArgs<ExtArgs>
+  virtualAccounts?: boolean | Prisma.Vendor$virtualAccountsArgs<ExtArgs>
   riskScores?: boolean | Prisma.Vendor$riskScoresArgs<ExtArgs>
   _count?: boolean | Prisma.VendorCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["vendor"]>
@@ -1329,8 +1865,15 @@ export type VendorSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
 export type VendorSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   businessName?: boolean
+  registrationNumber?: boolean
+  vendorType?: boolean
+  sector?: boolean
+  contactName?: boolean
   email?: boolean
   phone?: boolean
+  country?: boolean
+  state?: boolean
+  address?: boolean
   status?: boolean
   overallRiskScore?: boolean
   riskLevel?: boolean
@@ -1341,8 +1884,15 @@ export type VendorSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
 export type VendorSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   businessName?: boolean
+  registrationNumber?: boolean
+  vendorType?: boolean
+  sector?: boolean
+  contactName?: boolean
   email?: boolean
   phone?: boolean
+  country?: boolean
+  state?: boolean
+  address?: boolean
   status?: boolean
   overallRiskScore?: boolean
   riskLevel?: boolean
@@ -1353,8 +1903,15 @@ export type VendorSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
 export type VendorSelectScalar = {
   id?: boolean
   businessName?: boolean
+  registrationNumber?: boolean
+  vendorType?: boolean
+  sector?: boolean
+  contactName?: boolean
   email?: boolean
   phone?: boolean
+  country?: boolean
+  state?: boolean
+  address?: boolean
   status?: boolean
   overallRiskScore?: boolean
   riskLevel?: boolean
@@ -1362,7 +1919,7 @@ export type VendorSelectScalar = {
   updatedAt?: boolean
 }
 
-export type VendorOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "businessName" | "email" | "phone" | "status" | "overallRiskScore" | "riskLevel" | "createdAt" | "updatedAt", ExtArgs["result"]["vendor"]>
+export type VendorOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "businessName" | "registrationNumber" | "vendorType" | "sector" | "contactName" | "email" | "phone" | "country" | "state" | "address" | "status" | "overallRiskScore" | "riskLevel" | "createdAt" | "updatedAt", ExtArgs["result"]["vendor"]>
 export type VendorInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   documents?: boolean | Prisma.Vendor$documentsArgs<ExtArgs>
   devices?: boolean | Prisma.Vendor$devicesArgs<ExtArgs>
@@ -1370,6 +1927,7 @@ export type VendorInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   alerts?: boolean | Prisma.Vendor$alertsArgs<ExtArgs>
   bankAccounts?: boolean | Prisma.Vendor$bankAccountsArgs<ExtArgs>
   transfers?: boolean | Prisma.Vendor$transfersArgs<ExtArgs>
+  virtualAccounts?: boolean | Prisma.Vendor$virtualAccountsArgs<ExtArgs>
   riskScores?: boolean | Prisma.Vendor$riskScoresArgs<ExtArgs>
   _count?: boolean | Prisma.VendorCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -1385,13 +1943,21 @@ export type $VendorPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     alerts: Prisma.$AlertPayload<ExtArgs>[]
     bankAccounts: Prisma.$BankAccountPayload<ExtArgs>[]
     transfers: Prisma.$TransferPayload<ExtArgs>[]
+    virtualAccounts: Prisma.$VirtualAccountPayload<ExtArgs>[]
     riskScores: Prisma.$RiskScorePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     businessName: string
+    registrationNumber: string | null
+    vendorType: string | null
+    sector: string | null
+    contactName: string | null
     email: string
     phone: string
+    country: string | null
+    state: string | null
+    address: string | null
     status: $Enums.VendorStatus
     overallRiskScore: number
     riskLevel: $Enums.RiskLevel
@@ -1797,6 +2363,7 @@ export interface Prisma__VendorClient<T, Null = never, ExtArgs extends runtime.T
   alerts<T extends Prisma.Vendor$alertsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vendor$alertsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AlertPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   bankAccounts<T extends Prisma.Vendor$bankAccountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vendor$bankAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BankAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   transfers<T extends Prisma.Vendor$transfersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vendor$transfersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TransferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  virtualAccounts<T extends Prisma.Vendor$virtualAccountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vendor$virtualAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$VirtualAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   riskScores<T extends Prisma.Vendor$riskScoresArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vendor$riskScoresArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RiskScorePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1829,8 +2396,15 @@ export interface Prisma__VendorClient<T, Null = never, ExtArgs extends runtime.T
 export interface VendorFieldRefs {
   readonly id: Prisma.FieldRef<"Vendor", 'String'>
   readonly businessName: Prisma.FieldRef<"Vendor", 'String'>
+  readonly registrationNumber: Prisma.FieldRef<"Vendor", 'String'>
+  readonly vendorType: Prisma.FieldRef<"Vendor", 'String'>
+  readonly sector: Prisma.FieldRef<"Vendor", 'String'>
+  readonly contactName: Prisma.FieldRef<"Vendor", 'String'>
   readonly email: Prisma.FieldRef<"Vendor", 'String'>
   readonly phone: Prisma.FieldRef<"Vendor", 'String'>
+  readonly country: Prisma.FieldRef<"Vendor", 'String'>
+  readonly state: Prisma.FieldRef<"Vendor", 'String'>
+  readonly address: Prisma.FieldRef<"Vendor", 'String'>
   readonly status: Prisma.FieldRef<"Vendor", 'VendorStatus'>
   readonly overallRiskScore: Prisma.FieldRef<"Vendor", 'Float'>
   readonly riskLevel: Prisma.FieldRef<"Vendor", 'RiskLevel'>
@@ -2370,6 +2944,30 @@ export type Vendor$transfersArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.TransferScalarFieldEnum | Prisma.TransferScalarFieldEnum[]
+}
+
+/**
+ * Vendor.virtualAccounts
+ */
+export type Vendor$virtualAccountsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the VirtualAccount
+   */
+  select?: Prisma.VirtualAccountSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the VirtualAccount
+   */
+  omit?: Prisma.VirtualAccountOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.VirtualAccountInclude<ExtArgs> | null
+  where?: Prisma.VirtualAccountWhereInput
+  orderBy?: Prisma.VirtualAccountOrderByWithRelationInput | Prisma.VirtualAccountOrderByWithRelationInput[]
+  cursor?: Prisma.VirtualAccountWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.VirtualAccountScalarFieldEnum | Prisma.VirtualAccountScalarFieldEnum[]
 }
 
 /**

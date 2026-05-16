@@ -391,6 +391,7 @@ export const ModelName = {
   Transaction: 'Transaction',
   BankAccount: 'BankAccount',
   Transfer: 'Transfer',
+  VirtualAccount: 'VirtualAccount',
   WebhookEvent: 'WebhookEvent',
   RiskScore: 'RiskScore',
   GraphSyncFailure: 'GraphSyncFailure',
@@ -413,7 +414,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "vendor" | "document" | "device" | "transaction" | "bankAccount" | "transfer" | "webhookEvent" | "riskScore" | "graphSyncFailure" | "alert" | "session" | "account" | "verification"
+    modelProps: "user" | "vendor" | "document" | "device" | "transaction" | "bankAccount" | "transfer" | "virtualAccount" | "webhookEvent" | "riskScore" | "graphSyncFailure" | "alert" | "session" | "account" | "verification"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -932,6 +933,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.TransferCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.TransferCountAggregateOutputType> | number
+        }
+      }
+    }
+    VirtualAccount: {
+      payload: Prisma.$VirtualAccountPayload<ExtArgs>
+      fields: Prisma.VirtualAccountFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.VirtualAccountFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VirtualAccountPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.VirtualAccountFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VirtualAccountPayload>
+        }
+        findFirst: {
+          args: Prisma.VirtualAccountFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VirtualAccountPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.VirtualAccountFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VirtualAccountPayload>
+        }
+        findMany: {
+          args: Prisma.VirtualAccountFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VirtualAccountPayload>[]
+        }
+        create: {
+          args: Prisma.VirtualAccountCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VirtualAccountPayload>
+        }
+        createMany: {
+          args: Prisma.VirtualAccountCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.VirtualAccountCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VirtualAccountPayload>[]
+        }
+        delete: {
+          args: Prisma.VirtualAccountDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VirtualAccountPayload>
+        }
+        update: {
+          args: Prisma.VirtualAccountUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VirtualAccountPayload>
+        }
+        deleteMany: {
+          args: Prisma.VirtualAccountDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.VirtualAccountUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.VirtualAccountUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VirtualAccountPayload>[]
+        }
+        upsert: {
+          args: Prisma.VirtualAccountUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VirtualAccountPayload>
+        }
+        aggregate: {
+          args: Prisma.VirtualAccountAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateVirtualAccount>
+        }
+        groupBy: {
+          args: Prisma.VirtualAccountGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VirtualAccountGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.VirtualAccountCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VirtualAccountCountAggregateOutputType> | number
         }
       }
     }
@@ -1513,8 +1588,15 @@ export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof User
 export const VendorScalarFieldEnum = {
   id: 'id',
   businessName: 'businessName',
+  registrationNumber: 'registrationNumber',
+  vendorType: 'vendorType',
+  sector: 'sector',
+  contactName: 'contactName',
   email: 'email',
   phone: 'phone',
+  country: 'country',
+  state: 'state',
+  address: 'address',
   status: 'status',
   overallRiskScore: 'overallRiskScore',
   riskLevel: 'riskLevel',
@@ -1614,6 +1696,22 @@ export const TransferScalarFieldEnum = {
 } as const
 
 export type TransferScalarFieldEnum = (typeof TransferScalarFieldEnum)[keyof typeof TransferScalarFieldEnum]
+
+
+export const VirtualAccountScalarFieldEnum = {
+  id: 'id',
+  vendorId: 'vendorId',
+  provider: 'provider',
+  customerIdentifier: 'customerIdentifier',
+  virtualAccountNumber: 'virtualAccountNumber',
+  currency: 'currency',
+  active: 'active',
+  rawResponse: 'rawResponse',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type VirtualAccountScalarFieldEnum = (typeof VirtualAccountScalarFieldEnum)[keyof typeof VirtualAccountScalarFieldEnum]
 
 
 export const WebhookEventScalarFieldEnum = {
@@ -2061,6 +2159,7 @@ export type GlobalOmitConfig = {
   transaction?: Prisma.TransactionOmit
   bankAccount?: Prisma.BankAccountOmit
   transfer?: Prisma.TransferOmit
+  virtualAccount?: Prisma.VirtualAccountOmit
   webhookEvent?: Prisma.WebhookEventOmit
   riskScore?: Prisma.RiskScoreOmit
   graphSyncFailure?: Prisma.GraphSyncFailureOmit

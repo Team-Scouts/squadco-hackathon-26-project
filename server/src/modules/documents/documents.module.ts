@@ -5,9 +5,10 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CloudinaryService } from '../../cloudinary/cloudinary.service';
 import { GraphModule } from '../graph/graph.module';
 import { DocumentIntelligenceService } from './document-intelligence.service';
+import { RiskModule } from '../risk/risk.module';
 
 @Module({
-  imports: [GraphModule],
+  imports: [GraphModule, RiskModule],
   controllers: [DocumentsController],
   providers: [
     DocumentsService,
@@ -15,5 +16,6 @@ import { DocumentIntelligenceService } from './document-intelligence.service';
     PrismaService,
     CloudinaryService,
   ],
+  exports: [DocumentsService],
 })
 export class DocumentsModule {}

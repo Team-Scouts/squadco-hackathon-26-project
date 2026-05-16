@@ -7,7 +7,7 @@ colors:
   # Core dark system
   primary: "#F8FAFC"
   secondary: "#A1A1AA"
-  accent: "#00E5FF"
+  accent: "#F4F4F5"
   background: "#030303"
   surface: "#080808"
   surface-raised: "#0D0D0F"
@@ -31,8 +31,8 @@ colors:
   divider: "#202024"
 
   # Intelligence accents
-  intelligence: "#8B5CF6"
-  signal: "#00E5FF"
+  intelligence: "#A78BFA"
+  signal: "#38BDF8"
   verified: "#22C55E"
   review: "#FACC15"
   danger: "#EF4444"
@@ -61,7 +61,7 @@ gradients:
 
 typography:
   fontFamily:
-    sans: "Inter, Geist, Satoshi, Manrope, Arial, Helvetica, sans-serif"
+    sans: "JetBrains Mono, IBM Plex Mono, Consolas, monospace"
     mono: "JetBrains Mono, IBM Plex Mono, Consolas, monospace"
 
   display:
@@ -172,8 +172,8 @@ rounded:
 shadows:
   none: "none"
   soft: "0 18px 54px rgba(0, 0, 0, 0.52), 0 0 28px rgba(255, 255, 255, 0.035)"
-  raised: "0 24px 70px rgba(0, 0, 0, 0.55), 0 0 36px rgba(0, 229, 255, 0.055)"
-  glow-accent: "0 16px 38px rgba(0, 0, 0, 0.42), 0 0 34px rgba(0, 229, 255, 0.15)"
+  raised: "0 24px 70px rgba(0, 0, 0, 0.55), 0 0 36px rgba(255, 255, 255, 0.06)"
+  glow-accent: "0 16px 38px rgba(0, 0, 0, 0.42), 0 0 34px rgba(255, 255, 255, 0.14)"
   glow-danger: "0 16px 38px rgba(0, 0, 0, 0.42), 0 0 34px rgba(239, 68, 68, 0.14)"
   glow-white: "0 16px 34px rgba(0, 0, 0, 0.42), 0 0 24px rgba(255,255,255,0.12)"
   inset-line: "inset 0 1px 0 rgba(255,255,255,0.06)"
@@ -254,15 +254,15 @@ components:
     focusRing: "0 0 0 4px rgba(255,255,255,0.12)"
 
   button-accent:
-    backgroundColor: "{colors.accent}"
+    backgroundColor: "{colors.primary}"
     textColor: "{colors.on-accent}"
     border: "1px solid {colors.accent}"
     rounded: "{rounded.md}"
     padding: "12px 20px"
     fontWeight: 650
-    shadow: "{shadows.glow-accent}"
-    hoverBackgroundColor: "#67E8F9"
-    focusRing: "0 0 0 4px rgba(0,229,255,0.18)"
+    shadow: "{shadows.glow-white}"
+    hoverBackgroundColor: "#FFFFFF"
+    focusRing: "0 0 0 4px rgba(255,255,255,0.14)"
 
   button-secondary:
     backgroundColor: "{colors.surface-soft}"
@@ -289,8 +289,8 @@ components:
     border: "1px solid {colors.border}"
     rounded: "{rounded.md}"
     padding: "13px 14px"
-    focusBorder: "{colors.accent}"
-    focusRing: "0 0 0 4px rgba(0,229,255,0.12)"
+    focusBorder: "{colors.primary}"
+    focusRing: "0 0 0 4px rgba(255,255,255,0.12)"
 
   select:
     backgroundColor: "{colors.surface}"
@@ -361,7 +361,7 @@ components:
 
 states:
   focus:
-    ring: "0 0 0 4px rgba(0,229,255,0.16)"
+    ring: "0 0 0 4px rgba(255,255,255,0.16)"
   hover:
     lift: "translateY(-1px)"
   pressed:
@@ -380,9 +380,9 @@ accessibility:
 
 ## Design Direction
 
-VeriSphere should feel like a serious cyber intelligence workspace: dark, high-contrast, technical, and trustworthy. The product should look less like a generic fintech dashboard and more like a modern fraud operations command centre.
+VeriSphere should feel like a serious terminal-inspired cyber intelligence workspace: dark, high-contrast, technical, and trustworthy. The product should look less like a generic fintech dashboard and more like a modern fraud operations command centre.
 
-The visual style should be close to black, spacious, precise, and quietly energetic. Use stronger black/white contrast, clean typography, large empty space, dynamic shadow blur, and clear hierarchy. The interface should make complex fraud signals feel understandable without making the screen look crowded.
+The homepage aesthetic is the product source of truth: black terminal surfaces, thin white/grey borders, matrix-like background motion, mono typography, solid white/grey headings, and restrained glow. Use stronger black/white contrast, large empty space, dynamic shadow blur, and clear hierarchy. The interface should make complex fraud signals feel understandable without making the screen look crowded.
 
 ## Personality
 
@@ -393,7 +393,7 @@ VeriSphere is:
 - Technical, but still easy to understand.
 - Premium, but not decorative.
 - Investigative, but calm and controlled.
-- Cyber-oriented, but not gimmicky or neon-heavy.
+- Cyber-oriented, but not green-neon heavy.
 
 The UI should make users feel that they are looking at a reliable fraud intelligence system, not a colourful admin template.
 
@@ -422,40 +422,40 @@ Avoid:
 - Overuse of borders.
 - Overuse of neon effects.
 - Gradients using accent colours.
+- Gradient-filled text.
 - Overly rounded cards that make the app feel soft or playful.
 
 ## Colour Usage
 
 The app should be black or very close to black as the foundation.
 
-Use white and near-white for important text. Use greys for secondary text, borders, empty states, timestamps, descriptions, and metadata, but do not let metadata become too faint to read.
+Use white and near-white for important text. Use greys for secondary text, borders, empty states, timestamps, descriptions, and metadata, but do not let metadata become too faint to read. Decorative system accents should still be mostly white, zinc, graphite, or grey.
 
 Accent colours should only be used to communicate meaning:
 
-- Cyan for intelligence, active states, scanning, and primary system signals.
+- Blue for graph intelligence, active system signals, scanning, and connected infrastructure.
+- Violet for document intelligence, AI analysis, and synthetic-media review.
 - Green for verified, clean, approved, or low-risk.
 - Yellow for review, caution, or pending investigation.
 - Orange for high-risk warning.
 - Red for confirmed danger, critical risk, rejected vendors, and fraud alerts.
-- Purple for graph intelligence, pattern detection, and advanced AI insight.
 
-Accent colours must not be used in gradients. Gradients should only be made from black, white, and grey values.
+Accent colours must be sparse and purposeful. They may appear as small icons, status chips, borders, graph edges, and key metric numbers. Accent colours must not be used in gradients. Gradients should only be made from black, white, and grey values.
 
 ## Typography
 
-Use sans-serif fonts only.
+Use the homepage's terminal font globally.
 
 Primary font preference:
 
-1. Inter
-2. Geist
-3. Satoshi
-4. Manrope
-5. Arial or Helvetica fallback
+1. JetBrains Mono
+2. IBM Plex Mono
+3. Consolas
+4. monospace fallback
 
-Headings should be bold, tight, and modern. Body text should be readable and calm. Labels and captions can use slightly increased letter spacing for a technical feel.
+Headings should be bold, tight, uppercase-friendly, and console-like. Body text should be readable and calm. Labels and captions should use increased letter spacing for a technical feel.
 
-Use monospaced fonts only for transaction references, IDs, hashes, API events, logs, webhook payloads, and risk feature values.
+Because JetBrains Mono is global, references, IDs, hashes, API events, logs, webhook payloads, and risk feature values can use the same font with smaller size, stronger tracking, and muted grey.
 
 ## Navigation
 
@@ -539,7 +539,7 @@ Graph design rules:
 - Use dark background.
 - Use muted grey edges by default.
 - Highlight suspicious edges in red.
-- Highlight active selected paths in cyan.
+- Highlight active selected paths in white with subtle grey glow.
 - Use green nodes for verified entities.
 - Use yellow nodes for review entities.
 - Use red nodes for risky entities.
@@ -625,7 +625,7 @@ Avoid jokes or playful copy.
 
 Primary actions should be white or near-white on black and may use a subtle white blur shadow.
 
-Use cyan accent buttons only for system intelligence actions such as:
+Use white/grey terminal buttons for system intelligence actions such as:
 
 - Run Risk Scan
 - Analyze Document
@@ -638,7 +638,7 @@ Use red buttons only for destructive or severe actions:
 - Flag as Fraud
 - Delete Case
 
-Buttons should use moderate 12px to 16px corner radius. Do not make standard action buttons fully pill-shaped unless the control is a compact status/filter chip. Hover states should add subtle shadow blur, not bright gradients.
+Buttons should use moderate 8px to 14px corner radius, matching the homepage terminal controls. Do not make standard action buttons fully pill-shaped unless the control is a compact status/filter chip. Hover states should add subtle white/grey shadow blur, not bright gradients.
 
 ## Gradients
 
@@ -658,6 +658,7 @@ Not allowed:
 - Red gradients
 - Multi-colour gradients
 - Loud aurora backgrounds
+- Gradient-filled text
 
 ## Icons
 
@@ -815,7 +816,9 @@ Use the design system for:
 - Use lots of spacing.
 - Use white text for emphasis.
 - Use subtle borders.
-- Use accent colours only for meaning.
+- Use white/grey for most decorative system accents.
+- Add blue/violet accent colour only where it improves scanability or identifies intelligence features.
+- Use risk accent colours only for meaning.
 - Use moderate corners and subtle dynamic shadows for cyber-console depth.
 - Keep layouts calm and easy to navigate.
 - Show explanations beside AI decisions.
@@ -824,6 +827,7 @@ Use the design system for:
 ## Don't
 
 - Do not use colourful gradients.
+- Do not use gradient-filled text.
 - Do not use serif fonts.
 - Do not make the UI cramped.
 - Do not overload dashboards with too many cards.

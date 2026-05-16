@@ -1,4 +1,4 @@
-import { AlertSeverity, AlertType } from 'src/generated/prisma';
+import { AlertSeverity, AlertType } from '../../../generated/prisma/enums';
 
 export class CreateAlertDto {
   vendorId: string;

@@ -49,7 +49,7 @@ const alerts = [
     time: "3h ago",
     description: "Vendor name does not perfectly match the verified bank account name.",
     icon: Info,
-    badge: "border-cyan-300/25 bg-cyan-300/10 text-cyan-100",
+    badge: "border-sky-300/25 bg-sky-300/10 text-sky-100",
   },
 ];
 

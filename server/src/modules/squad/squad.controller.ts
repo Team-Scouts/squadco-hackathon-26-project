@@ -24,7 +24,11 @@ import {
   RefundDto,
   VirtualAccountDto,
 } from './dto/squad.dto';
-import { AllowAnonymous, OptionalAuth } from '@thallesp/nestjs-better-auth';
+import {
+  AllowAnonymous,
+  OptionalAuth,
+  Roles,
+} from '@thallesp/nestjs-better-auth';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -118,9 +122,16 @@ export class SquadController {
     return this.squadService.queryTransactions(query);
   }
 
+  @Roles(['admin', 'reviewer'])
   @Post('/virtual')
   postVirtualAccount(@Body() dto: VirtualAccountDto) {
     return this.squadService.virtualAccount(dto);
+  }
+
+  @Roles(['admin', 'reviewer'])
+  @Get('vendors/:vendorId/virtual-accounts')
+  getVendorVirtualAccounts(@Param('vendorId') vendorId: string) {
+    return this.squadService.getVendorVirtualAccounts(vendorId);
   }
   // ──────────────────────────────────────────────────────────────────────────
   // SANDBOX HELPERS

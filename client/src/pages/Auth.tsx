@@ -47,7 +47,7 @@ export default function Auth() {
   };
 
   return (
-    <div className="relative flex min-h-svh items-center justify-center overflow-hidden bg-vs-background p-6 text-zinc-200 selection:bg-cyan-300/20">
+    <div className="relative flex min-h-svh items-center justify-center overflow-hidden bg-vs-background p-6 text-zinc-200 selection:bg-white/20">
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
         <div className="absolute left-[-10%] top-[-20%] h-[50%] w-[50%] rounded-full bg-white/[0.035] blur-[150px]" />
         <div className="absolute bottom-[-20%] right-[-10%] h-[60%] w-[60%] rounded-full bg-white/[0.025] blur-[180px]" />

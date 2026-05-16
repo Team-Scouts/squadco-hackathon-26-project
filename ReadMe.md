@@ -1,8 +1,8 @@
-# FraudLens
+# VeriSphere
 
 ## AI Trust Graph & Fraud Intelligence Platform
 
-FraudLens is an AI-powered fraud intelligence platform for verifying vendors, detecting fake businesses, identifying fraud rings, and enabling safer grant, loan, procurement, and payout decisions.
+VeriSphere is an AI-powered fraud intelligence platform for verifying vendors, detecting fake businesses, identifying fraud rings, and enabling safer grant, loan, procurement, and payout decisions.
 
 The platform combines:
 
@@ -47,13 +47,13 @@ Common fraud patterns include:
 
 Traditional verification is weak because it checks vendors one by one. It may confirm that a document looks acceptable, but it does not reveal that five vendors may be connected by the same device, same bank account, duplicate document, or suspicious payment behavior.
 
-FraudLens solves this by building a trust graph.
+VeriSphere solves this by building a trust graph.
 
 ---
 
 # 2. Core Idea
 
-FraudLens creates a fraud intelligence graph where every important entity becomes a node.
+VeriSphere creates a fraud intelligence graph where every important entity becomes a node.
 
 ## Example Nodes
 
@@ -98,7 +98,7 @@ The system can flag this as a possible fraud ring.
 
 # 3. MVP Goal
 
-The MVP proves that FraudLens can complete an end-to-end vendor verification and payout workflow.
+The MVP proves that VeriSphere can complete an end-to-end vendor verification and payout workflow.
 
 ## MVP Flow
 
@@ -604,7 +604,7 @@ Vendor status becomes PAID_OUT
 
 The MVP should use Squad sandbox/test mode for transfers.
 
-Transfers prove that FraudLens can support a complete institutional workflow:
+Transfers prove that VeriSphere can support a complete institutional workflow:
 
 ```txt
 verify → approve → pay out → monitor
@@ -1072,7 +1072,7 @@ Webhook endpoints should respond quickly. Heavy processing should be done in bac
 
 ```bash
 git clone <repository-url>
-cd fraudlens
+cd verisphere
 ```
 
 ---
@@ -1146,7 +1146,7 @@ You can use Neo4j Desktop or Docker.
 
 ```bash
 docker run \
-  --name fraudlens-neo4j \
+  --name verisphere-neo4j \
   -p7474:7474 -p7687:7687 \
   -e NEO4J_AUTH=neo4j/password \
   neo4j:latest
@@ -1284,7 +1284,7 @@ Institution receives alert
 
 # 22. Phase 3 Integration Plan
 
-Phase 3 turns FraudLens into institutional fraud intelligence infrastructure.
+Phase 3 turns VeriSphere into institutional fraud intelligence infrastructure.
 
 ## 22.1 External Verification Integrations
 
@@ -1331,7 +1331,7 @@ Related vendors are flagged
 Partner institutions receive alerts
 ```
 
-This transforms FraudLens from a single verification product into a shared fraud intelligence network.
+This transforms VeriSphere from a single verification product into a shared fraud intelligence network.
 
 ---
 
@@ -1535,7 +1535,7 @@ An approved vendor receives a Squad transfer payout
 
 # 29. Final Product Vision
 
-FraudLens is not just a verification tool.
+VeriSphere is not just a verification tool.
 
 It is a fraud intelligence infrastructure layer for institutions that need to safely distribute money, onboard vendors, and detect coordinated fraud.
 

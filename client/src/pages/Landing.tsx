@@ -55,7 +55,7 @@ function MatrixRain({ mouseRef }: { mouseRef: MutableRefObject<MousePoint> }) {
     let h = (c.height = window.innerHeight);
     const cols = Math.floor(w / 20);
     const drops = Array(cols).fill(1);
-    const chars = "01アイウエオカキクケコサシスセソFRAUDLENS";
+    const chars = "01アイウエオカキクケコサシスセソVERISPHERE";
     const draw = () => {
       ctx.fillStyle = "rgba(10,10,15,0.05)";
       ctx.fillRect(0, 0, w, h);
@@ -242,11 +242,11 @@ export default function Landing() {
       <header className={`fixed inset-x-0 top-0 z-50 flex min-h-16 items-center justify-between gap-6 px-6 md:px-12 transition-all duration-500 ${scrollY > 50 ? "bg-[#0a0a0f]/90 backdrop-blur-xl border-b border-white/10" : "bg-transparent"}`}>
         <a className="flex items-center gap-3 font-extrabold text-white no-underline group" href="#top">
           <div className="relative grid h-9 w-9 place-items-center rounded-lg bg-[#0a0a0f] border border-white/30 text-white font-mono text-sm animate-neon-pulse group-hover:border-white/70 transition-all">
-            F
+            V
           </div>
           <span className="text-lg tracking-tight font-mono">
-            <span className="text-white">Fraud</span>
-            <span className="text-zinc-400">Lens</span>
+            <span className="text-white">Veri</span>
+            <span className="text-zinc-400">Sphere</span>
           </span>
         </a>
         <nav className="hidden items-center gap-1 md:flex" aria-label="Primary navigation">
@@ -281,9 +281,9 @@ export default function Landing() {
 
             {/* Main heading with glitch */}
             <h1 className="m-0 text-5xl font-black leading-[1.05] tracking-tight sm:text-7xl lg:text-8xl animate-fade-in-up" style={{ animationDelay: "200ms", animationFillMode: "both" }}>
-              <span className="block text-white/90 animate-glitch-subtle">FRAUD</span>
+              <span className="block text-white/90 animate-glitch-subtle">VERI</span>
               <span className="block text-sky-200">
-                LENS
+                SPHERE
               </span>
             </h1>
 
@@ -347,7 +347,7 @@ export default function Landing() {
               One decision layer for onboarding, payment telemetry, and fraud-ring evidence.
             </h2>
             <p className="mt-5 max-w-2xl text-sm leading-7 text-gray-500">
-              FraudLens consolidates the signals reviewers need before approving a vendor: identity, documents, devices, payment proof, and graph relationships.
+              VeriSphere consolidates the signals reviewers need before approving a vendor: identity, documents, devices, payment proof, and graph relationships.
             </p>
           </div>
 
@@ -360,7 +360,7 @@ export default function Landing() {
                 <div className="h-3 w-3 rounded-full bg-[#f59e0b]/60" />
                 <div className="h-3 w-3 rounded-full bg-zinc-300/60" />
               </div>
-              <span className="ml-3 text-[10px] font-mono text-gray-600 uppercase tracking-wider">fraudlens://risk-console</span>
+              <span className="ml-3 text-[10px] font-mono text-gray-600 uppercase tracking-wider">verisphere://risk-console</span>
             </div>
 
             <div className="p-6 md:p-8">
@@ -495,7 +495,7 @@ export default function Landing() {
         <footer className="relative border-t border-white/5 bg-black/30 px-6 py-12 md:px-12 text-center">
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
           <p className="text-xs text-gray-600 font-mono">
-            <span className="text-white/30">&gt;</span> © 2026 FraudLens Platform. All rights reserved.
+            <span className="text-white/30">&gt;</span> © 2026 VeriSphere Platform. All rights reserved.
           </p>
         </footer>
       </main>

@@ -61,7 +61,7 @@ export default function Auth() {
             </div>
           </Link>
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-zinc-500">
-            FraudLens console
+            VeriSphere console
           </p>
           <h1 className="mt-3 text-3xl font-black tracking-tight text-white">
             {isLogin ? "Welcome back" : "Create an account"}

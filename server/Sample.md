@@ -2,7 +2,7 @@ A **fraud ring** is a group of people, accounts, businesses, or devices secretly
 
 Instead of one fake person acting alone, multiple connected entities cooperate to scam a system.
 
-In FraudLens, this is one of the MOST important concepts.
+In VeriSphere, this is one of the MOST important concepts.
 
 ---
 
@@ -71,7 +71,7 @@ Then apply for:
 - grants
 - procurement contracts
 
-FraudLens’s job is to detect those hidden links.
+VeriSphere’s job is to detect those hidden links.
 
 ---
 
@@ -104,7 +104,7 @@ Very few teams build:
 
 # relationship intelligence
 
-That’s why FraudLens stands out.
+That’s why VeriSphere stands out.
 
 ---
 

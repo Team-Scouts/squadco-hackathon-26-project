@@ -53,7 +53,7 @@ export default function Settings() {
         </h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
           Manage secure integration settings, reviewer access, and system
-          connectivity for the FraudLens workspace.
+          connectivity for the VeriSphere workspace.
         </p>
       </div>
 

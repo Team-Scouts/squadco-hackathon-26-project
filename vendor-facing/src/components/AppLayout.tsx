@@ -11,7 +11,7 @@ export default function AppLayout({ children, navigate }: AppLayoutProps) {
       <header className="site-header">
         <button className="brand" type="button" onClick={() => navigate("/")}>
           <span className="brand-mark">V</span>
-          <span>FraudLens Vendors</span>
+          <span>VeriSphere Vendors</span>
         </button>
         <div className="header-actions">
           <button

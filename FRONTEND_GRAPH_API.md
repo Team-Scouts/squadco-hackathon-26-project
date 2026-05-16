@@ -1,6 +1,6 @@
 # Frontend Graph API Integration Guide
 
-This document explains how the frontend should consume FraudLens graph data.
+This document explains how the frontend should consume VeriSphere graph data.
 
 The frontend must never connect directly to Neo4j Aura and must never include Neo4j credentials. All graph data must be requested through the NestJS backend.
 

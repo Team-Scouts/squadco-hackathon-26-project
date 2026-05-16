@@ -160,7 +160,7 @@ export default function DashboardHome() {
               Vendor fraud intelligence, graph evidence, and review operations.
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-zinc-400">
-              FraudLens combines document integrity, device fingerprints,
+              VeriSphere combines document integrity, device fingerprints,
               payment-linked telemetry, and Neo4j relationship clusters into a
               reviewer-ready investigation workspace.
             </p>

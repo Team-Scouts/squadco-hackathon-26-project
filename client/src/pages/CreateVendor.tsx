@@ -355,7 +355,7 @@ export default function CreateVendor() {
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
             Capture the identity, document, bank, and Squad payment signals
-            needed to start a FraudLens risk review.
+            needed to start a VeriSphere risk review.
           </p>
         </div>
 
@@ -604,7 +604,7 @@ export default function CreateVendor() {
                   </h2>
                   <p className="text-sm text-gray-400 mt-1">
                     Add basic contact information for the entity being uploaded
-                    to the FraudLens Database.
+                    to the VeriSphere Database.
                   </p>
                 </div>
               </div>

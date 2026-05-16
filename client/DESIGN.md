@@ -1,6 +1,6 @@
 ---
 version: "alpha"
-name: "FraudLens"
+name: "VeriSphere"
 description: "A dark, modern fraud detection and intelligence platform for vendor verification, trust scoring, document intelligence, payment-linked telemetry, and fraud-ring detection."
 
 colors:
@@ -376,17 +376,17 @@ accessibility:
   reducedMotionSupport: true
 ---
 
-# FraudLens Design System
+# VeriSphere Design System
 
 ## Design Direction
 
-FraudLens should feel like a serious terminal-inspired cyber intelligence workspace: dark, high-contrast, technical, and trustworthy. The product should look less like a generic fintech dashboard and more like a modern fraud operations command centre.
+VeriSphere should feel like a serious terminal-inspired cyber intelligence workspace: dark, high-contrast, technical, and trustworthy. The product should look less like a generic fintech dashboard and more like a modern fraud operations command centre.
 
 The homepage aesthetic is the product source of truth: black terminal surfaces, thin white/grey borders, matrix-like background motion, mono typography, solid white/grey headings, and restrained glow. Use stronger black/white contrast, large empty space, dynamic shadow blur, and clear hierarchy. The interface should make complex fraud signals feel understandable without making the screen look crowded.
 
 ## Personality
 
-FraudLens is:
+VeriSphere is:
 
 - Intelligent, but not flashy.
 - Serious, but not intimidating.

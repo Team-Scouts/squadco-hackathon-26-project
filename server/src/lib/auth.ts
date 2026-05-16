@@ -34,5 +34,10 @@ export const auth = betterAuth({
   ],
   advanced: {
     disableOriginCheck: true,
+    defaultCookieAttributes: {
+      sameSite: 'none',
+      secure: true,
+      httpOnly: true,
+    },
   },
 });

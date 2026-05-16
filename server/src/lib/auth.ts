@@ -30,6 +30,6 @@ export const auth = betterAuth({
     'http://localhost:5173',
     'http://localhost:3000',
     'http://localhost:5190',
-    'https://squadco-hackathon-26-project.vercel.app/',
+    'https://squadco-hackathon-26-project.vercel.app',
   ],
 });

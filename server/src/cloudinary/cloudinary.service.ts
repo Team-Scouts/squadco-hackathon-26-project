@@ -9,7 +9,7 @@ export class CloudinaryService {
       cloudinary.uploader
         .upload_stream(
           {
-            folder: 'verisphere-documents',
+            folder: 'fraudlens-documents',
             resource_type: 'auto',
           },
           (error, result) => {

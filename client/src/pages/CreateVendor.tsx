@@ -76,12 +76,12 @@ const kycDocumentTypes: Array<{
   {
     type: "ADDRESS_PROOF",
     label: "Address proof",
-    description: "Utility bill, tenancy document, or other business address proof.",
+    description:
+      "Utility bill, tenancy document, or other business address proof.",
   },
 ];
 
-const inputClass =
-  "field-control";
+const inputClass = "field-control";
 
 const selectClass = `${inputClass} appearance-none`;
 
@@ -216,7 +216,9 @@ export default function CreateVendor() {
         );
 
         if (!response.ok) {
-          throw new Error(`Device capture failed with status ${response.status}`);
+          throw new Error(
+            `Device capture failed with status ${response.status}`,
+          );
         }
       } catch (error) {
         console.warn("Device fingerprint capture failed", error);
@@ -355,7 +357,7 @@ export default function CreateVendor() {
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
             Capture the identity, document, bank, and Squad payment signals
-            needed to start a VeriSphere risk review.
+            needed to start a FraudLens risk review.
           </p>
         </div>
 
@@ -573,7 +575,8 @@ export default function CreateVendor() {
                             {uploadedDocument?.duplicateDetected && (
                               <p className="mt-2 text-xs font-bold text-amber-200">
                                 Duplicate detected across{" "}
-                                {uploadedDocument.duplicateVendorCount} vendor(s)
+                                {uploadedDocument.duplicateVendorCount}{" "}
+                                vendor(s)
                               </p>
                             )}
                           </div>
@@ -604,7 +607,7 @@ export default function CreateVendor() {
                   </h2>
                   <p className="text-sm text-gray-400 mt-1">
                     Add basic contact information for the entity being uploaded
-                    to the VeriSphere Database.
+                    to the FraudLens Database.
                   </p>
                 </div>
               </div>

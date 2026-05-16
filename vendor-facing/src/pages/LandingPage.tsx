@@ -55,7 +55,7 @@ export default function LandingPage({ navigate }: LandingPageProps) {
               </span>
               <h1>Submit your vendor profile with less guesswork.</h1>
               <p className="hero-copy">
-                VeriSphere Vendors helps suppliers, contractors, and service
+                FraudLens Vendors helps suppliers, contractors, and service
                 providers send the details needed for review in a short guided
                 flow. No dashboard training required.
               </p>
@@ -105,7 +105,7 @@ export default function LandingPage({ navigate }: LandingPageProps) {
             <div className="section-heading">
               <h2>A calmer way to complete vendor review.</h2>
               <p>
-                The internal VeriSphere console is built for risk analysts. This
+                The internal FraudLens console is built for risk analysts. This
                 version is built for vendors who just need to submit accurate
                 information and move on.
               </p>
@@ -144,7 +144,7 @@ export default function LandingPage({ navigate }: LandingPageProps) {
         </section>
       </main>
       <footer className="footer">
-        VeriSphere Vendor Portal. Submit business information securely for
+        FraudLens Vendor Portal. Submit business information securely for
         review.
       </footer>
     </AppLayout>

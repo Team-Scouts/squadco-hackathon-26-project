@@ -194,11 +194,7 @@ export default function VendorOnboarding({ navigate }: VendorOnboardingProps) {
     },
   });
 
-  const {
-    isPending: isUploading,
-    mutateAsync: upload,
-    isSuccess: uploaded,
-  } = useMutation({
+  const { isPending: isUploading, mutateAsync: upload } = useMutation({
     mutationFn: async (body: FormData) => {
       const postRequest = await fetch(
         `${import.meta.env.VITE_SERVER_BASE_URL}/documents/upload`,
@@ -210,6 +206,9 @@ export default function VendorOnboarding({ navigate }: VendorOnboardingProps) {
       );
       const postResponse = await postRequest.json();
       return postResponse;
+    },
+    onSuccess: () => {
+      moveToStage(4);
     },
   });
 
@@ -252,9 +251,6 @@ export default function VendorOnboarding({ navigate }: VendorOnboardingProps) {
       formData.append("file", file);
     }
     await upload(formData);
-    if (uploaded) {
-      moveToStage(4);
-    }
   };
 
   const handleFile = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -443,7 +439,7 @@ function ContactStage({
               className="mt-1 h-4 w-4 accent-emerald-500"
             />
             <span className="text-sm text-slate-300">
-              Allow VeriSphere to capture a browser fingerprint for shared-device
+              Allow FraudLens to capture a browser fingerprint for shared-device
               fraud checks.
             </span>
           </span>
@@ -712,7 +708,7 @@ function CompletionPanel({ navigate }: { navigate: (path: AppRoute) => void }) {
         <span className="success-mark">OK</span>
         <h2>Your profile is ready for review.</h2>
         <p>
-          Your Vendor Profile has been created at VeriSphere and you will be
+          Your Vendor Profile has been created at FraudLens and you will be
           notified as soon as it's ready for your use
         </p>
         <div className="hero-actions w-full justify-center">

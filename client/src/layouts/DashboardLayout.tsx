@@ -83,7 +83,7 @@ export default function DashboardLayout() {
               V
             </div>
             <div>
-              <span className="block text-lg tracking-tight">VeriSphere</span>
+              <span className="block text-lg tracking-tight">FraudLens</span>
               <span className="block text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-500">
                 Fraud intelligence
               </span>

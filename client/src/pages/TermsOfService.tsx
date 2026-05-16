@@ -25,14 +25,14 @@ export default function TermsOfService() {
             <section>
               <h2 className="text-xl font-bold text-white mb-3">1. Acceptance of Terms</h2>
               <p>
-                By accessing or using the VeriSphere platform, you agree to be bound by these Terms of Service. If you do not agree to all the terms and conditions, you may not access the service.
+                By accessing or using the FraudLens platform, you agree to be bound by these Terms of Service. If you do not agree to all the terms and conditions, you may not access the service.
               </p>
             </section>
             
             <section>
               <h2 className="text-xl font-bold text-white mb-3">2. Description of Service</h2>
               <p>
-                VeriSphere provides a fraud intelligence and identity verification platform. The services include document screening, payment telemetry analysis, and device intelligence.
+                FraudLens provides a fraud intelligence and identity verification platform. The services include document screening, payment telemetry analysis, and device intelligence.
               </p>
             </section>
             
@@ -46,14 +46,14 @@ export default function TermsOfService() {
             <section>
               <h2 className="text-xl font-bold text-white mb-3">4. Data Processing & Privacy</h2>
               <p>
-                Your use of VeriSphere is also governed by our Privacy Policy. By using the platform, you consent to the processing of personal and business data as described therein.
+                Your use of FraudLens is also governed by our Privacy Policy. By using the platform, you consent to the processing of personal and business data as described therein.
               </p>
             </section>
             
             <section>
               <h2 className="text-xl font-bold text-white mb-3">5. Disclaimer of Warranties</h2>
               <p>
-                The service is provided "as is". VeriSphere makes no warranties, expressed or implied, regarding the accuracy or reliability of the fraud intelligence scores provided.
+                The service is provided "as is". FraudLens makes no warranties, expressed or implied, regarding the accuracy or reliability of the fraud intelligence scores provided.
               </p>
             </section>
           </div>

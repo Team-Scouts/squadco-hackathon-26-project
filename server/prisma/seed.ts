@@ -22,7 +22,7 @@ const demoVendors = [
     vendorType: 'Supplier',
     sector: 'Export logistics',
     contactName: 'Ada Okafor',
-    email: 'demo.clean@verisphere.test',
+    email: 'demo.clean@fraudlens.test',
     phone: '08010000001',
     country: 'Nigeria',
     state: 'Lagos',
@@ -38,7 +38,7 @@ const demoVendors = [
     vendorType: 'Supplier',
     sector: 'Agriculture',
     contactName: 'Musa Bello',
-    email: 'demo.cac-mismatch@verisphere.test',
+    email: 'demo.cac-mismatch@fraudlens.test',
     phone: '08010000002',
     country: 'Nigeria',
     state: 'Oyo',
@@ -54,7 +54,7 @@ const demoVendors = [
     vendorType: 'Contractor',
     sector: 'Retail operations',
     contactName: 'Kemi Adeyemi',
-    email: 'demo.duplicate-doc@verisphere.test',
+    email: 'demo.duplicate-doc@fraudlens.test',
     phone: '08010000003',
     country: 'Nigeria',
     state: 'Lagos',
@@ -70,7 +70,7 @@ const demoVendors = [
     vendorType: 'Service Provider',
     sector: 'Payments',
     contactName: 'Tunde Salami',
-    email: 'demo.shared-device@verisphere.test',
+    email: 'demo.shared-device@fraudlens.test',
     phone: '08010000004',
     country: 'Nigeria',
     state: 'Abuja',
@@ -86,7 +86,7 @@ const demoVendors = [
     vendorType: 'Contractor',
     sector: 'Construction',
     contactName: 'Chinedu Obi',
-    email: 'demo.financial-risk@verisphere.test',
+    email: 'demo.financial-risk@fraudlens.test',
     phone: '08010000005',
     country: 'Nigeria',
     state: 'Rivers',
@@ -102,7 +102,7 @@ const sharedDeviceHash = 'seed_device_shared_browser_001';
 const sharedAccountHash = 'seed_bank_hash_shared_001';
 
 async function main() {
-  console.log('Starting VeriSphere MVP seed...');
+  console.log('Starting FraudLens MVP seed...');
 
   const vendors = new Map<string, Awaited<ReturnType<typeof upsertVendor>>>();
 
@@ -295,7 +295,7 @@ async function createDocument(
     data: {
       vendorId,
       documentType,
-      fileUrl: `https://example.com/verisphere-seed/${documentHash}.pdf`,
+      fileUrl: `https://example.com/fraudlens-seed/${documentHash}.pdf`,
       documentHash,
       tamperScore,
       verificationStatus,

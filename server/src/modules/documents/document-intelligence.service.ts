@@ -1394,7 +1394,7 @@ export class DocumentIntelligenceService {
 
     const tempFilePath = join(
       tmpdir(),
-      `verisphere-reality-defender-${randomUUID()}${this.fileExtensionForDetector(
+      `fraudlens-reality-defender-${randomUUID()}${this.fileExtensionForDetector(
         document,
         file,
       )}`,

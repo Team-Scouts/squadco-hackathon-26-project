@@ -80,10 +80,10 @@ export default function DashboardLayout() {
             className="flex items-center gap-3 font-extrabold text-white no-underline transition-opacity hover:opacity-80"
           >
             <div className="relative grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white text-black shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]">
-              V
+              F
             </div>
             <div>
-              <span className="block text-lg tracking-tight">VeriSphere</span>
+              <span className="block text-lg tracking-tight">FraudLens</span>
               <span className="block text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-500">
                 Fraud intelligence
               </span>

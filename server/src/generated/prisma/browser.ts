@@ -53,6 +53,11 @@ export type BankAccount = Prisma.BankAccountModel
  */
 export type Transfer = Prisma.TransferModel
 /**
+ * Model VirtualAccount
+ * 
+ */
+export type VirtualAccount = Prisma.VirtualAccountModel
+/**
  * Model WebhookEvent
  * 
  */

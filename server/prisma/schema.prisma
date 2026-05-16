@@ -69,10 +69,17 @@ model User {
 }
 
 model Vendor {
-  id           String @id @default(uuid())
-  businessName String
-  email        String @unique
-  phone        String
+  id                 String  @id @default(uuid())
+  businessName       String
+  registrationNumber String?
+  vendorType         String?
+  sector             String?
+  contactName        String?
+  email              String  @unique
+  phone              String
+  country            String?
+  state              String?
+  address            String?
 
   status VendorStatus @default(PENDING)
 
@@ -88,6 +95,7 @@ model Vendor {
   alerts       Alert[]
   bankAccounts BankAccount[]
   transfers    Transfer[]
+  virtualAccounts VirtualAccount[]
   riskScores   RiskScore[]
 }
 
@@ -209,6 +217,27 @@ model Transfer {
 
   @@index([vendorId])
   @@index([bankAccountId])
+}
+
+model VirtualAccount {
+  id String @id @default(uuid())
+
+  vendorId String
+  vendor   Vendor @relation(fields: [vendorId], references: [id])
+
+  provider             String  @default("squad")
+  customerIdentifier   String
+  virtualAccountNumber String
+  currency             String  @default("NGN")
+  active               Boolean @default(true)
+  rawResponse          Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([provider, virtualAccountNumber])
+  @@index([vendorId])
+  @@index([customerIdentifier])
 }
 
 model WebhookEvent {

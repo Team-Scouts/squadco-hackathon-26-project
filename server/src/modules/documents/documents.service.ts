@@ -21,6 +21,7 @@ import {
   DocumentIntelligenceService,
   VerificationReason,
 } from './document-intelligence.service';
+import { RiskService } from '../risk/risk.service';
 
 @Injectable()
 export class DocumentsService {
@@ -29,6 +30,7 @@ export class DocumentsService {
     private cloudinaryService: CloudinaryService,
     private graphService: GraphService,
     private documentIntelligenceService: DocumentIntelligenceService,
+    private riskService: RiskService,
   ) {}
 
   async uploadDocument(
@@ -70,6 +72,7 @@ export class DocumentsService {
     const { document: checkedDocument, duplicateSummary } =
       await this.applyDuplicateChecks(document.id);
     const graphSynced = await this.graphService.safeSyncVendorById(vendor.id);
+    this.runChecks(checkedDocument.id).catch(() => undefined);
 
     return {
       success: true,
@@ -195,6 +198,27 @@ export class DocumentsService {
       throw new NotFoundException('Document not found');
     }
 
+    if (documentWithVendor.ocrProvider === 'seed') {
+      await this.updateDocumentRisk(documentWithVendor.vendorId, {
+        documentRisk: documentWithVendor.tamperScore,
+        reasons: Array.isArray(documentWithVendor.verificationReasons)
+          ? (documentWithVendor.verificationReasons as VerificationReason[])
+          : [],
+      });
+      const graphSynced = await this.graphService.safeSyncVendorById(
+        documentWithVendor.vendorId,
+      );
+
+      return {
+        success: true,
+        message: 'Seed document checks refreshed',
+        data: documentWithVendor,
+        duplicateSummary,
+        intelligence: null,
+        graphSynced,
+      };
+    }
+
     await this.prisma.document.update({
       where: { id: document.id },
       data: {
@@ -277,6 +301,47 @@ export class DocumentsService {
       data: processedDocument,
       duplicateSummary,
       intelligence,
+      graphSynced,
+    };
+  }
+
+  async runVendorChecks(vendorId: string) {
+    const vendor = await this.prisma.vendor.findUnique({
+      where: { id: vendorId },
+      select: { id: true },
+    });
+
+    if (!vendor) {
+      throw new NotFoundException('Vendor not found');
+    }
+
+    const documents = await this.prisma.document.findMany({
+      where: { vendorId },
+      orderBy: { createdAt: 'asc' },
+    });
+    const results: any[] = [];
+
+    for (const document of documents) {
+      try {
+        results.push(await this.runChecks(document.id));
+      } catch (error) {
+        results.push({
+          success: false,
+          documentId: document.id,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+
+    const risk = await this.riskService.recomputeVendorRisk(vendorId);
+    const graphSynced = await this.graphService.safeSyncVendorById(vendorId);
+
+    return {
+      success: true,
+      message: 'Vendor document checks completed',
+      count: results.length,
+      data: results,
+      risk,
       graphSynced,
     };
   }
@@ -400,39 +465,22 @@ export class DocumentsService {
     },
   ) {
     const documentRisk = Math.min(100, Math.max(0, input.documentRisk));
-    const riskLevel = this.resolveRiskLevel(documentRisk);
-    const recommendedAction = this.resolveRecommendedAction(riskLevel);
 
-    await this.prisma.riskScore.create({
-      data: {
-        vendorId,
-        documentRisk,
-        networkFraudRisk: 0,
-        financialAnomalyRisk: 0,
-        deviceRisk: 0,
-        identityMismatchRisk: input.reasons.some(
-          (reason) => reason.code === 'BUSINESS_NAME_MISMATCH',
-        )
-          ? 25
-          : 0,
-        manualReviewPenalty: input.reasons.some((reason) =>
-          reason.code.startsWith('MANUAL_'),
-        )
-          ? 60
-          : 0,
-        overallRisk: documentRisk,
-        riskLevel,
-        recommendedAction,
-        reasons: input.reasons as any,
-      },
-    });
-
-    await this.prisma.vendor.update({
-      where: { id: vendorId },
-      data: {
-        overallRiskScore: documentRisk,
-        riskLevel,
-      },
+    await this.riskService.recomputeVendorRisk(vendorId, {
+      documentRisk,
+      identityMismatchRisk: input.reasons.some((reason) =>
+        ['BUSINESS_NAME_MISMATCH', 'REGISTRATION_NUMBER_MISMATCH'].includes(
+          reason.code,
+        ),
+      )
+        ? 25
+        : 0,
+      manualReviewPenalty: input.reasons.some((reason) =>
+        reason.code.startsWith('MANUAL_'),
+      )
+        ? 60
+        : 0,
+      reasons: input.reasons,
     });
   }
 

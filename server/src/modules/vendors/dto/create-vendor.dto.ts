@@ -1,9 +1,25 @@
-import { IsEmail, IsNotEmpty, IsPhoneNumber, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateVendorDto {
   @IsString()
   @IsNotEmpty()
   businessName: string;
+
+  @IsString()
+  @IsOptional()
+  registrationNumber?: string;
+
+  @IsString()
+  @IsOptional()
+  vendorType?: string;
+
+  @IsString()
+  @IsOptional()
+  sector?: string;
+
+  @IsString()
+  @IsOptional()
+  contactName?: string;
 
   @IsEmail()
   email: string;
@@ -11,8 +27,22 @@ export class CreateVendorDto {
   phone: string;
 
   @IsString()
-  firstName: string;
+  @IsOptional()
+  country?: string;
 
   @IsString()
-  lastName: string;
+  @IsOptional()
+  state?: string;
+
+  @IsString()
+  @IsOptional()
+  address?: string;
+
+  @IsString()
+  @IsOptional()
+  firstName?: string;
+
+  @IsString()
+  @IsOptional()
+  lastName?: string;
 }

@@ -24,6 +24,11 @@ export class VendorsController {
     return this.vendorsService.getVendors();
   }
 
+  @Post(':id/run-checks')
+  runChecks(@Param('id') id: string) {
+    return this.vendorsService.runChecks(id);
+  }
+
   // GET ONE
   @Get(':id')
   getVendorById(@Param('id') id: string) {

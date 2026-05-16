@@ -10,8 +10,13 @@ import {
 
 type VendorLike = {
   businessName?: string;
+  registrationNumber?: string | null;
+  contactName?: string | null;
   email?: string;
   phone?: string;
+  country?: string | null;
+  state?: string | null;
+  address?: string | null;
 };
 
 type DocumentLike = {
@@ -284,6 +289,18 @@ export class DocumentIntelligenceService {
       return this.extractCacFieldsFromText(vendor, text, confidence);
     }
 
+    if (document.documentType === 'TAX_ID') {
+      return this.extractTaxFieldsFromText(vendor, text, confidence);
+    }
+
+    if (document.documentType === 'OWNER_ID') {
+      return this.extractOwnerIdFieldsFromText(vendor, text, confidence);
+    }
+
+    if (document.documentType === 'ADDRESS_PROOF') {
+      return this.extractAddressProofFieldsFromText(vendor, text, confidence);
+    }
+
     const fallback = this.defaultFieldsForDocumentType(document, vendor);
     const normalizedText = text.toLowerCase();
 
@@ -314,6 +331,7 @@ export class DocumentIntelligenceService {
     const businessName = this.extractCacBusinessName(text);
     const registrationNumber = this.extractCacRegistrationNumber(text);
     const vendorBusinessName = vendor.businessName ?? '';
+    const vendorRegistrationNumber = vendor.registrationNumber ?? '';
     const roundedConfidence = Math.round(confidence);
 
     const businessNameStatus: ExtractedDocumentField['status'] = businessName
@@ -321,6 +339,15 @@ export class DocumentIntelligenceService {
         ? 'match'
         : 'flagged'
       : 'missing';
+    const registrationNumberStatus: ExtractedDocumentField['status'] =
+      registrationNumber
+        ? this.registrationNumbersMatch(
+            registrationNumber,
+            vendorRegistrationNumber,
+          )
+          ? 'match'
+          : 'flagged'
+        : 'missing';
 
     return [
       this.field(
@@ -333,9 +360,9 @@ export class DocumentIntelligenceService {
       this.field(
         'Registration number',
         registrationNumber,
-        registrationNumber,
+        vendorRegistrationNumber,
         registrationNumber ? roundedConfidence : 0,
-        registrationNumber ? 'match' : 'missing',
+        registrationNumberStatus,
       ),
     ];
   }
@@ -354,6 +381,135 @@ export class DocumentIntelligenceService {
     }
 
     return this.pickBestBusinessNameLine(text);
+  }
+
+  private extractTaxFieldsFromText(
+    vendor: VendorLike,
+    text: string,
+    confidence: number,
+  ): ExtractedDocumentField[] {
+    const businessName = this.extractNamedValue(text, [
+      'business name',
+      'company name',
+      'taxpayer name',
+      'registered name',
+      'name',
+    ]) || this.pickBestBusinessNameLine(text);
+    const tin = this.extractTin(text);
+    const roundedConfidence = Math.round(confidence);
+
+    return [
+      this.field(
+        'Legal business name',
+        businessName,
+        vendor.businessName ?? '',
+        businessName ? roundedConfidence : 0,
+        this.textFieldStatus(
+          businessName,
+          vendor.businessName ?? '',
+          this.businessNamesMatch.bind(this),
+        ),
+      ),
+      this.field(
+        'Tax identification number',
+        tin,
+        '',
+        tin ? roundedConfidence : 0,
+        tin ? 'match' : 'missing',
+      ),
+    ];
+  }
+
+  private extractOwnerIdFieldsFromText(
+    vendor: VendorLike,
+    text: string,
+    confidence: number,
+  ): ExtractedDocumentField[] {
+    const ownerName =
+      this.extractNamedValue(text, [
+        'name',
+        'full name',
+        'surname',
+        'given names',
+        'holder',
+      ]) || this.pickLikelyPersonNameLine(text);
+    const documentNumber = this.extractIdentityDocumentNumber(text);
+    const roundedConfidence = Math.round(confidence);
+
+    return [
+      this.field(
+        'Owner name',
+        ownerName,
+        vendor.contactName ?? '',
+        ownerName ? roundedConfidence : 0,
+        this.textFieldStatus(
+          ownerName,
+          vendor.contactName ?? '',
+          this.personNamesMatch.bind(this),
+        ),
+      ),
+      this.field(
+        'Document number',
+        documentNumber,
+        '',
+        documentNumber ? roundedConfidence : 0,
+        documentNumber ? 'match' : 'missing',
+      ),
+    ];
+  }
+
+  private extractAddressProofFieldsFromText(
+    vendor: VendorLike,
+    text: string,
+    confidence: number,
+  ): ExtractedDocumentField[] {
+    const address =
+      this.extractNamedValue(text, [
+        'address',
+        'service address',
+        'billing address',
+        'premises',
+      ]) || this.pickLikelyAddressLine(text);
+    const businessName = this.extractNamedValue(text, [
+      'customer name',
+      'account name',
+      'business name',
+      'name',
+    ]) || this.pickBestBusinessNameLine(text);
+    const issueDate = this.extractDocumentDate(text);
+    const roundedConfidence = Math.round(confidence);
+
+    return [
+      this.field(
+        'Business address',
+        address,
+        this.vendorAddress(vendor),
+        address ? roundedConfidence : 0,
+        this.textFieldStatus(
+          address,
+          this.vendorAddress(vendor),
+          this.addressesMatch.bind(this),
+        ),
+      ),
+      this.field(
+        'Legal business name',
+        businessName,
+        vendor.businessName ?? '',
+        businessName ? roundedConfidence : 0,
+        this.textFieldStatus(
+          businessName,
+          vendor.businessName ?? '',
+          this.businessNamesMatch.bind(this),
+        ),
+      ),
+      this.field(
+        'Issue date',
+        issueDate,
+        '',
+        issueDate ? roundedConfidence : 0,
+        issueDate ? 'match' : 'missing',
+      ),
+    ];
   }
 
   private pickBestBusinessNameLine(text: string) {
@@ -421,6 +577,82 @@ export class DocumentIntelligenceService {
     return '';
   }
 
+  private extractTin(text: string) {
+    const labelledMatch = text.match(
+      /\b(?:TIN|TAX\s*(?:IDENTIFICATION)?\s*(?:NUMBER|NO\.?)?)\s*[:#-]?\s*([0-9][0-9\s.-]{5,})\b/i,
+    );
+
+    if (labelledMatch?.[1]) {
+      return labelledMatch[1].replace(/[\s.-]+/g, '');
+    }
+
+    const genericMatch = text.match(/\b([0-9]{8,14})\b/);
+
+    return genericMatch?.[1] ?? '';
+  }
+
+  private extractIdentityDocumentNumber(text: string) {
+    const labelledMatch = text.match(
+      /\b(?:NIN|PASSPORT|LICENSE|LICENCE|ID\s*(?:NO\.?|NUMBER)?)\s*[:#-]?\s*([A-Z0-9][A-Z0-9\s-]{5,})\b/i,
+    );
+
+    if (labelledMatch?.[1]) {
+      return labelledMatch[1].replace(/\s+/g, '').toUpperCase();
+    }
+
+    const genericMatch = text.match(/\b([A-Z]{1,3}[0-9]{6,12}|[0-9]{10,14})\b/i);
+
+    return genericMatch?.[1]?.toUpperCase() ?? '';
+  }
+
+  private extractDocumentDate(text: string) {
+    const match = text.match(
+      /\b(?:date|issued|bill date|statement date)\s*[:#-]?\s*([0-9]{1,2}[/-][0-9]{1,2}[/-][0-9]{2,4}|[0-9]{1,2}\s+[A-Z][a-z]+\s+[0-9]{4})/i,
+    );
+
+    return match?.[1] ?? '';
+  }
+
+  private extractNamedValue(text: string, labels: string[]) {
+    for (const label of labels) {
+      const pattern = new RegExp(
+        `\\b${label.replace(/\s+/g, '\\s+')}\\s*[:#-]\\s*([^\\n\\r]{3,80})`,
+        'i',
+      );
+      const match = text.match(pattern);
+      const value = match?.[1] ? this.cleanOcrLine(match[1]) : '';
+
+      if (value) {
+        return value;
+      }
+    }
+
+    return '';
+  }
+
+  private pickLikelyPersonNameLine(text: string) {
+    return (
+      text
+        .split(/\r?\n/)
+        .map((line) => this.cleanOcrLine(line))
+        .find((line) => /^[A-Z][A-Z.'-]+(?:\s+[A-Z][A-Z.'-]+){1,3}$/i.test(line)) ??
+      ''
+    );
+  }
+
+  private pickLikelyAddressLine(text: string) {
+    return (
+      text
+        .split(/\r?\n/)
+        .map((line) => this.cleanOcrLine(line))
+        .find((line) =>
+          /\b(street|road|avenue|close|crescent|estate|lagos|abuja|state|city|suite|flat|plot)\b/i.test(
+            line,
+          ),
+        ) ?? ''
+    );
+  }
+
   private cleanOcrLine(line: string) {
     return line
       .replace(/\s+/g, ' ')
@@ -437,7 +669,13 @@ export class DocumentIntelligenceService {
     if (document.documentType === 'CAC_REGISTRATION') {
       return [
         this.field('Legal business name', businessName, businessName, 82),
-        this.field('Registration number', '', '', 0, 'missing'),
+        this.field(
+          'Registration number',
+          '',
+          vendor.registrationNumber ?? '',
+          0,
+          'missing',
+        ),
       ];
     }
 
@@ -450,15 +688,27 @@ export class DocumentIntelligenceService {
 
     if (document.documentType === 'OWNER_ID') {
       return [
-        this.field('Owner name', '', '', 0, 'missing'),
+        this.field('Owner name', '', vendor.contactName ?? '', 0, 'missing'),
         this.field('Document number', '', '', 0, 'missing'),
       ];
     }
 
     return [
-      this.field('Business address', '', '', 0, 'missing'),
+      this.field(
+        'Business address',
+        '',
+        this.vendorAddress(vendor),
+        0,
+        'missing',
+      ),
       this.field('Legal business name', businessName, businessName, 72),
     ];
+  }
+
+  private vendorAddress(vendor: VendorLike) {
+    return [vendor.address, vendor.state, vendor.country]
+      .filter(Boolean)
+      .join(', ');
   }
 
   private field(
@@ -1177,6 +1427,45 @@ export class DocumentIntelligenceService {
       });
     }
 
+    const registrationNumberField = input.ocr.fields.find(
+      (field) => field.label === 'Registration number',
+    );
+    if (
+      registrationNumberField?.extracted &&
+      input.vendor.registrationNumber &&
+      !this.registrationNumbersMatch(
+        registrationNumberField.extracted,
+        input.vendor.registrationNumber,
+      )
+    ) {
+      tamperScore += 25;
+      reasons.push({
+        code: 'REGISTRATION_NUMBER_MISMATCH',
+        message: 'Extracted registration number differs from the vendor profile.',
+        severity: 'HIGH',
+        scoreImpact: 25,
+      });
+    }
+
+    const genericFlaggedFields = input.ocr.fields.filter(
+      (field) =>
+        field.status === 'flagged' &&
+        !['Legal business name', 'Registration number'].includes(field.label),
+    );
+    if (genericFlaggedFields.length) {
+      const scoreImpact = Math.min(30, genericFlaggedFields.length * 15);
+      tamperScore += scoreImpact;
+      reasons.push({
+        code: 'PROFILE_FIELD_MISMATCH',
+        message: 'One or more extracted fields differ from the vendor profile.',
+        severity: scoreImpact >= 30 ? 'HIGH' : 'MEDIUM',
+        scoreImpact,
+        metadata: {
+          fields: genericFlaggedFields.map((field) => field.label),
+        },
+      });
+    }
+
     const missingFields = input.ocr.fields.filter(
       (field) => field.status === 'missing',
     );
@@ -1260,6 +1549,73 @@ export class DocumentIntelligenceService {
     return this.normalizeBusinessName(first) === this.normalizeBusinessName(second);
   }
 
+  private personNamesMatch(first: string, second: string) {
+    return this.normalizeLooseText(first) === this.normalizeLooseText(second);
+  }
+
+  private addressesMatch(first: string, second: string) {
+    const firstAddress = this.normalizeLooseText(first);
+    const secondAddress = this.normalizeLooseText(second);
+
+    if (!firstAddress || !secondAddress) {
+      return false;
+    }
+
+    return (
+      firstAddress.includes(secondAddress) ||
+      secondAddress.includes(firstAddress) ||
+      this.sharedTokenRatio(firstAddress, secondAddress) >= 0.6
+    );
+  }
+
+  private textFieldStatus(
+    extracted: string,
+    verified: string,
+    matcher: (first: string, second: string) => boolean,
+  ): ExtractedDocumentField['status'] {
+    if (!extracted) {
+      return 'missing';
+    }
+
+    if (!verified) {
+      return 'flagged';
+    }
+
+    return matcher(extracted, verified) ? 'match' : 'flagged';
+  }
+
+  private registrationNumbersMatch(first: string, second: string) {
+    const firstNumber = this.normalizeRegistrationNumber(first);
+    const secondNumber = this.normalizeRegistrationNumber(second);
+
+    if (!firstNumber.raw || !secondNumber.raw) {
+      return false;
+    }
+
+    if (firstNumber.raw === secondNumber.raw) {
+      return true;
+    }
+
+    return (
+      firstNumber.numericPart === secondNumber.numericPart &&
+      Boolean(firstNumber.numericPart) &&
+      (!firstNumber.prefix ||
+        !secondNumber.prefix ||
+        firstNumber.prefix === secondNumber.prefix)
+    );
+  }
+
+  private normalizeRegistrationNumber(value: string) {
+    const raw = value.toUpperCase().replace(/[^A-Z0-9]+/g, '');
+    const match = raw.match(/^(RC|BN|IT|R)?([0-9]+)$/);
+
+    return {
+      raw,
+      prefix: match?.[1] ?? '',
+      numericPart: match?.[2] ?? raw.replace(/^[A-Z]+/, ''),
+    };
+  }
+
   private normalizeBusinessName(value: string) {
     return value
       .toUpperCase()
@@ -1268,6 +1624,27 @@ export class DocumentIntelligenceService {
       .replace(/[^A-Z0-9]+/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
+  }
+
+  private normalizeLooseText(value: string) {
+    return value
+      .toUpperCase()
+      .replace(/[^A-Z0-9]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  private sharedTokenRatio(first: string, second: string) {
+    const firstTokens = new Set(first.split(' ').filter((token) => token.length > 2));
+    const secondTokens = new Set(second.split(' ').filter((token) => token.length > 2));
+
+    if (!firstTokens.size || !secondTokens.size) {
+      return 0;
+    }
+
+    const shared = [...firstTokens].filter((token) => secondTokens.has(token)).length;
+
+    return shared / Math.max(firstTokens.size, secondTokens.size);
   }
 
   private async fetchDocumentFile(fileUrl: string) {

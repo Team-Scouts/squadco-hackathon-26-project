@@ -36,6 +36,11 @@ export class DocumentsController {
     return this.documentsService.getVendorDocuments(vendorId);
   }
 
+  @Post('vendor/:vendorId/run-checks')
+  runVendorChecks(@Param('vendorId') vendorId: string) {
+    return this.documentsService.runVendorChecks(vendorId);
+  }
+
   @Get(':id')
   getDocumentById(@Param('id') id: string) {
     return this.documentsService.getDocumentById(id);

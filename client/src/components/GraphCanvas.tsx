@@ -270,8 +270,8 @@ export default function GraphCanvas({
       <div className="mb-4 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div className="min-w-0">
           <div className="flex min-w-0 items-center gap-3">
-            <span className="icon-box border border-cyan-300/20 bg-cyan-300/10">
-              <ScanSearch className="h-4 w-4 text-cyan-200" />
+            <span className="icon-box border border-sky-300/20 bg-sky-300/10">
+              <ScanSearch className="h-4 w-4 text-sky-200" />
             </span>
             <div className="min-w-0">
               <h2 className="truncate text-xl font-bold text-white">{title}</h2>
@@ -306,7 +306,7 @@ export default function GraphCanvas({
               <button
                 type="button"
                 onClick={focusSelected}
-                className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-cyan-300/20 bg-cyan-300/10 px-3 py-2 text-xs font-bold text-cyan-100 transition-all hover:bg-cyan-300/15 hover:shadow-cyber-active"
+                className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-sky-300/20 bg-sky-300/10 px-3 py-2 text-xs font-bold text-sky-100 transition-all hover:bg-sky-300/15 hover:shadow-cyber-active"
               >
                 <Crosshair className="h-4 w-4" />
                 Focus selected
@@ -365,7 +365,7 @@ export default function GraphCanvas({
                 onClick={() => setHiddenTypes([])}
                 className={`inline-flex min-h-8 items-center rounded-lg border px-2.5 py-1 text-[11px] font-bold transition-all ${
                   allTypesVisible
-                    ? "border-cyan-300/25 bg-cyan-300/10 text-cyan-100 shadow-cyber-soft"
+                    ? "border-sky-300/25 bg-sky-300/10 text-sky-100 shadow-cyber-soft"
                     : "border-white/10 bg-white/5 text-zinc-400 hover:text-white"
                 }`}
               >
@@ -466,9 +466,9 @@ export default function GraphCanvas({
               minZoom: 0.05,
               styling: {
                 defaultRelationshipColor: "#71717A",
-                dropShadowColor: "rgba(0,229,255,0.28)",
-                nodeDefaultBorderColor: "rgba(255,255,255,0.24)",
-                selectedBorderColor: "#00E5FF",
+                dropShadowColor: "rgba(56,189,248,0.24)",
+                nodeDefaultBorderColor: "rgba(244,244,245,0.72)",
+                selectedBorderColor: "#38BDF8",
                 selectedInnerBorderColor: "#FFFFFF",
               },
               disableTelemetry: true,
@@ -478,8 +478,8 @@ export default function GraphCanvas({
 
         <aside className="min-w-0 rounded-2xl border border-white/10 bg-black/55 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
           <div className="mb-4 flex items-center gap-2">
-            <span className="icon-box border border-cyan-300/20 bg-cyan-300/10">
-              <Info className="h-4 w-4 text-cyan-200" />
+            <span className="icon-box border border-sky-300/20 bg-sky-300/10">
+              <Info className="h-4 w-4 text-sky-200" />
             </span>
             <div>
               <p className="text-sm font-bold text-white">Graph details</p>

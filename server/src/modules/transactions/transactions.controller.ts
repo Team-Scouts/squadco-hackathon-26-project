@@ -19,6 +19,16 @@ export class TransactionsController {
     return this.transactionsService.findAll();
   }
 
+  @Get('activity')
+  findFinancialActivity() {
+    return this.transactionsService.findFinancialActivity();
+  }
+
+  @Get('vendors/:vendorId/activity')
+  findVendorFinancialActivity(@Param('vendorId') vendorId: string) {
+    return this.transactionsService.findFinancialActivity(vendorId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.transactionsService.findOne(id);

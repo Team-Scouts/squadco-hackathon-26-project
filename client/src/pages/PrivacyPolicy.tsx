@@ -3,7 +3,7 @@ import { ArrowLeft } from 'lucide-react'
 
 export default function PrivacyPolicy() {
   return (
-    <div className="relative min-h-[100svh] overflow-hidden bg-vs-background p-6 font-sans text-zinc-200 selection:bg-cyan-300/20">
+    <div className="relative min-h-[100svh] overflow-hidden bg-vs-background p-6 font-sans text-zinc-200 selection:bg-white/20">
       {/* Dynamic Background */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-white/[0.035] blur-[150px]"></div>

@@ -4,6 +4,7 @@ import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { GraphService } from '../graph/graph.service';
 import { RiskLevel } from '../../generated/prisma/enums';
+import { RiskService } from '../risk/risk.service';
 
 type FinancialRiskSignal = {
   code: string;
@@ -13,11 +14,14 @@ type FinancialRiskSignal = {
   metadata?: Record<string, unknown>;
 };
 
+type FinancialActivityKind = 'TRANSACTION' | 'TRANSFER';
+
 @Injectable()
 export class TransactionsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly graphService: GraphService,
+    private readonly riskService: RiskService,
   ) {}
 
   async create(createTransactionDto: CreateTransactionDto) {
@@ -63,6 +67,99 @@ export class TransactionsService {
       success: true,
       count: transactions.length,
       data: transactions,
+    };
+  }
+
+  async findFinancialActivity(vendorId?: string) {
+    if (vendorId) {
+      const vendor = await this.prisma.vendor.findUnique({
+        where: { id: vendorId },
+        select: { id: true },
+      });
+
+      if (!vendor) {
+        throw new NotFoundException('Vendor not found');
+      }
+    }
+
+    const [transactions, transfers] = await Promise.all([
+      this.prisma.transaction.findMany({
+        where: vendorId ? { vendorId } : undefined,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          vendor: true,
+          webhookEvents: {
+            orderBy: { createdAt: 'desc' },
+          },
+        },
+      }),
+      this.prisma.transfer.findMany({
+        where: vendorId ? { vendorId } : undefined,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          vendor: true,
+          bankAccount: true,
+          webhookEvents: {
+            orderBy: { createdAt: 'desc' },
+          },
+        },
+      }),
+    ]);
+
+    const activity = [
+      ...transactions.map((transaction) => ({
+        id: transaction.id,
+        kind: 'TRANSACTION' as FinancialActivityKind,
+        vendorId: transaction.vendorId,
+        vendorName: transaction.vendor.businessName,
+        reference: transaction.transactionRef,
+        amount: transaction.amount,
+        currency: 'NGN',
+        status: transaction.status,
+        channel: transaction.channel,
+        webhookEventCount: transaction.webhookEvents.length,
+        latestWebhookEventType: transaction.webhookEvents[0]?.eventType,
+        createdAt: transaction.createdAt.toISOString(),
+      })),
+      ...transfers.map((transfer) => ({
+        id: transfer.id,
+        kind: 'TRANSFER' as FinancialActivityKind,
+        vendorId: transfer.vendorId,
+        vendorName: transfer.vendor.businessName,
+        reference: transfer.transferReference,
+        amount: transfer.amount,
+        currency: transfer.currency,
+        status: transfer.status,
+        bankAccount: {
+          id: transfer.bankAccount.id,
+          bankName: transfer.bankAccount.bankName,
+          accountName: transfer.bankAccount.accountName,
+          accountNumberLast4: transfer.bankAccount.accountNumberLast4,
+        },
+        webhookEventCount: transfer.webhookEvents.length,
+        latestWebhookEventType: transfer.webhookEvents[0]?.eventType,
+        createdAt: transfer.createdAt.toISOString(),
+        updatedAt: transfer.updatedAt.toISOString(),
+      })),
+    ].sort(
+      (left, right) =>
+        new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
+    );
+
+    return {
+      success: true,
+      count: activity.length,
+      summary: {
+        totalVolume: activity.reduce((sum, item) => sum + item.amount, 0),
+        transactionCount: transactions.length,
+        transferCount: transfers.length,
+        failedCount: activity.filter((item) => this.isFailedStatus(item.status))
+          .length,
+        pendingCount: activity.filter((item) =>
+          this.isPendingStatus(item.status),
+        ).length,
+      },
+      data: activity,
     };
   }
 
@@ -314,44 +411,14 @@ export class TransactionsService {
       100,
       signals.reduce((sum, signal) => sum + signal.scoreImpact, 0),
     );
-    const latestRisk = await this.prisma.riskScore.findFirst({
-      where: { vendorId },
-      orderBy: { createdAt: 'desc' },
-    });
-    const documentRisk = latestRisk?.documentRisk ?? 0;
-    const networkFraudRisk = latestRisk?.networkFraudRisk ?? 0;
-    const deviceRisk = latestRisk?.deviceRisk ?? 0;
-    const identityMismatchRisk = Math.max(
-      latestRisk?.identityMismatchRisk ?? 0,
-      signals.some((signal) => signal.code === 'BANK_ACCOUNT_IDENTITY_MISMATCH')
+    const risk = await this.riskService.recomputeVendorRisk(vendorId, {
+      financialAnomalyRisk,
+      identityMismatchRisk: signals.some(
+        (signal) => signal.code === 'BANK_ACCOUNT_IDENTITY_MISMATCH',
+      )
         ? 25
         : 0,
-    );
-    const manualReviewPenalty = latestRisk?.manualReviewPenalty ?? 0;
-    const overallRisk = Math.max(
-      documentRisk,
-      networkFraudRisk,
-      financialAnomalyRisk,
-      deviceRisk,
-      identityMismatchRisk,
-      manualReviewPenalty,
-    );
-    const riskLevel = this.resolveRiskLevel(overallRisk);
-    const recommendedAction = this.resolveRecommendedAction(riskLevel);
-    const riskScore = await this.prisma.riskScore.create({
-      data: {
-        vendorId,
-        documentRisk,
-        networkFraudRisk,
-        financialAnomalyRisk,
-        deviceRisk,
-        identityMismatchRisk,
-        manualReviewPenalty,
-        overallRisk,
-        riskLevel,
-        recommendedAction,
-        reasons: signals as any,
-      },
+      reasons: signals,
     });
 
     if (context.transactionRef) {
@@ -366,23 +433,15 @@ export class TransactionsService {
       });
     }
 
-    await this.prisma.vendor.update({
-      where: { id: vendorId },
-      data: {
-        overallRiskScore: overallRisk,
-        riskLevel,
-      },
-    });
-
     return {
       success: true,
       vendorId,
       financialAnomalyRisk,
-      overallRisk,
-      riskLevel,
-      recommendedAction,
+      overallRisk: risk.overallRisk,
+      riskLevel: risk.riskLevel,
+      recommendedAction: risk.recommendedAction,
       signals,
-      riskScore,
+      riskScore: risk.riskScore,
     };
   }
 
@@ -405,6 +464,18 @@ export class TransactionsService {
     return [...counts.entries()]
       .filter(([, count]) => count > 1)
       .map(([reference]) => reference);
+  }
+
+  private isFailedStatus(status: string) {
+    return ['FAILED', 'FAIL', 'DECLINED', 'REJECTED'].includes(
+      status.toUpperCase(),
+    );
+  }
+
+  private isPendingStatus(status: string) {
+    return ['PENDING', 'PROCESSING', 'INITIATED'].includes(
+      status.toUpperCase(),
+    );
   }
 
   private resolveRiskLevel(score: number) {

@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
+  ArrowDownRight,
   ArrowLeft,
+  ArrowUpRight,
   Banknote,
   Building2,
   Check,
@@ -16,18 +18,17 @@ import {
   History,
   LucideClockArrowUp,
   Mail,
+  MapPin,
   Phone,
   Save,
   ShieldAlert,
+  User,
   X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type {
-  IndividualVendorDetails,
-  VirtualAccountRequest,
-} from "../typesAndInterfaces";
+import type { IndividualVendorDetails } from "../typesAndInterfaces";
 import { VendorDetailSkeleton, SkeletonGraphPanel } from "../Skeletons";
 import GraphCanvas from "../components/GraphCanvas";
 import { graphApi } from "../lib/graphApi";
@@ -38,13 +39,18 @@ import {
   type VendorDocument,
 } from "../lib/documentApi";
 import { deviceApi } from "../lib/deviceApi";
+import {
+  financialActivityApi,
+  type FinancialActivityItem,
+  type VirtualAccountRequest,
+} from "../lib/financialActivityApi";
 import { useSession } from "../lib/authClient";
 import type { GraphResponse } from "../lib/graphApi";
 
 const panelTitle = "text-xs font-bold text-gray-400 uppercase tracking-wider";
 
 const fieldInput =
-  "w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-sm text-white transition-all focus:border-cyan-300/50 focus:outline-none focus:ring-1 focus:ring-cyan-300/50";
+  "w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-sm text-white transition-all focus:border-sky-300/50 focus:outline-none focus:ring-1 focus:ring-sky-300/40";
 
 function statusTone(status?: DocumentVerificationStatus) {
   if (status === "VERIFIED") {
@@ -59,7 +65,7 @@ function statusTone(status?: DocumentVerificationStatus) {
     return "text-amber-300 bg-amber-500/10 border-amber-500/20";
   }
 
-  return "text-cyan-200 bg-cyan-300/10 border-cyan-300/20";
+  return "text-zinc-200 bg-white/10 border-white/20";
 }
 
 function formatDate(value?: string | null) {
@@ -71,6 +77,42 @@ function formatDate(value?: string | null) {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(value));
+}
+
+function formatCurrency(amount: number, currency = "NGN") {
+  try {
+    return new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 0,
+    }).format(Number.isFinite(amount) ? amount : 0);
+  } catch {
+    return `${currency} ${Number.isFinite(amount) ? amount.toLocaleString() : "0"}`;
+  }
+}
+
+function isSuccessfulStatus(status: string) {
+  return ["SUCCESS", "SUCCESSFUL", "COMPLETED", "PAID"].includes(
+    status.trim().toUpperCase(),
+  );
+}
+
+function isFailedStatus(status: string) {
+  return ["FAILED", "FAIL", "DECLINED", "REJECTED"].includes(
+    status.trim().toUpperCase(),
+  );
+}
+
+function financialStatusClass(status: string) {
+  if (isSuccessfulStatus(status)) {
+    return "border-green-500/20 bg-green-500/10 text-green-300";
+  }
+
+  if (isFailedStatus(status)) {
+    return "border-red-500/20 bg-red-500/10 text-red-300";
+  }
+
+  return "border-amber-400/20 bg-amber-400/10 text-amber-200";
 }
 
 function asReasonList(value: unknown) {
@@ -192,7 +234,7 @@ function EvidenceSummaryStrip({
         label="Documents"
         value={vendor.documents?.length ?? 0}
         icon={FileText}
-        tone="text-cyan-200"
+        tone="text-sky-200"
       />
       <EvidenceMetric
         label="Devices"
@@ -220,8 +262,13 @@ function EntityProfilePanel({ vendor }: { vendor: IndividualVendorDetails }) {
   const deviceRisk = highestDeviceRisk(vendor.devices ?? []);
   const snapshotItems = [
     [Building2, "Business name", vendor.businessName],
+    [ShieldAlert, "Registration number", vendor.registrationNumber],
+    [User, "Primary contact", vendor.contactName],
+    [Building2, "Vendor type", vendor.vendorType],
+    [GitBranch, "Sector", vendor.sector],
     [Mail, "Email", vendor.email],
     [Phone, "Phone", vendor.phone],
+    [MapPin, "Address", [vendor.address, vendor.state, vendor.country].filter(Boolean).join(", ")],
     [ShieldAlert, "Status", vendor.status],
     [Banknote, "Risk level", vendor.riskLevel],
     [Fingerprint, "Highest device risk", `${deviceRisk}%`],
@@ -230,7 +277,7 @@ function EntityProfilePanel({ vendor }: { vendor: IndividualVendorDetails }) {
   return (
     <section className="panel-compact min-w-0 p-4">
       <div className="mb-4 flex items-center gap-3">
-        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-cyan-300/20 bg-cyan-300/10 text-base font-black text-cyan-100 shadow-cyber-soft">
+        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-sky-300/20 bg-sky-300/10 text-base font-black text-sky-100 shadow-cyber-soft">
           {vendorInitials(vendor.businessName)}
         </div>
         <div className="min-w-0">
@@ -413,6 +460,10 @@ function DocumentModification({ vendorId }: { vendorId: string }) {
       documentApi.runDocumentChecks(documentId),
     onSuccess: (response) => invalidateDocumentState(response.data),
   });
+  const runAllDocumentChecksMutation = useMutation({
+    mutationFn: () => documentApi.runVendorDocumentChecks(vendorId),
+    onSuccess: () => invalidateDocumentState(),
+  });
 
   const updateVerificationMutation = useMutation({
     mutationFn: (verificationStatus: DocumentVerificationStatus) => {
@@ -454,8 +505,8 @@ function DocumentModification({ vendorId }: { vendorId: string }) {
       <div className="flex flex-col gap-4 border-b border-white/10 pb-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span className="icon-box border border-cyan-300/20 bg-cyan-300/10">
-              <Edit3 className="h-4 w-4 text-cyan-200" />
+            <span className="icon-box border border-violet-300/20 bg-violet-300/10">
+              <Edit3 className="h-4 w-4 text-violet-200" />
             </span>
             <h2 className="text-xl font-bold text-white">
               Document intelligence
@@ -476,6 +527,16 @@ function DocumentModification({ vendorId }: { vendorId: string }) {
           >
             <History className="h-4 w-4" />
             {runChecksMutation.isPending ? "Running..." : "Run checks"}
+          </button>
+          <button
+            disabled={documents.length === 0 || runAllDocumentChecksMutation.isPending}
+            onClick={() => runAllDocumentChecksMutation.mutate()}
+            className="button-secondary min-h-0 rounded-xl px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <History className="h-4 w-4" />
+            {runAllDocumentChecksMutation.isPending
+              ? "Running all..."
+              : "Run all documents"}
           </button>
           <button
             disabled={!activeDocument || updateVerificationMutation.isPending}
@@ -514,12 +575,12 @@ function DocumentModification({ vendorId }: { vendorId: string }) {
               onClick={() => setActiveDocumentId(document.id)}
               className={`w-full min-w-0 rounded-2xl border p-4 text-left transition-all hover:shadow-cyber-soft ${
                 activeDocument?.id === document.id
-                  ? "border-cyan-300/40 bg-cyan-300/10"
+                  ? "border-violet-300/40 bg-violet-300/10"
                   : "border-white/10 bg-black/30 hover:bg-white/5"
               }`}
             >
               <div className="flex items-start justify-between gap-3">
-                <FileCheck2 className="mt-0.5 h-5 w-5 shrink-0 text-cyan-300" />
+                <FileCheck2 className="mt-0.5 h-5 w-5 shrink-0 text-violet-200" />
                 <span
                   className={`rounded border px-2 py-0.5 text-[10px] font-bold ${statusTone(document.verificationStatus)}`}
                 >
@@ -635,7 +696,7 @@ function DocumentModification({ vendorId }: { vendorId: string }) {
                         <CheckCircle2 className="h-5 w-5 text-green-300" />
                       )}
                       {field.status === "edited" && (
-                        <Edit3 className="h-5 w-5 text-cyan-300" />
+                        <Edit3 className="h-5 w-5 text-violet-200" />
                       )}
                       {field.status === "flagged" && (
                         <AlertTriangle className="h-5 w-5 text-amber-400" />
@@ -717,7 +778,7 @@ function DocumentModification({ vendorId }: { vendorId: string }) {
                         key={`${signal.code}-${index}`}
                         className="break-words text-xs leading-5 text-zinc-300"
                       >
-                        <span className="font-bold text-cyan-300">
+                        <span className="font-bold text-sky-200">
                           {signal.code ?? "SIGNAL"}
                         </span>{" "}
                         {signal.message ?? ""}
@@ -751,8 +812,8 @@ function DeviceIntelligencePanel({ vendorId }: { vendorId: string }) {
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span className="icon-box border border-cyan-300/20 bg-cyan-300/10">
-              <Fingerprint className="h-4 w-4 text-cyan-200" />
+            <span className="icon-box border border-sky-300/20 bg-sky-300/10">
+              <Fingerprint className="h-4 w-4 text-sky-200" />
             </span>
             <h2 className="text-xl font-bold text-white">
               Device intelligence
@@ -832,6 +893,157 @@ function DeviceIntelligencePanel({ vendorId }: { vendorId: string }) {
   );
 }
 
+function FinancialActivityPanel({ vendorId }: { vendorId: string }) {
+  const { data: session } = useSession();
+  const activityQuery = useQuery({
+    queryKey: ["vendor_financial_activity", vendorId],
+    queryFn: () => financialActivityApi.getVendorFinancialActivity(vendorId),
+    enabled: vendorId.length > 0 && !!session?.user,
+    retry: false,
+    staleTime: 60 * 1000,
+  });
+  const activity = activityQuery.data?.data ?? [];
+
+  const destinationLabel = (item: FinancialActivityItem) => {
+    if (item.kind !== "TRANSFER") {
+      return item.channel ?? "Squad payment";
+    }
+
+    return `${item.bankAccount?.bankName ?? "Bank"} - ****${item.bankAccount?.accountNumberLast4 ?? "----"}`;
+  };
+
+  return (
+    <section className="panel-card min-w-0 p-6">
+      <div className="flex flex-col gap-3 border-b border-white/10 pb-5 lg:flex-row lg:items-center lg:justify-between">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="icon-box border border-white/10 bg-white/[0.04]">
+              <Banknote className="h-4 w-4 text-zinc-100" />
+            </span>
+            <h2 className="text-xl font-bold text-white">
+              Financial activity
+            </h2>
+          </div>
+          <p className="mt-2 text-sm leading-6 text-zinc-300">
+            PostgreSQL-backed payments and transfers linked to this vendor.
+          </p>
+        </div>
+        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold text-gray-300">
+          {activity.length} event{activity.length === 1 ? "" : "s"}
+        </span>
+      </div>
+
+      <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-3">
+        <div className="rounded-2xl border border-white/10 bg-black/45 p-4">
+          <p className={panelTitle}>Volume</p>
+          <p className="mt-2 text-xl font-black text-white">
+            {formatCurrency(activityQuery.data?.summary.totalVolume ?? 0)}
+          </p>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-black/45 p-4">
+          <p className={panelTitle}>Transactions</p>
+          <p className="mt-2 text-xl font-black text-sky-200">
+            {activityQuery.data?.summary.transactionCount ?? 0}
+          </p>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-black/45 p-4">
+          <p className={panelTitle}>Transfers</p>
+          <p className="mt-2 text-xl font-black text-violet-200">
+            {activityQuery.data?.summary.transferCount ?? 0}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-5 overflow-x-auto">
+        {activityQuery.isLoading && (
+          <p className="text-sm text-gray-400">Loading financial activity...</p>
+        )}
+        {activityQuery.isError && (
+          <p className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-300">
+            {(activityQuery.error as Error).message}
+          </p>
+        )}
+        {!activityQuery.isLoading && !activityQuery.isError && activity.length === 0 && (
+          <p className="rounded-2xl border border-white/10 bg-black/50 p-4 text-sm text-zinc-400">
+            No transaction or transfer webhook has been recorded for this vendor
+            yet.
+          </p>
+        )}
+        {activity.length > 0 && (
+          <table className="w-full min-w-[840px] text-left text-sm">
+            <thead className="border-b border-white/10 text-xs uppercase tracking-wider text-gray-500">
+              <tr>
+                <th className="py-3 pr-4">Reference</th>
+                <th className="py-3 pr-4">Kind</th>
+                <th className="py-3 pr-4">Amount</th>
+                <th className="py-3 pr-4">Status</th>
+                <th className="py-3 pr-4">Destination / Channel</th>
+                <th className="py-3 pr-4">Webhook</th>
+                <th className="py-3 pr-4">Date</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {activity.map((item) => (
+                <tr key={`${item.kind}-${item.id}`}>
+                  <td className="max-w-56 py-3 pr-4">
+                    <span className="block truncate font-mono text-xs text-zinc-200">
+                      {item.reference}
+                    </span>
+                    <span className="mt-1 block truncate font-mono text-[10px] text-zinc-600">
+                      {item.id}
+                    </span>
+                  </td>
+                  <td className="py-3 pr-4">
+                    <span
+                      className={`inline-flex items-center gap-2 rounded-lg border px-2 py-1 text-xs font-bold ${
+                        item.kind === "TRANSFER"
+                          ? "border-violet-400/20 bg-violet-400/10 text-violet-200"
+                          : "border-sky-400/20 bg-sky-400/10 text-sky-200"
+                      }`}
+                    >
+                      {item.kind === "TRANSFER" ? (
+                        <ArrowUpRight className="h-3.5 w-3.5" />
+                      ) : (
+                        <ArrowDownRight className="h-3.5 w-3.5" />
+                      )}
+                      {item.kind}
+                    </span>
+                  </td>
+                  <td className="py-3 pr-4 font-black text-white">
+                    {formatCurrency(item.amount, item.currency)}
+                  </td>
+                  <td className="py-3 pr-4">
+                    <span
+                      className={`rounded border px-2 py-1 text-xs font-bold ${financialStatusClass(item.status)}`}
+                    >
+                      {item.status}
+                    </span>
+                  </td>
+                  <td className="py-3 pr-4 text-gray-300">
+                    {destinationLabel(item)}
+                  </td>
+                  <td className="py-3 pr-4">
+                    <span className="block text-xs text-zinc-300">
+                      {item.latestWebhookEventType ?? "No webhook event"}
+                    </span>
+                    <span className="mt-1 block text-[10px] text-zinc-600">
+                      {item.webhookEventCount} event
+                      {item.webhookEventCount === 1 ? "" : "s"}
+                    </span>
+                  </td>
+                  <td className="py-3 pr-4 text-xs text-gray-500">
+                    {formatDate(item.createdAt)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </section>
+  );
+}
+
 export default function VendorDetail() {
   const { vendorId } = useParams();
   const queryClient = useQueryClient();
@@ -886,43 +1098,35 @@ export default function VendorDetail() {
     beneficiary_account: "4920299492",
   };
 
+  const virtualAccountsQuery = useQuery({
+    queryKey: ["vendor_virtual_accounts", vendorId],
+    queryFn: () => financialActivityApi.getVendorVirtualAccounts(String(vendorId)),
+    enabled: !!vendorId && !!session?.user,
+    retry: false,
+    staleTime: 5 * 60 * 1000,
+  });
+  const savedVirtualAccount = virtualAccountsQuery.data?.data?.[0];
+  const activeVirtualAccountNumber =
+    virtual_account || savedVirtualAccount?.virtualAccountNumber || "";
+
   //User VA generation mutation
   const {
     isPending: isGenerating,
-    isSuccess: isGenerated,
     mutateAsync: getVirtual,
   } = useMutation({
     mutationFn: async (body: VirtualAccountRequest) => {
-      const request = await fetch(
-        `${import.meta.env.VITE_SERVER_BASE_URL}/squad/virtual`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-          credentials: "include",
-        },
+      const response = await financialActivityApi.createVirtualAccount(body);
+      updateVA(
+        response.virtualAccount.virtualAccountNumber ??
+          response.data.virtual_account_number ??
+          "",
       );
-      const response = await request.json();
-      updateVA(response.data.virtual_account_number);
       return response;
     },
-  });
-
-  const {
-    data: events,
-    isSuccess: eventsLoaded,
-    isLoading: loadingEvents,
-  } = useQuery({
-    queryKey: ["events"],
-    queryFn: async () => {
-      const request = await fetch(
-        `${import.meta.env.VITE_SERVER_BASE_URL}/squad/events`,
-        {
-          credentials: "include",
-        },
-      );
-      const response = await request.json();
-      return response;
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["vendor_virtual_accounts", vendorId],
+      });
     },
   });
 
@@ -945,14 +1149,11 @@ export default function VendorDetail() {
       return response;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["events"] });
+      queryClient.invalidateQueries({
+        queryKey: ["vendor_financial_activity", vendorId],
+      });
     },
   });
-
-  const handleDate = (string: string) => {
-    const newDate = new Date(string);
-    return newDate.toDateString();
-  };
 
   const { isPending: isSyncing, mutateAsync: synchronise } = useMutation({
     mutationFn: async () => {
@@ -971,6 +1172,36 @@ export default function VendorDetail() {
         queryKey: ["vendorGraph", vendorId],
       }),
   });
+
+  const { isPending: isRunningAllChecks, mutateAsync: runAllChecks } =
+    useMutation({
+      mutationFn: async () => {
+        const request = await fetch(
+          `${import.meta.env.VITE_SERVER_BASE_URL}/vendors/${vendorId}/run-checks`,
+          {
+            method: "POST",
+            credentials: "include",
+          },
+        );
+        const response = await request.json();
+
+        if (!request.ok || !response.success) {
+          throw new Error(response.message ?? "Vendor checks failed");
+        }
+
+        return response;
+      },
+      onSuccess: async () => {
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ["vendor_details", vendorId] }),
+          queryClient.invalidateQueries({ queryKey: ["vendor_documents", vendorId] }),
+          queryClient.invalidateQueries({
+            queryKey: ["vendor_financial_activity", vendorId],
+          }),
+          queryClient.invalidateQueries({ queryKey: ["vendorGraph", vendorId] }),
+        ]);
+      },
+    });
 
   if (isLoading) {
     return <VendorDetailSkeleton />;
@@ -1010,6 +1241,14 @@ export default function VendorDetail() {
 
             <div className="flex flex-wrap items-center gap-3">
               <button
+                onClick={() => runAllChecks()}
+                disabled={isRunningAllChecks}
+                className="button-secondary rounded-xl disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <History className="h-4 w-4 text-zinc-400" />
+                {isRunningAllChecks ? "Running checks..." : "Run all checks"}
+              </button>
+              <button
                 onClick={() => synchronise()}
                 className={`button-secondary rounded-xl ${isSyncing ? "opacity-70" : "opacity-100"}`}
               >
@@ -1029,16 +1268,44 @@ export default function VendorDetail() {
         </section>
 
         <EvidenceSummaryStrip vendor={vendorDetails.data} graph={userGraph} />
-        <section>
-          <p className="text-3xl">Your Account Details</p>
-          <p>Your Virtual Account</p>
-          {isGenerated && <p>Account Number: {virtual_account} </p>}
-          <div className="flex gap-x-4 p-2">
+        <section className="panel-card min-w-0 p-6">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0">
+              <p className={panelTitle}>Sandbox tools</p>
+              <h2 className="mt-2 text-xl font-bold text-white">
+                Virtual account simulation
+              </h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-300">
+                Generate a Squad virtual account and simulate sandbox payment
+                events. Real payment history is shown in Financial Activity
+                below.
+              </p>
+            </div>
+            {activeVirtualAccountNumber && (
+              <div className="rounded-2xl border border-white/10 bg-black/45 p-4">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                  Virtual account
+                </p>
+                <p className="mt-1 font-mono text-lg font-black text-white">
+                  {activeVirtualAccountNumber}
+                </p>
+                {savedVirtualAccount && (
+                  <p className="mt-1 text-[10px] font-bold uppercase tracking-wider text-zinc-600">
+                    Persisted account
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+          <div className="mt-5 flex flex-wrap gap-3">
             <button
+              disabled={isGenerating}
+              className="button-secondary rounded-xl disabled:cursor-not-allowed disabled:opacity-60"
               onClick={() => {
                 if (vendorDetails.data) {
                   getVirtual({
                     ...starterObjVirtual,
+                    vendorId: String(vendorDetails.data.id),
                     customer_identifier: String(vendorDetails.data.id),
                     mobile_num: String(vendorDetails.data.phone),
                     bvn: `22${String(vendorDetails.data.phone).slice(2, 11)}`,
@@ -1049,32 +1316,31 @@ export default function VendorDetail() {
                 }
               }}
             >
-              Click to Generate Virtual Account
+              <Banknote className="h-4 w-4" />
+              {isGenerating ? "Generating..." : "Generate virtual account"}
             </button>
             <button
+              disabled={isSimulating || activeVirtualAccountNumber.length <= 1}
+              className="button-primary rounded-xl disabled:cursor-not-allowed disabled:opacity-60"
               onClick={() => {
-                if (virtual_account.length > 1) {
+                if (activeVirtualAccountNumber.length > 1) {
                   simulate({
-                    virtual_account_number: virtual_account,
+                    virtual_account_number: activeVirtualAccountNumber,
                     amount: String(Math.floor(Math.random() * 10000)),
                   });
                 }
               }}
             >
-              Simulate Transaction into Account
+              <ArrowDownRight className="h-4 w-4" />
+              {isSimulating ? "Simulating..." : "Simulate payment"}
             </button>
           </div>
-          <div>
-            <p>Your Transactions</p>
-            {events.map((event: any) => (
-              <div className="flex gap-x-4 p-2">
-                <p>Successful Transaction</p>
-                <p>{event.payload.currency}</p>
-                <p>{event.payload.settled_amount}</p>
-                <p className="text-right">{handleDate(event.receivedAt)}</p>
-              </div>
-            ))}
-          </div>
+          {isSimulated && (
+            <p className="mt-4 rounded-xl border border-green-500/20 bg-green-500/10 p-3 text-sm text-green-300">
+              Simulated transaction submitted. The financial activity table will
+              update when the webhook is processed.
+            </p>
+          )}
         </section>
 
         <section className="min-w-0">
@@ -1094,6 +1360,7 @@ export default function VendorDetail() {
 
         <div className="grid grid-cols-1 gap-6 2xl:grid-cols-[minmax(0,1fr)_21rem]">
           <div className="min-w-0 space-y-6">
+            <FinancialActivityPanel vendorId={String(vendorId ?? "")} />
             <DocumentModification vendorId={String(vendorId ?? "")} />
             <DeviceIntelligencePanel vendorId={String(vendorId ?? "")} />
           </div>

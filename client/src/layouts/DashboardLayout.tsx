@@ -72,7 +72,7 @@ export default function DashboardLayout() {
         : "bg-red-500";
 
   return (
-    <div className="flex min-h-screen bg-vs-background text-zinc-200 selection:bg-cyan-300/20">
+    <div className="flex min-h-screen bg-vs-background text-zinc-200 selection:bg-white/20">
       <aside className="fixed inset-y-0 left-0 z-20 flex w-70 flex-col border-r border-vs-border-soft bg-vs-surface/90 backdrop-blur-xl">
         <div className="flex h-20 items-center border-b border-vs-border-soft px-6">
           <Link
@@ -105,7 +105,7 @@ export default function DashboardLayout() {
                 }`}
               >
                 <item.icon
-                  className={`h-5 w-5 ${isActive ? "text-cyan-300" : "text-zinc-600"}`}
+                  className={`h-5 w-5 ${isActive ? "text-sky-300" : "text-zinc-600"}`}
                 />
                 {item.name}
               </Link>
@@ -151,7 +151,7 @@ export default function DashboardLayout() {
 
           <div className="flex items-center gap-4">
             <div className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold text-zinc-300 lg:flex">
-              <Activity className="h-4 w-4 text-cyan-300" />
+              <Activity className="h-4 w-4 text-sky-300" />
               Review workspace
             </div>
             <button className="relative rounded-full p-2 text-zinc-500 transition-colors hover:bg-white/5 hover:text-white">

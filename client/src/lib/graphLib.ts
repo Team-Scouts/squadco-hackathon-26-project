@@ -8,67 +8,67 @@ class GraphApi {
 
 export const graphEntityStyles: Record<
   string,
-  { color: string; dotClass: string; size: number; captionSize: number }
+  { color: string; dotClass: string; size: number; maxCaptionSize: number }
 > = {
   Vendor: {
-    color: "#334155",
+    color: "#020203",
     dotClass: "bg-zinc-200",
     size: 54,
-    captionSize: 11,
+    maxCaptionSize: 3,
   },
   Cluster: {
-    color: "#7F1D1D",
+    color: "#020203",
     dotClass: "bg-red-500",
     size: 58,
-    captionSize: 11,
+    maxCaptionSize: 3,
   },
   Device: {
-    color: "#164E63",
-    dotClass: "bg-cyan-500",
+    color: "#020203",
+    dotClass: "bg-sky-400",
     size: 42,
-    captionSize: 10,
+    maxCaptionSize: 2,
   },
   Document: {
-    color: "#78350F",
+    color: "#020203",
     dotClass: "bg-amber-500",
     size: 42,
-    captionSize: 10,
+    maxCaptionSize: 2,
   },
   BankAccount: {
-    color: "#4C1D95",
+    color: "#020203",
     dotClass: "bg-violet-500",
     size: 42,
-    captionSize: 10,
+    maxCaptionSize: 2,
   },
   Transaction: {
-    color: "#14532D",
+    color: "#020203",
     dotClass: "bg-green-500",
     size: 40,
-    captionSize: 9,
+    maxCaptionSize: 2,
   },
   Transfer: {
-    color: "#134E4A",
+    color: "#020203",
     dotClass: "bg-teal-500",
     size: 40,
-    captionSize: 9,
+    maxCaptionSize: 2,
   },
   RiskScore: {
-    color: "#881337",
+    color: "#020203",
     dotClass: "bg-rose-500",
     size: 42,
-    captionSize: 9,
+    maxCaptionSize: 2,
   },
   Email: {
-    color: "#71717A",
+    color: "#020203",
     dotClass: "bg-zinc-500",
     size: 36,
-    captionSize: 9,
+    maxCaptionSize: 2,
   },
   Phone: {
-    color: "#71717A",
+    color: "#020203",
     dotClass: "bg-zinc-500",
     size: 36,
-    captionSize: 9,
+    maxCaptionSize: 2,
   },
 };
 
@@ -87,15 +87,43 @@ function normalizeCaption(value: unknown, fallback: string, length = 28) {
   return shortValue(text || fallback, length);
 }
 
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function dynamicNodeCaptionSize({
+  caption,
+  nodeType,
+  nodeSize,
+  maxCaptionSize,
+}: {
+  caption: string;
+  nodeType: string;
+  nodeSize: number;
+  maxCaptionSize: number;
+}) {
+  const compactCaptionLength = caption.replace(/\s/g, "").length;
+  const sizeAllowance = Math.floor(nodeSize / 24);
+  const lengthPenalty =
+    compactCaptionLength > 16 ? 2 : compactCaptionLength > 10 ? 1 : 0;
+  const typePenalty = ["Document", "BankAccount", "Transaction", "Transfer"].includes(
+    nodeType,
+  )
+    ? 1
+    : 0;
+
+  return clamp(maxCaptionSize - lengthPenalty - typePenalty + sizeAllowance - 1, 1, 3);
+}
+
 export function graphNodeCaption(node: GraphNode) {
   const data = node.data ?? {};
 
   if (node.type === "Vendor") {
-    return normalizeCaption(data.businessName ?? node.label, node.id, 20);
+    return normalizeCaption(data.businessName ?? node.label, node.id, 16);
   }
 
   if (node.type === "Cluster") {
-    return normalizeCaption(data.riskType ?? node.label, "Cluster", 16);
+    return normalizeCaption(data.riskType ?? node.label, "Cluster", 14);
   }
 
   if (node.type === "Device") {
@@ -103,7 +131,7 @@ export function graphNodeCaption(node: GraphNode) {
   }
 
   if (node.type === "Document") {
-    return normalizeCaption(data.documentType ?? node.label, "Document", 16);
+    return normalizeCaption(data.documentType ?? node.label, "Document", 14);
   }
 
   if (node.type === "BankAccount") {
@@ -146,17 +174,17 @@ function relationshipStyle(type: string) {
   return {
     color: suspicious ? "#FF2E63" : "#71717A",
     width: suspicious ? 2 : 1,
-    captionSize: suspicious ? 7 : 6,
+    captionSize: 2,
   };
 }
 
 export function transformGraphToNVL(apiResponse: GraphResponse) {
   const nodes = apiResponse.nodes.map((node) => {
     const style = graphEntityStyles[node.type] ?? {
-      color: "#3F3F46",
+      color: "#020203",
       dotClass: "bg-zinc-300",
       size: 38,
-      captionSize: 9,
+      maxCaptionSize: 2,
     };
     const caption = graphNodeCaption(node);
 
@@ -164,7 +192,12 @@ export function transformGraphToNVL(apiResponse: GraphResponse) {
       id: node.id,
       caption,
       captionAlign: "center" as const,
-      captionSize: style.captionSize,
+      captionSize: dynamicNodeCaptionSize({
+        caption,
+        nodeType: node.type,
+        nodeSize: style.size,
+        maxCaptionSize: style.maxCaptionSize,
+      }),
       color: style.color,
       size: style.size,
     };

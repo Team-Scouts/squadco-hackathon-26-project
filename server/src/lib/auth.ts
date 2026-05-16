@@ -32,4 +32,7 @@ export const auth = betterAuth({
     'http://localhost:5190',
     'https://squadco-hackathon-26-project.vercel.app',
   ],
+  advanced: {
+    disableOriginCheck: true,
+  },
 });

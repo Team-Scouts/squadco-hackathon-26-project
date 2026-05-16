@@ -1771,8 +1771,11 @@ export const AlertScalarFieldEnum = {
   id: 'id',
   vendorId: 'vendorId',
   type: 'type',
+  severity: 'severity',
+  title: 'title',
   message: 'message',
   resolved: 'resolved',
+  resolvedAt: 'resolvedAt',
   createdAt: 'createdAt'
 } as const
 
@@ -2023,6 +2026,20 @@ export type EnumAlertTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$Prisma
  * Reference to a field of type 'AlertType[]'
  */
 export type ListEnumAlertTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AlertType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'AlertSeverity'
+ */
+export type EnumAlertSeverityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AlertSeverity'>
+    
+
+
+/**
+ * Reference to a field of type 'AlertSeverity[]'
+ */
+export type ListEnumAlertSeverityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AlertSeverity[]'>
     
 
 /**

@@ -406,6 +406,13 @@ export type EnumAlertTypeFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumAlertTypeFilter<$PrismaModel> | $Enums.AlertType
 }
 
+export type EnumAlertSeverityFilter<$PrismaModel = never> = {
+  equals?: $Enums.AlertSeverity | Prisma.EnumAlertSeverityFieldRefInput<$PrismaModel>
+  in?: $Enums.AlertSeverity[] | Prisma.ListEnumAlertSeverityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AlertSeverity[] | Prisma.ListEnumAlertSeverityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAlertSeverityFilter<$PrismaModel> | $Enums.AlertSeverity
+}
+
 export type EnumAlertTypeWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.AlertType | Prisma.EnumAlertTypeFieldRefInput<$PrismaModel>
   in?: $Enums.AlertType[] | Prisma.ListEnumAlertTypeFieldRefInput<$PrismaModel>
@@ -414,6 +421,16 @@ export type EnumAlertTypeWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumAlertTypeFilter<$PrismaModel>
   _max?: Prisma.NestedEnumAlertTypeFilter<$PrismaModel>
+}
+
+export type EnumAlertSeverityWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AlertSeverity | Prisma.EnumAlertSeverityFieldRefInput<$PrismaModel>
+  in?: $Enums.AlertSeverity[] | Prisma.ListEnumAlertSeverityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AlertSeverity[] | Prisma.ListEnumAlertSeverityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAlertSeverityWithAggregatesFilter<$PrismaModel> | $Enums.AlertSeverity
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAlertSeverityFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAlertSeverityFilter<$PrismaModel>
 }
 
 export type NestedStringFilter<$PrismaModel = never> = {
@@ -756,6 +773,13 @@ export type NestedEnumAlertTypeFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumAlertTypeFilter<$PrismaModel> | $Enums.AlertType
 }
 
+export type NestedEnumAlertSeverityFilter<$PrismaModel = never> = {
+  equals?: $Enums.AlertSeverity | Prisma.EnumAlertSeverityFieldRefInput<$PrismaModel>
+  in?: $Enums.AlertSeverity[] | Prisma.ListEnumAlertSeverityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AlertSeverity[] | Prisma.ListEnumAlertSeverityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAlertSeverityFilter<$PrismaModel> | $Enums.AlertSeverity
+}
+
 export type NestedEnumAlertTypeWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.AlertType | Prisma.EnumAlertTypeFieldRefInput<$PrismaModel>
   in?: $Enums.AlertType[] | Prisma.ListEnumAlertTypeFieldRefInput<$PrismaModel>
@@ -764,6 +788,16 @@ export type NestedEnumAlertTypeWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumAlertTypeFilter<$PrismaModel>
   _max?: Prisma.NestedEnumAlertTypeFilter<$PrismaModel>
+}
+
+export type NestedEnumAlertSeverityWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AlertSeverity | Prisma.EnumAlertSeverityFieldRefInput<$PrismaModel>
+  in?: $Enums.AlertSeverity[] | Prisma.ListEnumAlertSeverityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AlertSeverity[] | Prisma.ListEnumAlertSeverityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAlertSeverityWithAggregatesFilter<$PrismaModel> | $Enums.AlertSeverity
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAlertSeverityFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAlertSeverityFilter<$PrismaModel>
 }
 
 

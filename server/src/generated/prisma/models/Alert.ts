@@ -28,8 +28,11 @@ export type AlertMinAggregateOutputType = {
   id: string | null
   vendorId: string | null
   type: $Enums.AlertType | null
+  severity: $Enums.AlertSeverity | null
+  title: string | null
   message: string | null
   resolved: boolean | null
+  resolvedAt: Date | null
   createdAt: Date | null
 }
 
@@ -37,8 +40,11 @@ export type AlertMaxAggregateOutputType = {
   id: string | null
   vendorId: string | null
   type: $Enums.AlertType | null
+  severity: $Enums.AlertSeverity | null
+  title: string | null
   message: string | null
   resolved: boolean | null
+  resolvedAt: Date | null
   createdAt: Date | null
 }
 
@@ -46,8 +52,11 @@ export type AlertCountAggregateOutputType = {
   id: number
   vendorId: number
   type: number
+  severity: number
+  title: number
   message: number
   resolved: number
+  resolvedAt: number
   createdAt: number
   _all: number
 }
@@ -57,8 +66,11 @@ export type AlertMinAggregateInputType = {
   id?: true
   vendorId?: true
   type?: true
+  severity?: true
+  title?: true
   message?: true
   resolved?: true
+  resolvedAt?: true
   createdAt?: true
 }
 
@@ -66,8 +78,11 @@ export type AlertMaxAggregateInputType = {
   id?: true
   vendorId?: true
   type?: true
+  severity?: true
+  title?: true
   message?: true
   resolved?: true
+  resolvedAt?: true
   createdAt?: true
 }
 
@@ -75,8 +90,11 @@ export type AlertCountAggregateInputType = {
   id?: true
   vendorId?: true
   type?: true
+  severity?: true
+  title?: true
   message?: true
   resolved?: true
+  resolvedAt?: true
   createdAt?: true
   _all?: true
 }
@@ -157,8 +175,11 @@ export type AlertGroupByOutputType = {
   id: string
   vendorId: string
   type: $Enums.AlertType
+  severity: $Enums.AlertSeverity
+  title: string
   message: string
   resolved: boolean
+  resolvedAt: Date | null
   createdAt: Date
   _count: AlertCountAggregateOutputType | null
   _min: AlertMinAggregateOutputType | null
@@ -187,8 +208,11 @@ export type AlertWhereInput = {
   id?: Prisma.StringFilter<"Alert"> | string
   vendorId?: Prisma.StringFilter<"Alert"> | string
   type?: Prisma.EnumAlertTypeFilter<"Alert"> | $Enums.AlertType
+  severity?: Prisma.EnumAlertSeverityFilter<"Alert"> | $Enums.AlertSeverity
+  title?: Prisma.StringFilter<"Alert"> | string
   message?: Prisma.StringFilter<"Alert"> | string
   resolved?: Prisma.BoolFilter<"Alert"> | boolean
+  resolvedAt?: Prisma.DateTimeNullableFilter<"Alert"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Alert"> | Date | string
   vendor?: Prisma.XOR<Prisma.VendorScalarRelationFilter, Prisma.VendorWhereInput>
 }
@@ -197,8 +221,11 @@ export type AlertOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   vendorId?: Prisma.SortOrder
   type?: Prisma.SortOrder
+  severity?: Prisma.SortOrder
+  title?: Prisma.SortOrder
   message?: Prisma.SortOrder
   resolved?: Prisma.SortOrder
+  resolvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   vendor?: Prisma.VendorOrderByWithRelationInput
 }
@@ -210,8 +237,11 @@ export type AlertWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.AlertWhereInput | Prisma.AlertWhereInput[]
   vendorId?: Prisma.StringFilter<"Alert"> | string
   type?: Prisma.EnumAlertTypeFilter<"Alert"> | $Enums.AlertType
+  severity?: Prisma.EnumAlertSeverityFilter<"Alert"> | $Enums.AlertSeverity
+  title?: Prisma.StringFilter<"Alert"> | string
   message?: Prisma.StringFilter<"Alert"> | string
   resolved?: Prisma.BoolFilter<"Alert"> | boolean
+  resolvedAt?: Prisma.DateTimeNullableFilter<"Alert"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Alert"> | Date | string
   vendor?: Prisma.XOR<Prisma.VendorScalarRelationFilter, Prisma.VendorWhereInput>
 }, "id">
@@ -220,8 +250,11 @@ export type AlertOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   vendorId?: Prisma.SortOrder
   type?: Prisma.SortOrder
+  severity?: Prisma.SortOrder
+  title?: Prisma.SortOrder
   message?: Prisma.SortOrder
   resolved?: Prisma.SortOrder
+  resolvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.AlertCountOrderByAggregateInput
   _max?: Prisma.AlertMaxOrderByAggregateInput
@@ -235,16 +268,22 @@ export type AlertScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Alert"> | string
   vendorId?: Prisma.StringWithAggregatesFilter<"Alert"> | string
   type?: Prisma.EnumAlertTypeWithAggregatesFilter<"Alert"> | $Enums.AlertType
+  severity?: Prisma.EnumAlertSeverityWithAggregatesFilter<"Alert"> | $Enums.AlertSeverity
+  title?: Prisma.StringWithAggregatesFilter<"Alert"> | string
   message?: Prisma.StringWithAggregatesFilter<"Alert"> | string
   resolved?: Prisma.BoolWithAggregatesFilter<"Alert"> | boolean
+  resolvedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Alert"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Alert"> | Date | string
 }
 
 export type AlertCreateInput = {
   id?: string
   type: $Enums.AlertType
+  severity?: $Enums.AlertSeverity
+  title: string
   message: string
   resolved?: boolean
+  resolvedAt?: Date | string | null
   createdAt?: Date | string
   vendor: Prisma.VendorCreateNestedOneWithoutAlertsInput
 }
@@ -253,16 +292,22 @@ export type AlertUncheckedCreateInput = {
   id?: string
   vendorId: string
   type: $Enums.AlertType
+  severity?: $Enums.AlertSeverity
+  title: string
   message: string
   resolved?: boolean
+  resolvedAt?: Date | string | null
   createdAt?: Date | string
 }
 
 export type AlertUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumAlertTypeFieldUpdateOperationsInput | $Enums.AlertType
+  severity?: Prisma.EnumAlertSeverityFieldUpdateOperationsInput | $Enums.AlertSeverity
+  title?: Prisma.StringFieldUpdateOperationsInput | string
   message?: Prisma.StringFieldUpdateOperationsInput | string
   resolved?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   vendor?: Prisma.VendorUpdateOneRequiredWithoutAlertsNestedInput
 }
@@ -271,8 +316,11 @@ export type AlertUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   vendorId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumAlertTypeFieldUpdateOperationsInput | $Enums.AlertType
+  severity?: Prisma.EnumAlertSeverityFieldUpdateOperationsInput | $Enums.AlertSeverity
+  title?: Prisma.StringFieldUpdateOperationsInput | string
   message?: Prisma.StringFieldUpdateOperationsInput | string
   resolved?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -280,16 +328,22 @@ export type AlertCreateManyInput = {
   id?: string
   vendorId: string
   type: $Enums.AlertType
+  severity?: $Enums.AlertSeverity
+  title: string
   message: string
   resolved?: boolean
+  resolvedAt?: Date | string | null
   createdAt?: Date | string
 }
 
 export type AlertUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumAlertTypeFieldUpdateOperationsInput | $Enums.AlertType
+  severity?: Prisma.EnumAlertSeverityFieldUpdateOperationsInput | $Enums.AlertSeverity
+  title?: Prisma.StringFieldUpdateOperationsInput | string
   message?: Prisma.StringFieldUpdateOperationsInput | string
   resolved?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -297,8 +351,11 @@ export type AlertUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   vendorId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumAlertTypeFieldUpdateOperationsInput | $Enums.AlertType
+  severity?: Prisma.EnumAlertSeverityFieldUpdateOperationsInput | $Enums.AlertSeverity
+  title?: Prisma.StringFieldUpdateOperationsInput | string
   message?: Prisma.StringFieldUpdateOperationsInput | string
   resolved?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -316,8 +373,11 @@ export type AlertCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   vendorId?: Prisma.SortOrder
   type?: Prisma.SortOrder
+  severity?: Prisma.SortOrder
+  title?: Prisma.SortOrder
   message?: Prisma.SortOrder
   resolved?: Prisma.SortOrder
+  resolvedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -325,8 +385,11 @@ export type AlertMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   vendorId?: Prisma.SortOrder
   type?: Prisma.SortOrder
+  severity?: Prisma.SortOrder
+  title?: Prisma.SortOrder
   message?: Prisma.SortOrder
   resolved?: Prisma.SortOrder
+  resolvedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -334,8 +397,11 @@ export type AlertMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   vendorId?: Prisma.SortOrder
   type?: Prisma.SortOrder
+  severity?: Prisma.SortOrder
+  title?: Prisma.SortOrder
   message?: Prisma.SortOrder
   resolved?: Prisma.SortOrder
+  resolvedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -385,19 +451,29 @@ export type EnumAlertTypeFieldUpdateOperationsInput = {
   set?: $Enums.AlertType
 }
 
+export type EnumAlertSeverityFieldUpdateOperationsInput = {
+  set?: $Enums.AlertSeverity
+}
+
 export type AlertCreateWithoutVendorInput = {
   id?: string
   type: $Enums.AlertType
+  severity?: $Enums.AlertSeverity
+  title: string
   message: string
   resolved?: boolean
+  resolvedAt?: Date | string | null
   createdAt?: Date | string
 }
 
 export type AlertUncheckedCreateWithoutVendorInput = {
   id?: string
   type: $Enums.AlertType
+  severity?: $Enums.AlertSeverity
+  title: string
   message: string
   resolved?: boolean
+  resolvedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -434,40 +510,55 @@ export type AlertScalarWhereInput = {
   id?: Prisma.StringFilter<"Alert"> | string
   vendorId?: Prisma.StringFilter<"Alert"> | string
   type?: Prisma.EnumAlertTypeFilter<"Alert"> | $Enums.AlertType
+  severity?: Prisma.EnumAlertSeverityFilter<"Alert"> | $Enums.AlertSeverity
+  title?: Prisma.StringFilter<"Alert"> | string
   message?: Prisma.StringFilter<"Alert"> | string
   resolved?: Prisma.BoolFilter<"Alert"> | boolean
+  resolvedAt?: Prisma.DateTimeNullableFilter<"Alert"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Alert"> | Date | string
 }
 
 export type AlertCreateManyVendorInput = {
   id?: string
   type: $Enums.AlertType
+  severity?: $Enums.AlertSeverity
+  title: string
   message: string
   resolved?: boolean
+  resolvedAt?: Date | string | null
   createdAt?: Date | string
 }
 
 export type AlertUpdateWithoutVendorInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumAlertTypeFieldUpdateOperationsInput | $Enums.AlertType
+  severity?: Prisma.EnumAlertSeverityFieldUpdateOperationsInput | $Enums.AlertSeverity
+  title?: Prisma.StringFieldUpdateOperationsInput | string
   message?: Prisma.StringFieldUpdateOperationsInput | string
   resolved?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type AlertUncheckedUpdateWithoutVendorInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumAlertTypeFieldUpdateOperationsInput | $Enums.AlertType
+  severity?: Prisma.EnumAlertSeverityFieldUpdateOperationsInput | $Enums.AlertSeverity
+  title?: Prisma.StringFieldUpdateOperationsInput | string
   message?: Prisma.StringFieldUpdateOperationsInput | string
   resolved?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type AlertUncheckedUpdateManyWithoutVendorInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumAlertTypeFieldUpdateOperationsInput | $Enums.AlertType
+  severity?: Prisma.EnumAlertSeverityFieldUpdateOperationsInput | $Enums.AlertSeverity
+  title?: Prisma.StringFieldUpdateOperationsInput | string
   message?: Prisma.StringFieldUpdateOperationsInput | string
   resolved?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -477,8 +568,11 @@ export type AlertSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   id?: boolean
   vendorId?: boolean
   type?: boolean
+  severity?: boolean
+  title?: boolean
   message?: boolean
   resolved?: boolean
+  resolvedAt?: boolean
   createdAt?: boolean
   vendor?: boolean | Prisma.VendorDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["alert"]>
@@ -487,8 +581,11 @@ export type AlertSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   id?: boolean
   vendorId?: boolean
   type?: boolean
+  severity?: boolean
+  title?: boolean
   message?: boolean
   resolved?: boolean
+  resolvedAt?: boolean
   createdAt?: boolean
   vendor?: boolean | Prisma.VendorDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["alert"]>
@@ -497,8 +594,11 @@ export type AlertSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   id?: boolean
   vendorId?: boolean
   type?: boolean
+  severity?: boolean
+  title?: boolean
   message?: boolean
   resolved?: boolean
+  resolvedAt?: boolean
   createdAt?: boolean
   vendor?: boolean | Prisma.VendorDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["alert"]>
@@ -507,12 +607,15 @@ export type AlertSelectScalar = {
   id?: boolean
   vendorId?: boolean
   type?: boolean
+  severity?: boolean
+  title?: boolean
   message?: boolean
   resolved?: boolean
+  resolvedAt?: boolean
   createdAt?: boolean
 }
 
-export type AlertOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "vendorId" | "type" | "message" | "resolved" | "createdAt", ExtArgs["result"]["alert"]>
+export type AlertOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "vendorId" | "type" | "severity" | "title" | "message" | "resolved" | "resolvedAt" | "createdAt", ExtArgs["result"]["alert"]>
 export type AlertInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   vendor?: boolean | Prisma.VendorDefaultArgs<ExtArgs>
 }
@@ -532,8 +635,11 @@ export type $AlertPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     id: string
     vendorId: string
     type: $Enums.AlertType
+    severity: $Enums.AlertSeverity
+    title: string
     message: string
     resolved: boolean
+    resolvedAt: Date | null
     createdAt: Date
   }, ExtArgs["result"]["alert"]>
   composites: {}
@@ -962,8 +1068,11 @@ export interface AlertFieldRefs {
   readonly id: Prisma.FieldRef<"Alert", 'String'>
   readonly vendorId: Prisma.FieldRef<"Alert", 'String'>
   readonly type: Prisma.FieldRef<"Alert", 'AlertType'>
+  readonly severity: Prisma.FieldRef<"Alert", 'AlertSeverity'>
+  readonly title: Prisma.FieldRef<"Alert", 'String'>
   readonly message: Prisma.FieldRef<"Alert", 'String'>
   readonly resolved: Prisma.FieldRef<"Alert", 'Boolean'>
+  readonly resolvedAt: Prisma.FieldRef<"Alert", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Alert", 'DateTime'>
 }
     

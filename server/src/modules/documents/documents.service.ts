@@ -236,10 +236,11 @@ export class DocumentsService {
         vendor: documentWithVendor.vendor,
       });
 
-      const verificationStatus = this.resolveVerificationStatusAfterIntelligence(
-        document.verificationStatus,
-        intelligence,
-      );
+      const verificationStatus =
+        this.resolveVerificationStatusAfterIntelligence(
+          document.verificationStatus,
+          intelligence,
+        );
 
       processedDocument = await this.prisma.document.update({
         where: { id: document.id },

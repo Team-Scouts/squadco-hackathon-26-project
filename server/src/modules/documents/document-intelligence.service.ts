@@ -223,7 +223,9 @@ export class DocumentIntelligenceService {
     }
 
     const fs = await import('node:fs/promises');
-    const credentials = JSON.parse(await fs.readFile(credentialsPath, 'utf8')) as {
+    const credentials = JSON.parse(
+      await fs.readFile(`${credentialsPath}.json`, 'utf8'),
+    ) as {
       client_email?: string;
       private_key?: string;
     };
@@ -352,7 +354,10 @@ export class DocumentIntelligenceService {
       vendorBusinessName,
     );
     const registrationNumberCandidate =
-      this.extractCacRegistrationNumberCandidate(text, vendorRegistrationNumber);
+      this.extractCacRegistrationNumberCandidate(
+        text,
+        vendorRegistrationNumber,
+      );
     const businessName = businessNameCandidate?.value ?? '';
     const registrationNumber = registrationNumberCandidate?.value ?? '';
 
@@ -477,18 +482,12 @@ export class DocumentIntelligenceService {
     const ownerNameCandidate =
       this.extractNamedValueCandidate(
         text,
-        [
-          'full name',
-          'name',
-          'surname',
-          'given names',
-          'given name',
-          'holder',
-        ],
+        ['full name', 'name', 'surname', 'given names', 'given name', 'holder'],
         contactName,
         this.personNamesMatch.bind(this),
       ) || this.pickLikelyPersonNameCandidate(text, contactName);
-    const documentNumberCandidate = this.extractIdentityDocumentNumberCandidate(text);
+    const documentNumberCandidate =
+      this.extractIdentityDocumentNumberCandidate(text);
     const ownerName = ownerNameCandidate?.value ?? '';
     const documentNumber = documentNumberCandidate?.value ?? '';
 
@@ -669,8 +668,7 @@ export class DocumentIntelligenceService {
       numberGroup: number;
     }> = [
       {
-        regex:
-          /\bCAC\s*[/-]\s*(RC|BN|IT)\s*[/-]\s*([0-9][0-9,\s.-]{2,})\b/gi,
+        regex: /\bCAC\s*[/-]\s*(RC|BN|IT)\s*[/-]\s*([0-9][0-9,\s.-]{2,})\b/gi,
         score: 95,
         prefixGroup: 1,
         numberGroup: 2,
@@ -733,7 +731,9 @@ export class DocumentIntelligenceService {
       .toLowerCase();
     let score = 0;
 
-    if (/cac|registration|reg\.?|company|certificate|incorporated/.test(context)) {
+    if (
+      /cac|registration|reg\.?|company|certificate|incorporated/.test(context)
+    ) {
       score += 15;
     }
 
@@ -758,7 +758,10 @@ export class DocumentIntelligenceService {
     }
 
     for (const match of text.matchAll(/\b([0-9]{8,14})\b/g)) {
-      const contextScore = this.scoreRegistrationContext(text, match.index ?? 0);
+      const contextScore = this.scoreRegistrationContext(
+        text,
+        match.index ?? 0,
+      );
       candidates.push({
         value: match[1],
         score: 45 + Math.max(-20, contextScore),
@@ -894,9 +897,12 @@ export class DocumentIntelligenceService {
   ): ExtractionCandidate | null {
     const candidates = this.ocrLines(text)
       .map((line) => {
-        let score = /\b(street|road|avenue|close|crescent|estate|lagos|abuja|state|city|suite|flat|plot|drive|lane|way)\b/i.test(line)
-          ? 55
-          : 0;
+        let score =
+          /\b(street|road|avenue|close|crescent|estate|lagos|abuja|state|city|suite|flat|plot|drive|lane|way)\b/i.test(
+            line,
+          )
+            ? 55
+            : 0;
 
         if (verifiedAddress) {
           const ratio = this.sharedTokenRatio(
@@ -2031,7 +2037,7 @@ export class DocumentIntelligenceService {
     const rawInput = value.toUpperCase().replace(/[^A-Z0-9]+/g, '');
     const withoutCacPrefix = rawInput.replace(/^CAC(?=RC|BN|IT|\d)/, '');
     const match = withoutCacPrefix.match(/^(RC|BN|IT|R)?([0-9]+)$/);
-    const prefix = match?.[1] === 'R' ? 'RC' : match?.[1] ?? '';
+    const prefix = match?.[1] === 'R' ? 'RC' : (match?.[1] ?? '');
     const numericPart = match?.[2] ?? withoutCacPrefix.replace(/^[A-Z]+/, '');
 
     return {

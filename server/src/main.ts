@@ -12,6 +12,7 @@ async function bootstrap() {
       'http://localhost:5190',
       'http://localhost:3000',
       'https://squadco-hackathon-26-project.vercel.app',
+      'https://fraudlens-stable-version.vercel.app'
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,

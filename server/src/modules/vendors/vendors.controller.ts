@@ -1,10 +1,18 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 
-import { VendorsService } from './vendors.service';
+import { VendorsService } from './vendors.service.js';
 
-import { CreateVendorDto } from './dto/create-vendor.dto';
+import { CreateVendorDto } from './dto/create-vendor.dto.js';
 
-import { UpdateVendorDto } from './dto/update-vendor.dto';
+import { UpdateVendorDto } from './dto/update-vendor.dto.js';
 import { OptionalAuth, Roles } from '@thallesp/nestjs-better-auth';
 
 @OptionalAuth()

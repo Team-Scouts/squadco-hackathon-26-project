@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { Roles } from '@thallesp/nestjs-better-auth';
-import { Neo4jService } from './neo4j.service';
+import { Neo4jService } from './neo4j.service.js';
 
 @Roles(['admin', 'reviewer'])
 @Controller('neo4j')

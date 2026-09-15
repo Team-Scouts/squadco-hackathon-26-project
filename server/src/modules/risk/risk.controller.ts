@@ -1,7 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { RiskService } from './risk.service';
-import { CreateRiskDto } from './dto/create-risk.dto';
-import { UpdateRiskDto } from './dto/update-risk.dto';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
+import { RiskService } from './risk.service.js';
+import { CreateRiskDto } from './dto/create-risk.dto.js';
+import { UpdateRiskDto } from './dto/update-risk.dto.js';
 
 @Controller('risk')
 export class RiskController {

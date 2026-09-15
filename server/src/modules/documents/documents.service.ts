@@ -4,24 +4,24 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import { UploadDocumentDto } from './dto/upload-document.dto';
+import { UploadDocumentDto } from './dto/upload-document.dto.js';
 
 import * as crypto from 'crypto';
-import { PrismaService } from '../../prisma/prisma.service';
-import { CloudinaryService } from '../../cloudinary/cloudinary.service';
-import { GraphService } from '../graph/graph.service';
-import { UpdateDocumentVerificationDto } from './dto/update-document-verification.dto';
+import { PrismaService } from '../../prisma/prisma.service.js';
+import { CloudinaryService } from '../../cloudinary/cloudinary.service.js';
+import { GraphService } from '../graph/graph.service.js';
+import { UpdateDocumentVerificationDto } from './dto/update-document-verification.dto.js';
 import {
   DocumentVerificationStatus,
   OcrStatus,
   RiskLevel,
-} from '../../generated/prisma/enums';
+} from '../../generated/prisma/enums.js';
 import {
   DocumentIntelligenceResult,
   DocumentIntelligenceService,
   VerificationReason,
-} from './document-intelligence.service';
-import { RiskService } from '../risk/risk.service';
+} from './document-intelligence.service.js';
+import { RiskService } from '../risk/risk.service.js';
 
 @Injectable()
 export class DocumentsService {

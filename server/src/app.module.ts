@@ -1,23 +1,23 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { PrismaModule } from './prisma/prisma.module';
+import { AppController } from './app.controller.js';
+import { AppService } from './app.service.js';
+import { PrismaModule } from './prisma/prisma.module.js';
 import { AuthModule } from '@thallesp/nestjs-better-auth';
-import { VendorsModule } from './modules/vendors/vendors.module';
-import { DocumentsModule } from './modules/documents/documents.module';
-import { TransactionsModule } from './modules/transactions/transactions.module';
-import { SquadModule } from './modules/squad/squad.module';
-import { RiskModule } from './modules/risk/risk.module';
-import { GraphModule } from './modules/graph/graph.module';
+import { VendorsModule } from './modules/vendors/vendors.module.js';
+import { DocumentsModule } from './modules/documents/documents.module.js';
+import { TransactionsModule } from './modules/transactions/transactions.module.js';
+import { SquadModule } from './modules/squad/squad.module.js';
+import { RiskModule } from './modules/risk/risk.module.js';
+import { GraphModule } from './modules/graph/graph.module.js';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AlertsModule } from './modules/alerts/alerts.module';
-import { AdminModule } from './modules/admin/admin.module';
-import { PayoutsModule } from './modules/payouts/payouts.module';
-import { auth } from './lib/auth';
-import { CloudinaryModule } from './cloudinary/cloudinary.module';
-import { Neo4jModule } from './neo4j/neo4j.module';
-import { DeviceIntelligenceModule } from './modules/device-intelligence/device-intelligence.module';
-import { UserModule } from './modules/user/user.module';
+import { AlertsModule } from './modules/alerts/alerts.module.js';
+import { AdminModule } from './modules/admin/admin.module.js';
+import { PayoutsModule } from './modules/payouts/payouts.module.js';
+import { auth } from './lib/auth.js';
+import { CloudinaryModule } from './cloudinary/cloudinary.module.js';
+import { Neo4jModule } from './neo4j/neo4j.module.js';
+import { DeviceIntelligenceModule } from './modules/device-intelligence/device-intelligence.module.js';
+import { UserModule } from './modules/user/user.module.js';
 
 @Module({
   imports: [

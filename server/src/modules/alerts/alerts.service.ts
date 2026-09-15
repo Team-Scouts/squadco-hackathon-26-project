@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { CreateAlertDto } from './dto/create-alert.dto';
-import { AlertSeverity, AlertType } from '../../generated/prisma/enums';
+import { PrismaService } from '../../prisma/prisma.service.js';
+import { CreateAlertDto } from './dto/create-alert.dto.js';
+import { AlertSeverity, AlertType } from '../../generated/prisma/enums.js';
 
 type RiskAlertInput = {
   vendorId: string;

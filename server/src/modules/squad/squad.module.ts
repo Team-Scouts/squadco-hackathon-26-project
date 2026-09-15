@@ -1,10 +1,10 @@
 import { Module, DynamicModule, Global } from '@nestjs/common';
-import { SquadService } from './squad.service';
-import { SquadController } from './squad.controller';
-import { SquadModuleOptions, SQUAD_MODULE_OPTIONS } from './squad.config';
-import { PrismaModule } from '../../prisma/prisma.module';
-import { GraphModule } from '../graph/graph.module';
-import { TransactionsModule } from '../transactions/transactions.module';
+import { SquadService } from './squad.service.js';
+import { SquadController } from './squad.controller.js';
+import { SquadModuleOptions, SQUAD_MODULE_OPTIONS } from './squad.config.js';
+import { PrismaModule } from '../../prisma/prisma.module.js';
+import { GraphModule } from '../graph/graph.module.js';
+import { TransactionsModule } from '../transactions/transactions.module.js';
 
 /**
  * SquadModule

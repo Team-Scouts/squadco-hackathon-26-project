@@ -6,7 +6,7 @@ import {
   PrismaClient,
   RiskLevel,
   VendorStatus,
-} from '../src/generated/prisma/client';
+} from '../src/generated/prisma/client.js';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 const adapter = new PrismaPg({
@@ -114,10 +114,15 @@ async function main() {
   await seedCleanVendor(vendors.get('clean')!);
   await seedCacMismatchVendor(vendors.get('cac-mismatch')!);
   await seedDuplicateDocumentVendor(vendors.get('duplicate-document')!);
-  await seedSharedDeviceVendor(vendors.get('shared-device')!, vendors.get('duplicate-document')!);
+  await seedSharedDeviceVendor(
+    vendors.get('shared-device')!,
+    vendors.get('duplicate-document')!,
+  );
   await seedFinancialRiskVendor(vendors.get('financial-risk')!);
 
-  console.log('Seed completed. Run POST /graph/sync after starting the API to rebuild Neo4j from PostgreSQL.');
+  console.log(
+    'Seed completed. Run POST /graph/sync after starting the API to rebuild Neo4j from PostgreSQL.',
+  );
 }
 
 async function upsertVendor(vendorData: (typeof demoVendors)[number]) {
@@ -150,8 +155,16 @@ async function resetVendorEvidence(vendorId: string) {
   await prisma.webhookEvent.deleteMany({
     where: {
       OR: [
-        { transactionReference: { in: transactions.map((item) => item.transactionRef) } },
-        { transferReference: { in: transfers.map((item) => item.transferReference) } },
+        {
+          transactionReference: {
+            in: transactions.map((item) => item.transactionRef),
+          },
+        },
+        {
+          transferReference: {
+            in: transfers.map((item) => item.transferReference),
+          },
+        },
       ],
     },
   });
@@ -167,8 +180,24 @@ async function resetVendorEvidence(vendorId: string) {
 
 async function seedCleanVendor(vendor: { id: string; businessName: string }) {
   await createDevice(vendor.id, 'seed_device_clean_001', 0);
-  await createBankAndTransfer(vendor.id, vendor.businessName, 'seed_bank_hash_clean_001', '1001', 'TRF_SEED_CLEAN', 'SUCCESS', 250000, 96);
-  await createTransaction(vendor.id, 'TXN_SEED_CLEAN_001', 45000, 'virtual-account', 'SUCCESS', 0);
+  await createBankAndTransfer(
+    vendor.id,
+    vendor.businessName,
+    'seed_bank_hash_clean_001',
+    '1001',
+    'TRF_SEED_CLEAN',
+    'SUCCESS',
+    250000,
+    96,
+  );
+  await createTransaction(
+    vendor.id,
+    'TXN_SEED_CLEAN_001',
+    45000,
+    'virtual-account',
+    'SUCCESS',
+    0,
+  );
   await createDocumentSet(vendor.id, {
     cacHash: 'seed_doc_hash_clean_cac',
     status: DocumentVerificationStatus.VERIFIED,
@@ -180,47 +209,148 @@ async function seedCleanVendor(vendor: { id: string; businessName: string }) {
     financialAnomalyRisk: 0,
     overallRisk: 12,
     riskLevel: RiskLevel.LOW,
-    reasons: [{ code: 'SEED_CLEAN_PROFILE', message: 'Clean seeded profile.', severity: 'LOW', scoreImpact: 0 }],
+    reasons: [
+      {
+        code: 'SEED_CLEAN_PROFILE',
+        message: 'Clean seeded profile.',
+        severity: 'LOW',
+        scoreImpact: 0,
+      },
+    ],
   });
 }
 
 async function seedCacMismatchVendor(vendor: { id: string }) {
   await createDevice(vendor.id, 'seed_device_cac_mismatch_001', 0);
-  await createDocument(vendor.id, 'CAC_REGISTRATION', 'seed_doc_hash_cac_mismatch', 50, DocumentVerificationStatus.NEEDS_REVIEW, [
-    { label: 'Legal business name', extracted: 'Northline Export Ltd', verified: 'Reddish Blue Fruit Company', confidence: 98, status: 'flagged' },
-    { label: 'Registration number', extracted: 'RC748922', verified: 'RC1234567', confidence: 98, status: 'flagged' },
-  ], [
-    { code: 'BUSINESS_NAME_MISMATCH', message: 'Extracted business name differs from vendor profile.', severity: 'HIGH', scoreImpact: 25 },
-    { code: 'REGISTRATION_NUMBER_MISMATCH', message: 'Extracted registration number differs from vendor profile.', severity: 'HIGH', scoreImpact: 25 },
-  ]);
+  await createDocument(
+    vendor.id,
+    'CAC_REGISTRATION',
+    'seed_doc_hash_cac_mismatch',
+    50,
+    DocumentVerificationStatus.NEEDS_REVIEW,
+    [
+      {
+        label: 'Legal business name',
+        extracted: 'Northline Export Ltd',
+        verified: 'Reddish Blue Fruit Company',
+        confidence: 98,
+        status: 'flagged',
+      },
+      {
+        label: 'Registration number',
+        extracted: 'RC748922',
+        verified: 'RC1234567',
+        confidence: 98,
+        status: 'flagged',
+      },
+    ],
+    [
+      {
+        code: 'BUSINESS_NAME_MISMATCH',
+        message: 'Extracted business name differs from vendor profile.',
+        severity: 'HIGH',
+        scoreImpact: 25,
+      },
+      {
+        code: 'REGISTRATION_NUMBER_MISMATCH',
+        message: 'Extracted registration number differs from vendor profile.',
+        severity: 'HIGH',
+        scoreImpact: 25,
+      },
+    ],
+  );
   await createRisk(vendor.id, {
     documentRisk: 60,
     identityMismatchRisk: 25,
     overallRisk: 70,
     riskLevel: RiskLevel.HIGH,
-    reasons: [{ code: 'SEED_CAC_MISMATCH', message: 'CAC profile values conflict with OCR fields.', severity: 'HIGH', scoreImpact: 50 }],
+    reasons: [
+      {
+        code: 'SEED_CAC_MISMATCH',
+        message: 'CAC profile values conflict with OCR fields.',
+        severity: 'HIGH',
+        scoreImpact: 50,
+      },
+    ],
   });
 }
 
-async function seedDuplicateDocumentVendor(vendor: { id: string; businessName: string }) {
+async function seedDuplicateDocumentVendor(vendor: {
+  id: string;
+  businessName: string;
+}) {
   await createDevice(vendor.id, sharedDeviceHash, 70);
-  await createBankAndTransfer(vendor.id, vendor.businessName, sharedAccountHash, '2020', 'TRF_SEED_SHARED_A', 'PENDING', 90000, 58);
-  await createDocument(vendor.id, 'CAC_REGISTRATION', duplicateHash, 45, DocumentVerificationStatus.NEEDS_REVIEW, [], [
-    { code: 'DUPLICATE_DOCUMENT', message: 'This document hash is linked to another vendor.', severity: 'HIGH', scoreImpact: 45 },
-  ]);
-  await createDocument(vendor.id, 'TAX_ID', 'seed_doc_hash_tax_missing_name', 20, DocumentVerificationStatus.NEEDS_REVIEW, [
-    { label: 'Tax identification number', extracted: '1234567890', verified: '', confidence: 88, status: 'match' },
-    { label: 'Legal business name', extracted: '', verified: vendor.businessName, confidence: 0, status: 'missing' },
-  ], [
-    { code: 'MISSING_EXPECTED_FIELD', message: 'Business name missing on tax document.', severity: 'MEDIUM', scoreImpact: 10 },
-  ]);
+  await createBankAndTransfer(
+    vendor.id,
+    vendor.businessName,
+    sharedAccountHash,
+    '2020',
+    'TRF_SEED_SHARED_A',
+    'PENDING',
+    90000,
+    58,
+  );
+  await createDocument(
+    vendor.id,
+    'CAC_REGISTRATION',
+    duplicateHash,
+    45,
+    DocumentVerificationStatus.NEEDS_REVIEW,
+    [],
+    [
+      {
+        code: 'DUPLICATE_DOCUMENT',
+        message: 'This document hash is linked to another vendor.',
+        severity: 'HIGH',
+        scoreImpact: 45,
+      },
+    ],
+  );
+  await createDocument(
+    vendor.id,
+    'TAX_ID',
+    'seed_doc_hash_tax_missing_name',
+    20,
+    DocumentVerificationStatus.NEEDS_REVIEW,
+    [
+      {
+        label: 'Tax identification number',
+        extracted: '1234567890',
+        verified: '',
+        confidence: 88,
+        status: 'match',
+      },
+      {
+        label: 'Legal business name',
+        extracted: '',
+        verified: vendor.businessName,
+        confidence: 0,
+        status: 'missing',
+      },
+    ],
+    [
+      {
+        code: 'MISSING_EXPECTED_FIELD',
+        message: 'Business name missing on tax document.',
+        severity: 'MEDIUM',
+        scoreImpact: 10,
+      },
+    ],
+  );
   await createRisk(vendor.id, {
     documentRisk: 55,
     deviceRisk: 70,
     networkFraudRisk: 45,
     overallRisk: 70,
     riskLevel: RiskLevel.HIGH,
-    reasons: [{ code: 'SEED_DUPLICATE_CLUSTER', message: 'Duplicate document and shared device signals.', severity: 'HIGH', scoreImpact: 70 }],
+    reasons: [
+      {
+        code: 'SEED_DUPLICATE_CLUSTER',
+        message: 'Duplicate document and shared device signals.',
+        severity: 'HIGH',
+        scoreImpact: 70,
+      },
+    ],
   });
 }
 
@@ -229,10 +359,33 @@ async function seedSharedDeviceVendor(
   duplicateVendor: { id: string },
 ) {
   await createDevice(vendor.id, sharedDeviceHash, 70);
-  await createBankAndTransfer(vendor.id, vendor.businessName, sharedAccountHash, '2020', 'TRF_SEED_SHARED_B', 'FAILED', 50000, 45);
-  await createDocument(vendor.id, 'CAC_REGISTRATION', duplicateHash, 45, DocumentVerificationStatus.NEEDS_REVIEW, [], [
-    { code: 'DUPLICATE_DOCUMENT', message: 'This document hash is linked to another vendor.', severity: 'HIGH', scoreImpact: 45, metadata: { duplicateVendorId: duplicateVendor.id } },
-  ]);
+  await createBankAndTransfer(
+    vendor.id,
+    vendor.businessName,
+    sharedAccountHash,
+    '2020',
+    'TRF_SEED_SHARED_B',
+    'FAILED',
+    50000,
+    45,
+  );
+  await createDocument(
+    vendor.id,
+    'CAC_REGISTRATION',
+    duplicateHash,
+    45,
+    DocumentVerificationStatus.NEEDS_REVIEW,
+    [],
+    [
+      {
+        code: 'DUPLICATE_DOCUMENT',
+        message: 'This document hash is linked to another vendor.',
+        severity: 'HIGH',
+        scoreImpact: 45,
+        metadata: { duplicateVendorId: duplicateVendor.id },
+      },
+    ],
+  );
   await createRisk(vendor.id, {
     documentRisk: 55,
     networkFraudRisk: 88,
@@ -241,28 +394,97 @@ async function seedSharedDeviceVendor(
     identityMismatchRisk: 25,
     overallRisk: 90,
     riskLevel: RiskLevel.CRITICAL,
-    reasons: [{ code: 'SEED_FRAUD_CLUSTER', message: 'Seeded multi-signal fraud cluster.', severity: 'CRITICAL', scoreImpact: 90 }],
+    reasons: [
+      {
+        code: 'SEED_FRAUD_CLUSTER',
+        message: 'Seeded multi-signal fraud cluster.',
+        severity: 'CRITICAL',
+        scoreImpact: 90,
+      },
+    ],
   });
 }
 
-async function seedFinancialRiskVendor(vendor: { id: string; businessName: string }) {
+async function seedFinancialRiskVendor(vendor: {
+  id: string;
+  businessName: string;
+}) {
   await createDevice(vendor.id, 'seed_device_financial_001', 0);
-  await createBankAndTransfer(vendor.id, vendor.businessName, 'seed_bank_hash_financial_001', '7788', 'TRF_SEED_FINANCIAL', 'SUCCESS', 1200000, 92);
-  await createTransaction(vendor.id, 'TXN_SEED_FAIL_001', 15000, 'card', 'FAILED', 25);
-  await createTransaction(vendor.id, 'TXN_SEED_FAIL_002', 17500, 'card', 'FAILED', 25);
-  await createTransaction(vendor.id, 'TXN_SEED_FAIL_003', 21000, 'card', 'FAILED', 25);
-  await createTransaction(vendor.id, 'TXN_SEED_HIGH_001', 2500000, 'virtual-account', 'SUCCESS', 72);
+  await createBankAndTransfer(
+    vendor.id,
+    vendor.businessName,
+    'seed_bank_hash_financial_001',
+    '7788',
+    'TRF_SEED_FINANCIAL',
+    'SUCCESS',
+    1200000,
+    92,
+  );
+  await createTransaction(
+    vendor.id,
+    'TXN_SEED_FAIL_001',
+    15000,
+    'card',
+    'FAILED',
+    25,
+  );
+  await createTransaction(
+    vendor.id,
+    'TXN_SEED_FAIL_002',
+    17500,
+    'card',
+    'FAILED',
+    25,
+  );
+  await createTransaction(
+    vendor.id,
+    'TXN_SEED_FAIL_003',
+    21000,
+    'card',
+    'FAILED',
+    25,
+  );
+  await createTransaction(
+    vendor.id,
+    'TXN_SEED_HIGH_001',
+    2500000,
+    'virtual-account',
+    'SUCCESS',
+    72,
+  );
   await createWebhook(vendor.id, 'transaction.failed', 'TXN_SEED_FAIL_001');
   await createWebhook(vendor.id, 'transaction.replay', 'TXN_SEED_FAIL_001');
-  await createDocument(vendor.id, 'CAC_REGISTRATION', 'seed_doc_hash_synthetic', 75, DocumentVerificationStatus.NEEDS_REVIEW, [], [
-    { code: 'SUSPECTED_AI_GENERATED_DOCUMENT', message: 'Synthetic document risk is elevated.', severity: 'HIGH', scoreImpact: 30 },
-  ], 82, true);
+  await createDocument(
+    vendor.id,
+    'CAC_REGISTRATION',
+    'seed_doc_hash_synthetic',
+    75,
+    DocumentVerificationStatus.NEEDS_REVIEW,
+    [],
+    [
+      {
+        code: 'SUSPECTED_AI_GENERATED_DOCUMENT',
+        message: 'Synthetic document risk is elevated.',
+        severity: 'HIGH',
+        scoreImpact: 30,
+      },
+    ],
+    82,
+    true,
+  );
   await createRisk(vendor.id, {
     documentRisk: 75,
     financialAnomalyRisk: 72,
     overallRisk: 75,
     riskLevel: RiskLevel.HIGH,
-    reasons: [{ code: 'SEED_FINANCIAL_ANOMALY', message: 'Repeated failures, replay, and high-value transaction.', severity: 'HIGH', scoreImpact: 72 }],
+    reasons: [
+      {
+        code: 'SEED_FINANCIAL_ANOMALY',
+        message: 'Repeated failures, replay, and high-value transaction.',
+        severity: 'HIGH',
+        scoreImpact: 72,
+      },
+    ],
   });
 }
 
@@ -274,10 +496,34 @@ async function createDocumentSet(
     tamperScore: number;
   },
 ) {
-  await createDocument(vendorId, 'CAC_REGISTRATION', input.cacHash, input.tamperScore, input.status);
-  await createDocument(vendorId, 'TAX_ID', `${input.cacHash}_tax`, 4, input.status);
-  await createDocument(vendorId, 'OWNER_ID', `${input.cacHash}_owner`, 3, input.status);
-  await createDocument(vendorId, 'ADDRESS_PROOF', `${input.cacHash}_address`, 5, input.status);
+  await createDocument(
+    vendorId,
+    'CAC_REGISTRATION',
+    input.cacHash,
+    input.tamperScore,
+    input.status,
+  );
+  await createDocument(
+    vendorId,
+    'TAX_ID',
+    `${input.cacHash}_tax`,
+    4,
+    input.status,
+  );
+  await createDocument(
+    vendorId,
+    'OWNER_ID',
+    `${input.cacHash}_owner`,
+    3,
+    input.status,
+  );
+  await createDocument(
+    vendorId,
+    'ADDRESS_PROOF',
+    `${input.cacHash}_address`,
+    5,
+    input.status,
+  );
 }
 
 async function createDocument(
@@ -310,14 +556,24 @@ async function createDocument(
       aiGeneratedScore,
       aiGeneratedDetected,
       forensicSignals: aiGeneratedDetected
-        ? [{ code: 'SEED_SYNTHETIC_DOCUMENT', message: 'Seeded synthetic risk.', weight: 30 }]
+        ? [
+            {
+              code: 'SEED_SYNTHETIC_DOCUMENT',
+              message: 'Seeded synthetic risk.',
+              weight: 30,
+            },
+          ]
         : [],
       processedAt: new Date(),
     },
   });
 }
 
-async function createDevice(vendorId: string, deviceHash: string, riskScore: number) {
+async function createDevice(
+  vendorId: string,
+  deviceHash: string,
+  riskScore: number,
+) {
   return prisma.device.create({
     data: {
       vendorId,

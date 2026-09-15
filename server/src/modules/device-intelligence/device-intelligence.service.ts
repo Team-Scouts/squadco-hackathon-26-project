@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { CreateDeviceDto } from './dto/create-device-dto';
-import { GraphService } from '../graph/graph.service';
-import { RiskLevel } from '../../generated/prisma/enums';
-import { RiskService } from '../risk/risk.service';
+import { PrismaService } from '../../prisma/prisma.service.js';
+import { CreateDeviceDto } from './dto/create-device-dto.js';
+import { GraphService } from '../graph/graph.service.js';
+import { RiskLevel } from '../../generated/prisma/enums.js';
+import { RiskService } from '../risk/risk.service.js';
 
 type DeviceRiskReason = {
   code: string;
@@ -128,7 +128,10 @@ export class DeviceIntelligenceService {
     const devices = await this.prisma.device.findMany({
       where: { vendorId },
     });
-    const deviceRisk = Math.max(0, ...devices.map((device) => device.riskScore));
+    const deviceRisk = Math.max(
+      0,
+      ...devices.map((device) => device.riskScore),
+    );
     const reasons: DeviceRiskReason[] = input.suspicious
       ? [
           {
@@ -164,7 +167,9 @@ export class DeviceIntelligenceService {
       return ipAddress[0] ?? '';
     }
 
-    return String(ipAddress ?? '').split(',')[0].trim();
+    return String(ipAddress ?? '')
+      .split(',')[0]
+      .trim();
   }
 
   private resolveRiskLevel(score: number) {

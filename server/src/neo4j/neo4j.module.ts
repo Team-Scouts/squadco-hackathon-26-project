@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { Neo4jService } from './neo4j.service';
-import { Neo4jController } from './neo4j.controller';
+import { Neo4jService } from './neo4j.service.js';
+import { Neo4jController } from './neo4j.controller.js';
 
 @Module({
   imports: [ConfigModule],

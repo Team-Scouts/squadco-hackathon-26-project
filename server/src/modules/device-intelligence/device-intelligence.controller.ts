@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
 import { AllowAnonymous, Roles } from '@thallesp/nestjs-better-auth';
-import { CreateDeviceDto } from './dto/create-device-dto';
-import { DeviceIntelligenceService } from './device-intelligence.service';
+import { CreateDeviceDto } from './dto/create-device-dto.js';
+import { DeviceIntelligenceService } from './device-intelligence.service.js';
 
 @Controller('devices')
 export class DeviceIntelligenceController {

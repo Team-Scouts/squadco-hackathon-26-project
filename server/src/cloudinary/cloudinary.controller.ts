@@ -7,9 +7,9 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
-import { CloudinaryService } from './cloudinary.service';
-import { CreateCloudinaryDto } from './dto/create-cloudinary.dto';
-import { UpdateCloudinaryDto } from './dto/update-cloudinary.dto';
+import { CloudinaryService } from './cloudinary.service.js';
+import { CreateCloudinaryDto } from './dto/create-cloudinary.dto.js';
+import { UpdateCloudinaryDto } from './dto/update-cloudinary.dto.js';
 
 @Controller('cloudinary')
 export class CloudinaryController {

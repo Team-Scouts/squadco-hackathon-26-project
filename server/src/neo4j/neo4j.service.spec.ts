@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Neo4jService } from './neo4j.service';
+import { Neo4jService } from './neo4j.service.js';
 
 describe('Neo4jService', () => {
   let service: Neo4jService;

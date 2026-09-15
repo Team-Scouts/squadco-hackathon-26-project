@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import cloudinary from '../config/cloudinary.config';
+import cloudinary from '../config/cloudinary.config.js';
 import multer from 'multer';
 
 @Injectable()

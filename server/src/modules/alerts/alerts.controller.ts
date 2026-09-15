@@ -1,8 +1,8 @@
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { Roles } from '@thallesp/nestjs-better-auth';
 
-import { AlertsService } from './alerts.service';
-import { CreateAlertDto } from './dto/create-alert.dto';
+import { AlertsService } from './alerts.service.js';
+import { CreateAlertDto } from './dto/create-alert.dto.js';
 
 @Controller('alerts')
 @Roles(['admin', 'reviewer'])

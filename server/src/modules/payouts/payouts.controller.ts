@@ -1,7 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { PayoutsService } from './payouts.service';
-import { CreatePayoutDto } from './dto/create-payout.dto';
-import { UpdatePayoutDto } from './dto/update-payout.dto';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
+import { PayoutsService } from './payouts.service.js';
+import { CreatePayoutDto } from './dto/create-payout.dto.js';
+import { UpdatePayoutDto } from './dto/update-payout.dto.js';
 
 @Controller('payouts')
 export class PayoutsController {

@@ -10,7 +10,7 @@ import {
   HttpStatus,
   Headers,
 } from '@nestjs/common';
-import { SquadService } from './squad.service';
+import { SquadService } from './squad.service.js';
 import {
   InitiatePaymentDto,
   ChargeCardDto,
@@ -23,7 +23,7 @@ import {
   GetAllTransfersDto,
   RefundDto,
   VirtualAccountDto,
-} from './dto/squad.dto';
+} from './dto/squad.dto.js';
 import {
   AllowAnonymous,
   OptionalAuth,

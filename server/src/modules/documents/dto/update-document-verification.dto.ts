@@ -7,7 +7,7 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { DocumentVerificationStatus } from '../../../generated/prisma/enums';
+import { DocumentVerificationStatus } from '../../../generated/prisma/enums.js';
 
 export class DocumentFieldVerificationDto {
   @IsString()

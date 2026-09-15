@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Neo4jController } from './neo4j.controller';
-import { Neo4jService } from './neo4j.service';
+import { Neo4jController } from './neo4j.controller.js';
+import { Neo4jService } from './neo4j.service.js';
 
 describe('Neo4jController', () => {
   let controller: Neo4jController;

@@ -9,9 +9,9 @@ import {
 } from '@nestjs/common';
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import { createHmac, timingSafeEqual } from 'node:crypto';
-import { PrismaService } from '../../prisma/prisma.service';
-import { GraphService } from '../graph/graph.service';
-import { TransactionsService } from '../transactions/transactions.service';
+import { PrismaService } from '../../prisma/prisma.service.js';
+import { GraphService } from '../graph/graph.service.js';
+import { TransactionsService } from '../transactions/transactions.service.js';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -19,9 +19,9 @@ import {
   SQUAD_MODULE_OPTIONS,
   SQUAD_SANDBOX_BASE_URL,
   SQUAD_PRODUCTION_BASE_URL,
-} from '../squad/squad.config';
+} from '../squad/squad.config.js';
 
-import type { SquadModuleOptions } from '../squad/squad.config';
+import type { SquadModuleOptions } from '../squad/squad.config.js';
 import {
   InitiatePaymentDto,
   ChargeCardDto,
@@ -34,7 +34,7 @@ import {
   GetAllTransfersDto,
   RefundDto,
   VirtualAccountDto,
-} from './dto/squad.dto';
+} from './dto/squad.dto.js';
 
 import {
   SquadApiResponse,
@@ -46,7 +46,7 @@ import {
   TransferRecord,
   RefundResponseData,
   TransactionRecord,
-} from '../squad/squad.interfaces';
+} from '../squad/squad.interfaces.js';
 
 @Injectable()
 export class SquadService {
@@ -344,23 +344,28 @@ export class SquadService {
   ) {
     const amount = this.resolveAmount(data, metadata);
     const channel =
-      this.resolveFirstStringFromSources([data, metadata], [
-        'channel',
-        'payment_channel',
-        'paymentChannel',
-        'transaction_channel',
-        'payment_method',
-        'paymentMethod',
-      ]) ??
-      (data.virtual_account_number ? 'virtual-account' : 'SQUAD');
+      this.resolveFirstStringFromSources(
+        [data, metadata],
+        [
+          'channel',
+          'payment_channel',
+          'paymentChannel',
+          'transaction_channel',
+          'payment_method',
+          'paymentMethod',
+        ],
+      ) ?? (data.virtual_account_number ? 'virtual-account' : 'SQUAD');
     const status =
-      this.resolveFirstStringFromSources([data, metadata], [
-        'status',
-        'transaction_status',
-        'transactionStatus',
-        'payment_status',
-        'paymentStatus',
-      ]) ??
+      this.resolveFirstStringFromSources(
+        [data, metadata],
+        [
+          'status',
+          'transaction_status',
+          'transactionStatus',
+          'payment_status',
+          'paymentStatus',
+        ],
+      ) ??
       (String(data.transaction_indicator ?? '').toUpperCase() === 'C'
         ? 'SUCCESS'
         : 'UNKNOWN');
@@ -423,11 +428,10 @@ export class SquadService {
         transferReference,
         amount: this.resolveAmount(data, metadata),
         currency:
-          this.resolveFirstStringFromSources([data, metadata], [
-            'currency',
-            'currency_id',
-            'currencyId',
-          ]) ?? 'NGN',
+          this.resolveFirstStringFromSources(
+            [data, metadata],
+            ['currency', 'currency_id', 'currencyId'],
+          ) ?? 'NGN',
         status:
           this.resolveFirstStringFromSources([data, metadata], ['status']) ??
           'UNKNOWN',
@@ -436,11 +440,10 @@ export class SquadService {
       update: {
         amount: this.resolveAmount(data, metadata),
         currency:
-          this.resolveFirstStringFromSources([data, metadata], [
-            'currency',
-            'currency_id',
-            'currencyId',
-          ]) ?? 'NGN',
+          this.resolveFirstStringFromSources(
+            [data, metadata],
+            ['currency', 'currency_id', 'currencyId'],
+          ) ?? 'NGN',
         status:
           this.resolveFirstStringFromSources([data, metadata], ['status']) ??
           'UNKNOWN',
@@ -456,13 +459,10 @@ export class SquadService {
     data: Record<string, any>,
   ) {
     return (
-      this.resolveFirstStringFromSources([payload, data], [
-        'eventType',
-        'event_type',
-        'event',
-        'type',
-        'name',
-      ]) ?? 'UNKNOWN'
+      this.resolveFirstStringFromSources(
+        [payload, data],
+        ['eventType', 'event_type', 'event', 'type', 'name'],
+      ) ?? 'UNKNOWN'
     );
   }
 
@@ -486,15 +486,18 @@ export class SquadService {
     data: Record<string, any>,
     metadata: Record<string, any>,
   ) {
-    return this.resolveFirstStringFromSources([data, metadata], [
-      'transactionReference',
-      'transactionRef',
-      'transaction_ref',
-      'transaction_reference',
-      'paymentReference',
-      'payment_reference',
-      'reference',
-    ]);
+    return this.resolveFirstStringFromSources(
+      [data, metadata],
+      [
+        'transactionReference',
+        'transactionRef',
+        'transaction_ref',
+        'transaction_reference',
+        'paymentReference',
+        'payment_reference',
+        'reference',
+      ],
+    );
   }
 
   private resolveTransferReference(
@@ -502,16 +505,19 @@ export class SquadService {
     metadata: Record<string, any>,
     isTransferEvent: boolean,
   ) {
-    return this.resolveFirstStringFromSources([data, metadata], [
-      'transferReference',
-      'transferRef',
-      'transfer_reference',
-      'payoutReference',
-      'payout_reference',
-      ...(isTransferEvent
-        ? ['transaction_reference', 'transactionReference', 'reference']
-        : []),
-    ]);
+    return this.resolveFirstStringFromSources(
+      [data, metadata],
+      [
+        'transferReference',
+        'transferRef',
+        'transfer_reference',
+        'payoutReference',
+        'payout_reference',
+        ...(isTransferEvent
+          ? ['transaction_reference', 'transactionReference', 'reference']
+          : []),
+      ],
+    );
   }
 
   private isTransferEvent(
@@ -525,13 +531,16 @@ export class SquadService {
       normalizedEventType.includes('transfer') ||
       normalizedEventType.includes('payout') ||
       Boolean(
-        this.resolveFirstStringFromSources([data, metadata], [
-          'transferReference',
-          'transferRef',
-          'transfer_reference',
-          'payoutReference',
-          'payout_reference',
-        ]),
+        this.resolveFirstStringFromSources(
+          [data, metadata],
+          [
+            'transferReference',
+            'transferRef',
+            'transfer_reference',
+            'payoutReference',
+            'payout_reference',
+          ],
+        ),
       )
     );
   }
@@ -696,17 +705,20 @@ export class SquadService {
     metadata: Record<string, any> = {},
   ) {
     const amount =
-      this.resolveFirstValueFromSources([data, metadata], [
-        'principal_amount',
-        'principalAmount',
-        'settled_amount',
-        'settledAmount',
-        'amount',
-        'amount_paid',
-        'amountPaid',
-        'transfer_amount',
-        'transferAmount',
-      ]) ?? 0;
+      this.resolveFirstValueFromSources(
+        [data, metadata],
+        [
+          'principal_amount',
+          'principalAmount',
+          'settled_amount',
+          'settledAmount',
+          'amount',
+          'amount_paid',
+          'amountPaid',
+          'transfer_amount',
+          'transferAmount',
+        ],
+      ) ?? 0;
     const parsed = Number(amount);
     return Number.isFinite(parsed) ? parsed : 0;
   }
@@ -870,11 +882,10 @@ export class SquadService {
         customerIdentifier: dto.customer_identifier,
         virtualAccountNumber,
         currency:
-          this.resolveFirstStringFromSources([responseData], [
-            'currency',
-            'currency_id',
-            'currencyId',
-          ]) ?? 'NGN',
+          this.resolveFirstStringFromSources(
+            [responseData],
+            ['currency', 'currency_id', 'currencyId'],
+          ) ?? 'NGN',
         active: true,
         rawResponse: data as any,
       },
@@ -882,11 +893,10 @@ export class SquadService {
         vendorId,
         customerIdentifier: dto.customer_identifier,
         currency:
-          this.resolveFirstStringFromSources([responseData], [
-            'currency',
-            'currency_id',
-            'currencyId',
-          ]) ?? 'NGN',
+          this.resolveFirstStringFromSources(
+            [responseData],
+            ['currency', 'currency_id', 'currencyId'],
+          ) ?? 'NGN',
         active: true,
         rawResponse: data as any,
       },

@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Post } from '@nestjs/common';
 import { Roles } from '@thallesp/nestjs-better-auth';
-import { GraphService } from './graph.service';
+import { GraphService } from './graph.service.js';
 
 @Roles(['admin', 'reviewer'])
 @Controller('graph')

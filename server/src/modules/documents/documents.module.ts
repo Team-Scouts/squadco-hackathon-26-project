@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { DocumentsService } from './documents.service';
-import { DocumentsController } from './documents.controller';
-import { PrismaService } from '../../prisma/prisma.service';
-import { CloudinaryService } from '../../cloudinary/cloudinary.service';
-import { GraphModule } from '../graph/graph.module';
-import { DocumentIntelligenceService } from './document-intelligence.service';
-import { RiskModule } from '../risk/risk.module';
+import { DocumentsService } from './documents.service.js';
+import { DocumentsController } from './documents.controller.js';
+import { PrismaService } from '../../prisma/prisma.service.js';
+import { CloudinaryService } from '../../cloudinary/cloudinary.service.js';
+import { GraphModule } from '../graph/graph.module.js';
+import { DocumentIntelligenceService } from './document-intelligence.service.js';
+import { RiskModule } from '../risk/risk.module.js';
 
 @Module({
   imports: [GraphModule, RiskModule],

@@ -12,10 +12,10 @@ import { Roles } from '@thallesp/nestjs-better-auth';
 
 import { FileInterceptor } from '@nestjs/platform-express';
 
-import { DocumentsService } from './documents.service';
+import { DocumentsService } from './documents.service.js';
 
-import { UploadDocumentDto } from './dto/upload-document.dto';
-import { UpdateDocumentVerificationDto } from './dto/update-document-verification.dto';
+import { UploadDocumentDto } from './dto/upload-document.dto.js';
+import { UpdateDocumentVerificationDto } from './dto/update-document-verification.dto.js';
 
 @Roles(['admin', 'reviewer'])
 @Controller('documents')

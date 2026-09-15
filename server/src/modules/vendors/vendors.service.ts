@@ -1,14 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { CreateVendorDto } from './dto/create-vendor.dto';
+import { CreateVendorDto } from './dto/create-vendor.dto.js';
 
-import { PrismaService } from '../../prisma/prisma.service';
-import { UpdateVendorDto } from './dto/update-vendor.dto';
-import { GraphService } from '../graph/graph.service';
-import { SquadService } from '../squad/squad.service';
-import { DocumentsService } from '../documents/documents.service';
-import { TransactionsService } from '../transactions/transactions.service';
-import { RiskService } from '../risk/risk.service';
+import { PrismaService } from '../../prisma/prisma.service.js';
+import { UpdateVendorDto } from './dto/update-vendor.dto.js';
+import { GraphService } from '../graph/graph.service.js';
+import { SquadService } from '../squad/squad.service.js';
+import { DocumentsService } from '../documents/documents.service.js';
+import { TransactionsService } from '../transactions/transactions.service.js';
+import { RiskService } from '../risk/risk.service.js';
 
 const testVirtualAccountObject = {
   address: '22 Kota street, UK',
@@ -222,7 +222,8 @@ export class VendorsService {
     }
 
     const documents = await this.documentsService.runVendorChecks(id);
-    const financial = await this.transactionsService.evaluateVendorFinancialRisk(id);
+    const financial =
+      await this.transactionsService.evaluateVendorFinancialRisk(id);
     const risk = await this.riskService.recomputeVendorRisk(id);
     const graphSynced = await this.graphService.safeSyncVendorById(id);
 

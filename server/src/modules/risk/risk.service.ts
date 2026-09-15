@@ -1,14 +1,14 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service.js';
 import {
   AlertSeverity,
   AlertType,
   DocumentVerificationStatus,
   RiskLevel,
-} from '../../generated/prisma/enums';
-import { CreateRiskDto } from './dto/create-risk.dto';
-import { UpdateRiskDto } from './dto/update-risk.dto';
-import { AlertsService } from '../alerts/alerts.service';
+} from '../../generated/prisma/enums.js';
+import { CreateRiskDto } from './dto/create-risk.dto.js';
+import { UpdateRiskDto } from './dto/update-risk.dto.js';
+import { AlertsService } from '../alerts/alerts.service.js';
 
 export type RiskSignal = {
   code: string;
@@ -73,12 +73,15 @@ export class RiskService {
       input.documentRisk,
     );
     const deviceRisk =
-      input.deviceRisk ?? Math.max(0, ...vendor.devices.map((device) => device.riskScore));
+      input.deviceRisk ??
+      Math.max(0, ...vendor.devices.map((device) => device.riskScore));
     const financialAnomalyRisk =
       input.financialAnomalyRisk ??
       Math.max(
         latestRisk?.financialAnomalyRisk ?? 0,
-        ...vendor.transactions.map((transaction) => transaction.financialRiskScore),
+        ...vendor.transactions.map(
+          (transaction) => transaction.financialRiskScore,
+        ),
       );
     const identityMismatchRisk = Math.max(
       input.identityMismatchRisk ?? 0,
@@ -189,7 +192,9 @@ export class RiskService {
     }>,
     override?: number,
   ) {
-    const uploadedTypes = new Set(documents.map((document) => document.documentType));
+    const uploadedTypes = new Set(
+      documents.map((document) => document.documentType),
+    );
     const missingTypes = REQUIRED_DOCUMENT_TYPES.filter(
       (documentType) => !uploadedTypes.has(documentType),
     );
@@ -200,7 +205,8 @@ export class RiskService {
       override ?? 0,
     );
     const rejectedDocumentRisk = documents.some(
-      (document) => document.verificationStatus === DocumentVerificationStatus.REJECTED,
+      (document) =>
+        document.verificationStatus === DocumentVerificationStatus.REJECTED,
     )
       ? 60
       : 0;
@@ -208,7 +214,8 @@ export class RiskService {
       ? [
           {
             code: 'MISSING_REQUIRED_KYC_DOCUMENTS',
-            message: 'One or more required KYC documents have not been uploaded.',
+            message:
+              'One or more required KYC documents have not been uploaded.',
             severity: missingRequiredRisk >= 30 ? 'MEDIUM' : 'LOW',
             scoreImpact: missingRequiredRisk,
             metadata: {
@@ -312,7 +319,10 @@ export class RiskService {
         await this.alertsService.createRiskAlert({
           vendorId: input.vendorId,
           type: alertType,
-          severity: this.resolveAlertSeverity(reason.severity, reason.scoreImpact),
+          severity: this.resolveAlertSeverity(
+            reason.severity,
+            reason.scoreImpact,
+          ),
           title: this.resolveAlertTitle(reason.code),
           message: reason.message,
         });

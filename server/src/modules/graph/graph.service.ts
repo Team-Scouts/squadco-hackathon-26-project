@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { Neo4jService } from '../../neo4j/neo4j.service';
-import { PrismaService } from '../../prisma/prisma.service';
+import { Neo4jService } from '../../neo4j/neo4j.service.js';
+import { PrismaService } from '../../prisma/prisma.service.js';
 
 type GraphNode = {
   id: string;
@@ -57,8 +57,11 @@ export class GraphService {
     let failed = 0;
 
     for (const user of users) {
-      const result = await this.safeGraphSync('User', user.id, 'upsertUser', () =>
-        this.upsertUserGraph(user),
+      const result = await this.safeGraphSync(
+        'User',
+        user.id,
+        'upsertUser',
+        () => this.upsertUserGraph(user),
       );
       result ? synced++ : failed++;
     }
@@ -87,22 +90,32 @@ export class GraphService {
   }
 
   async safeSyncVendorById(vendorId: string) {
-    return this.safeGraphSync('Vendor', vendorId, 'syncVendorById', async () => {
-      const vendor = await this.getVendorWithRelations(vendorId);
-      await this.upsertVendorGraph(vendor);
-    });
+    return this.safeGraphSync(
+      'Vendor',
+      vendorId,
+      'syncVendorById',
+      async () => {
+        const vendor = await this.getVendorWithRelations(vendorId);
+        await this.upsertVendorGraph(vendor);
+      },
+    );
   }
 
   async safeDeleteVendorById(vendorId: string) {
-    return this.safeGraphSync('Vendor', vendorId, 'deleteVendorById', async () => {
-      await this.neo4j.write(
-        `
+    return this.safeGraphSync(
+      'Vendor',
+      vendorId,
+      'deleteVendorById',
+      async () => {
+        await this.neo4j.write(
+          `
         MATCH (v:Vendor {id: $vendorId})
         DETACH DELETE v
         `,
-        { vendorId },
-      );
-    });
+          { vendorId },
+        );
+      },
+    );
   }
 
   async safeSyncWebhookEventById(webhookEventId: string) {
@@ -116,7 +129,9 @@ export class GraphService {
         });
 
         if (!webhookEvent) {
-          throw new NotFoundException(`Webhook event ${webhookEventId} not found`);
+          throw new NotFoundException(
+            `Webhook event ${webhookEventId} not found`,
+          );
         }
 
         await this.upsertWebhookEventGraph(webhookEvent);
@@ -471,7 +486,12 @@ export class GraphService {
       const targetId = this.resolveNodeId(type, link.node);
       this.addNode(
         graph,
-        this.toGraphNode(type, targetId, this.resolveLabel(type, link.node), link.node),
+        this.toGraphNode(
+          type,
+          targetId,
+          this.resolveLabel(type, link.node),
+          link.node,
+        ),
       );
       this.addEdge(graph, vendor.id, targetId, link.relationship);
     }
@@ -505,7 +525,12 @@ export class GraphService {
       );
       this.addNode(
         graph,
-        this.toGraphNode('Device', device.id, this.resolveLabel('Device', device), device),
+        this.toGraphNode(
+          'Device',
+          device.id,
+          this.resolveLabel('Device', device),
+          device,
+        ),
       );
       this.addEdge(graph, clusterId, device.id, 'HAS_SHARED_SIGNAL');
 
@@ -613,7 +638,12 @@ export class GraphService {
         const data = document.properties ?? document;
         this.addNode(
           graph,
-          this.toGraphNode('Document', data.id, this.resolveLabel('Document', data), data),
+          this.toGraphNode(
+            'Document',
+            data.id,
+            this.resolveLabel('Document', data),
+            data,
+          ),
         );
         this.addEdge(graph, clusterId, data.id, 'HAS_SHARED_SIGNAL');
       }
@@ -688,7 +718,9 @@ export class GraphService {
       return true;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      this.logger.error(`${operation} failed for ${entityType}:${entityId}: ${message}`);
+      this.logger.error(
+        `${operation} failed for ${entityType}:${entityId}: ${message}`,
+      );
       await this.prisma.graphSyncFailure.create({
         data: {
           entityType,

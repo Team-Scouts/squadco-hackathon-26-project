@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { GraphService } from './graph.service';
-import { GraphController } from './graph.controller';
-import { Neo4jModule } from '../../neo4j/neo4j.module';
-import { PrismaModule } from '../../prisma/prisma.module';
+import { GraphService } from './graph.service.js';
+import { GraphController } from './graph.controller.js';
+import { Neo4jModule } from '../../neo4j/neo4j.module.js';
+import { PrismaModule } from '../../prisma/prisma.module.js';
 
 @Module({
   imports: [Neo4jModule, PrismaModule],

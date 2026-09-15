@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateTransactionDto } from './dto/create-transaction.dto';
-import { UpdateTransactionDto } from './dto/update-transaction.dto';
-import { PrismaService } from '../../prisma/prisma.service';
-import { GraphService } from '../graph/graph.service';
-import { RiskLevel } from '../../generated/prisma/enums';
-import { RiskService } from '../risk/risk.service';
+import { CreateTransactionDto } from './dto/create-transaction.dto.js';
+import { UpdateTransactionDto } from './dto/update-transaction.dto.js';
+import { PrismaService } from '../../prisma/prisma.service.js';
+import { GraphService } from '../graph/graph.service.js';
+import { RiskLevel } from '../../generated/prisma/enums.js';
+import { RiskService } from '../risk/risk.service.js';
 
 type FinancialRiskSignal = {
   code: string;
@@ -143,7 +143,8 @@ export class TransactionsService {
       })),
     ].sort(
       (left, right) =>
-        new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
+        new Date(right.createdAt).getTime() -
+        new Date(left.createdAt).getTime(),
     );
 
     return {
@@ -298,7 +299,8 @@ export class TransactionsService {
 
     const currentTransaction = context.transactionRef
       ? vendor.transactions.find(
-          (transaction) => transaction.transactionRef === context.transactionRef,
+          (transaction) =>
+            transaction.transactionRef === context.transactionRef,
         )
       : vendor.transactions[0];
     const previousAmounts = vendor.transactions
@@ -347,7 +349,8 @@ export class TransactionsService {
     for (const reference of replayedRefs) {
       signals.push({
         code: 'WEBHOOK_REPLAY_OR_IDEMPOTENCY_CONFLICT',
-        message: 'Multiple webhook events reference the same transaction or transfer.',
+        message:
+          'Multiple webhook events reference the same transaction or transfer.',
         severity: 'MEDIUM',
         scoreImpact: 15,
         metadata: { reference },
@@ -445,10 +448,12 @@ export class TransactionsService {
     };
   }
 
-  private findReplayedReferences(webhookEvents: Array<{
-    transactionReference: string | null;
-    transferReference: string | null;
-  }>) {
+  private findReplayedReferences(
+    webhookEvents: Array<{
+      transactionReference: string | null;
+      transferReference: string | null;
+    }>,
+  ) {
     const counts = new Map<string, number>();
 
     for (const event of webhookEvents) {

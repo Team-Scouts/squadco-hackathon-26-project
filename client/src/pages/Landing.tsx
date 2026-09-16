@@ -6,6 +6,8 @@ import {
   type MutableRefObject,
   type PointerEvent,
 } from "react";
+import { authClient } from "../lib/authClient";
+import { useNavigate } from "react-router-dom";
 
 /* ── data ── */
 const metrics = [
@@ -265,15 +267,15 @@ function SectionBoundary({
 
   return (
     <div className="pointer-events-none absolute inset-x-0 top-0 z-10">
-      <div className="h-px bg-gradient-to-r from-transparent via-white/35 to-transparent" />
+      <div className="h-px bg-linear-to-r from-transparent via-white/35 to-transparent" />
       <div className="mx-auto flex max-w-5xl items-center gap-4 px-6 md:px-0">
-        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-white/20" />
+        <div className="h-px flex-1 bg-linear-to-r from-transparent via-white/10 to-white/20" />
         <span
           className={`-mt-px rounded-b border border-t-0 px-4 py-2 text-[10px] font-black uppercase tracking-[0.24em] backdrop-blur-xl ${toneClasses[tone]}`}
         >
           {label}
         </span>
-        <div className="h-px flex-1 bg-gradient-to-l from-transparent via-white/10 to-white/20" />
+        <div className="h-px flex-1 bg-linear-to-l from-transparent via-white/10 to-white/20" />
       </div>
     </div>
   );
@@ -282,6 +284,8 @@ function SectionBoundary({
 export default function Landing() {
   const [scrollY, setScrollY] = useState(0);
   const mouseRef = useRef<MousePoint>({ x: -9999, y: -9999 });
+  const navigate = useNavigate();
+  const [isLoggingIn, updateLogInStatus] = useState(false);
 
   useEffect(() => {
     const h = () => setScrollY(window.scrollY);
@@ -303,13 +307,13 @@ export default function Landing() {
 
   return (
     <div
-      className="min-h-svh bg-[#0a0a0f] text-gray-200 font-sans scanlines cyber-grid overflow-x-hidden"
+      className="min-h-svh bg-cyber-dark text-gray-200 font-sans scanlines cyber-grid overflow-x-hidden"
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
     >
       <MatrixRain mouseRef={mouseRef} />
       <div
-        className="pointer-events-none fixed left-0 top-0 z-[60] h-64 w-64 rounded-full opacity-80 blur-2xl mix-blend-screen"
+        className="pointer-events-none fixed left-0 top-0 z-60 h-64 w-64 rounded-full opacity-80 blur-2xl mix-blend-screen"
         style={{
           background:
             "radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(56,189,248,0.11) 34%, rgba(167,139,250,0.055) 52%, transparent 72%)",
@@ -355,12 +359,21 @@ export default function Landing() {
             </a>
           ))}
         </nav>
-        <Link
+        <button
           className="hidden min-h-10 items-center justify-center rounded border border-white/30 bg-white/10 px-6 text-xs font-bold uppercase tracking-[0.2em] text-white no-underline transition-all hover:bg-white/15 hover:border-white/70 hover:shadow-[0_0_20px_rgba(255,255,255,0.16)] font-mono sm:inline-flex"
-          to="/auth"
+          onClick={() => {
+            updateLogInStatus(true);
+            authClient.signIn.email({
+              email: "testuser@gmail.com",
+              password: "Migwizzy07",
+              fetchOptions: {
+                onSuccess: () => navigate("/dashboard"),
+              },
+            });
+          }}
         >
-          &gt; Access Console
-        </Link>
+          &gt; {isLoggingIn ? `Logging in...` : `Access Console`}
+        </button>
       </header>
 
       <main id="top" className="relative z-10">
@@ -457,7 +470,7 @@ export default function Landing() {
 
           {/* Scan line decoration */}
           <div className="absolute bottom-0 left-0 right-0">
-            <div className="h-px bg-gradient-to-r from-transparent via-white/35 to-transparent" />
+            <div className="h-px bg-linear-to-r from-transparent via-white/35 to-transparent" />
             <div className="mx-auto flex max-w-5xl items-center justify-center px-6">
               <span className="-translate-y-1/2 rounded border border-white/15 bg-black/60 px-4 py-2 text-[10px] font-black uppercase tracking-[0.24em] text-zinc-300 backdrop-blur-xl">
                 Scroll / Live Intelligence
@@ -677,7 +690,7 @@ export default function Landing() {
                 </p>
                 {/* Connection line */}
                 {i < 3 && (
-                  <div className="hidden lg:block absolute top-1/2 -right-2 w-4 h-px bg-gradient-to-r from-white/20 to-transparent" />
+                  <div className="hidden lg:block absolute top-1/2 -right-2 w-4 h-px bg-linear-to-r from-white/20 to-transparent" />
                 )}
               </article>
             ))}
@@ -749,7 +762,7 @@ export default function Landing() {
 
         {/* ━━ FOOTER ━━ */}
         <footer className="relative border-t border-white/5 bg-black/30 px-6 py-12 md:px-12 text-center">
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+          <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-white/10 to-transparent" />
           <p className="text-xs text-gray-600 font-mono">
             <span className="text-white/30">&gt;</span> © 2026 FraudLens
             Platform. All rights reserved.
